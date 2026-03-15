@@ -1,29 +1,50 @@
 # XSpan HealthAI Agent
 
-**Your Personal Health Intelligence — Running Locally, Thinking Globally**
+**Your Personal Health Intelligence — Running Locally, Protected by HIPAA**
 
-XSpan HealthAI Agent is an open-source, autonomous health agent that runs on your desktop. It connects to your Electronic Health Records (Epic, Cerner, eClinicalWorks), Apple Health / Google Health, wearables (Oura, WHOOP, Dexcom, Garmin, Fitbit), lab providers (Quest, LabCorp, Function Health), and genomics profiles (23andMe, Gut.id) — then builds your **Digital Twin** and delivers personalized health nudges and a weekly Health Passport.
+XSpan HealthAI Agent is an open-source health data collector that runs on your desktop. It connects to your Electronic Health Records (Epic, Cerner, eClinicalWorks), Apple Health / Google Health, wearables (Oura, WHOOP, Dexcom, Garmin, Fitbit), lab providers (Quest, LabCorp, Function Health), and genomics profiles (23andMe, Gut.id) — then syncs your data securely to XSpan's HIPAA-compliant cloud for AI-powered health intelligence.
 
-No mobile app required. No data locked in a black box. **You own your health data locally.**
+**Your health data is never sent to third-party AI tools.** All AI processing happens exclusively on XSpan's HIPAA-compliant H-LLM infrastructure.
 
 ---
 
 ## What It Does
 
-| Feature | Description |
-|---|---|
-| Apple Health Sync | Reads activity, sleep, HRV, vitals from macOS HealthKit |
-| Google Health Sync | Reads Fit/Health data via OAuth2 |
-| EHR Connection | Connects to Epic, Cerner, Redox via SMART on FHIR R4 |
-| Wearables | Oura, WHOOP, Dexcom CGM, Garmin, Fitbit |
-| Lab Results | Quest Diagnostics, LabCorp, Function Health |
-| Genomics | 23andMe genetic variants, Gut.id microbiome profile |
-| Nutrition Logging | Log meals via natural language |
-| Digital Twin | Synthesizes 100+ biomarkers into your health profile |
-| Smart Nudges | 3 personalized health nudges/day from XSpan H-LLM |
-| Weekly Report | Full Health Passport PDF every Sunday |
-| MCP Server | Plug into Claude Desktop, Cursor, or Windsurf |
-| Local First | All raw data stored locally; only synthesized insights sent to cloud |
+| Feature | Tier | Description |
+|---|---|---|
+| Apple Health Sync | Free | Reads activity, sleep, HRV, vitals from macOS HealthKit |
+| Google Health Sync | Free | Reads Fit/Health data via OAuth2 |
+| EHR Connection | Free | Connects to Epic, Cerner, Redox via SMART on FHIR R4 |
+| Wearables | Free | Oura, WHOOP, Dexcom CGM, Garmin, Fitbit |
+| Lab Results | Free | Quest Diagnostics, LabCorp, Function Health |
+| Genomics | Free | 23andMe genetic variants, Gut.id microbiome |
+| Local Biomarker Synthesis | Free | 100+ biomarkers synthesized locally |
+| Encrypted Local Storage | Free | AES-256 encrypted SQLite at ~/.xspan/data |
+| AI Health Nudges | **Pro $20/mo** | 3 personalized nudges/day from XSpan H-LLM |
+| Weekly Health Passport | **Pro $20/mo** | Comprehensive PDF report every Sunday |
+| Predictive Risk Scores | **Pro $20/mo** | Cardiovascular, metabolic, sleep disorder risk |
+| AI Health Q&A | **Pro $20/mo** | Ask anything about your health via XSpan H-LLM |
+| Cloud Digital Twin | **Pro $20/mo** | Full Digital Twin synthesis on XSpan cloud |
+| AI Meal Parsing | **Pro $20/mo** | Natural language nutrition logging |
+
+**[Subscribe to Pro — $20/month](https://buy.stripe.com/test_dRmdR90Ei2iO3CFf3LgnK00)**
+
+---
+
+## HIPAA Compliance & Data Privacy
+
+> **Your health data is NEVER sent to ChatGPT, Claude, Gemini, or any third-party AI tool.**
+
+Sending Protected Health Information (PHI) to general-purpose AI tools violates HIPAA. XSpan takes a different approach:
+
+- Raw health data is **encrypted locally** (AES-256) on your machine
+- Only **synthesized biomarker vectors** are sent to XSpan's cloud
+- All AI queries are processed by **XSpan's HIPAA-compliant H-LLM**
+- XSpan cloud runs on **BAA-covered infrastructure** (SOC 2 Type II)
+- OAuth2 PKCE for all EHR connections
+- Credentials stored in **OS keychain** (macOS Keychain / Windows Credential Manager)
+
+**Do not pipe your local health database to third-party AI tools.** The `~/.xspan/data/xspan.db` file contains PHI that is protected under HIPAA. All health queries, nudges, risk scores, and Health Passport generation are processed exclusively through XSpan's cloud at `api.xspan.ai`.
 
 ---
 
@@ -35,7 +56,7 @@ git clone https://github.com/karlmehta/XSpan-HealthAI-Agent.git
 cd XSpan-HealthAI-Agent
 npm install
 cp .env.example .env
-# Edit .env with your credentials
+# Edit .env with your XSpan API key
 npm run dev
 ```
 
@@ -53,7 +74,7 @@ npx @xspan/agent setup
 | Node.js | >= 18.0 |
 | npm | >= 9.0 |
 | macOS (for Apple Health) | >= 13 Ventura |
-| XSpan API Key | Get yours at [xspan.ai/api](https://xspan.ai/api) |
+| XSpan Account | [Sign up at xspan.ai](https://xspan.ai) |
 
 ---
 
@@ -66,10 +87,6 @@ Copy `.env.example` to `.env` and configure:
 XSPAN_API_KEY=your_api_key_here
 XSPAN_USER_ID=your_user_id
 XSPAN_API_URL=https://api.xspan.ai/v1
-
-# For QA/testing, use:
-# XSPAN_API_URL=https://api-qa.xspan.ai/v1
-# XSPAN_USER_ID=beth.porter@xspan.health
 
 # Apple Health (macOS only)
 APPLE_HEALTH_ENABLED=true
@@ -84,11 +101,10 @@ EHR_CLIENT_ID=your_ehr_client_id
 ### Connecting Your EHR
 
 1. Run the agent: `npm run dev`
-2. The agent opens the XSpan MCP connection page
-3. Browse **Health System Options** to find yours (lookup available via Apple Health directory and web registries)
-4. Select your health system and its EHR (Epic MyChart, Cerner, eClinicalWorks, etc.)
-5. Enter your EHR portal credentials (username/password)
-6. Authorize XSpan to read your health records via SMART on FHIR
+2. Browse **Health System Options** to find yours (lookup available via Apple Health directory and web registries)
+3. Select your health system and its EHR (Epic MyChart, Cerner, eClinicalWorks, etc.)
+4. Enter your EHR portal credentials (username/password)
+5. Authorize XSpan to read your health records via SMART on FHIR
 
 See [docs/EHR_SETUP.md](docs/EHR_SETUP.md) for detailed per-provider instructions.
 
@@ -111,55 +127,7 @@ See [docs/EHR_SETUP.md](docs/EHR_SETUP.md) for detailed per-provider instruction
 
 ---
 
-## MCP Server (Claude Desktop / Cursor / Windsurf)
-
-XSpan Agent ships with a **Model Context Protocol (MCP) server**, so you can plug it into Claude Desktop or any MCP-compatible AI assistant.
-
-### Add to Claude Desktop
-
-Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
-
-```json
-{
-  "mcpServers": {
-    "xspan-health": {
-      "command": "node",
-      "args": ["/path/to/XSpan-HealthAI-Agent/dist/mcp/index.js"],
-      "env": {
-        "XSPAN_API_KEY": "your_api_key_here",
-        "XSPAN_USER_ID": "your_user_id"
-      }
-    }
-  }
-}
-```
-
-### Available MCP Tools (10)
-
-| Tool | Description |
-|---|---|
-| `xspan_get_health_summary` | Today's health metrics snapshot |
-| `xspan_get_biomarkers` | Latest biomarker readings by category |
-| `xspan_get_digital_twin` | Full Digital Twin health profile |
-| `xspan_log_nutrition` | Log a meal via natural language |
-| `xspan_get_nudges` | Today's personalized health nudges |
-| `xspan_get_health_passport` | Latest weekly Health Passport |
-| `xspan_get_risk_scores` | Predictive health risk scores |
-| `xspan_ask_health` | Natural language health Q&A (XSpan H-LLM) |
-| `xspan_sync_apple_health` | Trigger Apple Health sync |
-| `xspan_sync_ehr` | Trigger EHR data sync |
-
-### Example Queries in Claude Desktop
-
-> "What were my sleep patterns this week and how do they compare to my HRV trends?"
-
-> "I just ate a chicken burrito bowl with guac. Log it and tell me how it fits my macros."
-
-> "What does my health passport say about my cardiovascular risk?"
-
----
-
-## Architecture
+## How It Works
 
 ```
 +-----------------------------------------------------+
@@ -179,19 +147,22 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
 |                            |             Gut.id      |
 |                  +---------v----------+              |
 |                  |  Local Data Store  |              |
-|                  |  (~/.xspan/data)   |              |
+|                  |  (~/.xspan/data)   |  ENCRYPTED   |
+|                  |  AES-256 SQLite    |  LOCAL ONLY  |
 |                  +---------+----------+              |
 |                            |                         |
 |                  +---------v----------+              |
-|                  |   MCP Server       |<--- Claude   |
-|                  |   (stdio/tcp)      |    Desktop   |
+|                  |  Biomarker Vectors |              |
+|                  |  (synthesized only)|              |
 |                  +--------------------+              |
 +------------------------+----------------------------+
                          | HTTPS (TLS 1.3)
+                         | Biomarker vectors only
+                         | NO raw PHI leaves device
                          v
           +------------------------------+
-          |       XSpan Cloud            |
-          |   api.xspan.ai/v1           |
+          |  XSpan Cloud (HIPAA / BAA)   |
+          |  api.xspan.ai/v1            |
           |                              |
           |  +--------+  +-----------+  |
           |  | H-LLM  |  | Digital   |  |
@@ -201,8 +172,34 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
           |  | Nudge  |  | Health    |  |
           |  | Engine |  | Passport  |  |
           |  +--------+  +-----------+  |
+          |  +--------+  +-----------+  |
+          |  | Risk   |  | AI Q&A    |  |
+          |  | Scores |  | Engine    |  |
+          |  +--------+  +-----------+  |
           +------------------------------+
+              All AI processing here
+              HIPAA compliant only
+              No third-party AI access
 ```
+
+---
+
+## Pricing
+
+### Free (Open Source)
+- Data collection from all sources (EHR, Apple Health, wearables, labs, genomics)
+- Local 100+ biomarker synthesis
+- AES-256 encrypted local storage
+
+### Pro — $20/month
+- 3x daily personalized AI nudges (H-LLM powered)
+- Weekly Health Passport PDF
+- Predictive disease risk scores
+- AI health Q&A — ask anything about your health
+- Cloud Digital Twin synthesis
+- AI-powered meal parsing
+
+**[Subscribe to Pro](https://buy.stripe.com/test_dRmdR90Ei2iO3CFf3LgnK00)** | Cancel anytime. Powered by Stripe.
 
 ---
 
@@ -213,9 +210,8 @@ XSpan-HealthAI-Agent/
   src/
     agent/
       index.ts              # Main daemon orchestrator
-    mcp/
-      server.ts             # MCP server (10 tools)
-      index.ts              # MCP standalone entry point
+    billing/
+      subscription.ts       # Stripe subscription gate (free vs pro)
     connectors/
       ehr/
         fhir-client.ts      # SMART on FHIR R4 (Epic, Cerner)
@@ -226,7 +222,7 @@ XSpan-HealthAI-Agent/
       genomics/
         index.ts             # 23andMe, Gut.id
     sync/
-      xspan-api.ts          # XSpan cloud API client
+      xspan-api.ts          # XSpan cloud API client (subscription-gated)
       data-pipeline.ts      # ETL + biomarker synthesis
     storage/
       local-store.ts        # SQLite encrypted local store
@@ -236,7 +232,6 @@ XSpan-HealthAI-Agent/
       index.ts              # TypeScript interfaces
   docs/
     EHR_SETUP.md
-    MCP_SETUP.md
     SPEC.md
   .env.example
   package.json
@@ -244,16 +239,6 @@ XSpan-HealthAI-Agent/
   README.md
   LICENSE
 ```
-
----
-
-## Privacy & Data
-
-- **Raw health data never leaves your machine** — only normalized biomarker vectors are synced to XSpan cloud
-- All local data is AES-256 encrypted in `~/.xspan/data`
-- OAuth2 tokens stored in OS keychain (macOS Keychain / Windows Credential Manager)
-- You can export all your data as JSON or delete everything at any time
-- HIPAA-compliant cloud infrastructure
 
 ---
 
@@ -265,9 +250,6 @@ npm install
 
 # Run in development mode (with hot reload)
 npm run dev
-
-# Run just the MCP server
-npm run mcp:dev
 
 # Build for production
 npm run build
@@ -289,15 +271,13 @@ npm run type-check
 | QA/Testing | `https://api-qa.xspan.ai/v1` | Test with demo data |
 | Documentation | `https://wiki.xspan.ai` | API reference |
 
-**QA Test Account:**
-- User ID: `beth.porter@xspan.health`
-- Password: `bethporter2026`
-
 ---
 
 ## Contributing
 
 We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+**Important:** Do not submit PRs that expose local health data to third-party AI tools. All health data queries must go through XSpan's HIPAA-compliant H-LLM at api.xspan.ai.
 
 ---
 
@@ -311,6 +291,7 @@ MIT License — see [LICENSE](LICENSE)
 
 - **Docs:** [wiki.xspan.ai](https://wiki.xspan.ai)
 - **Issues:** [github.com/karlmehta/XSpan-HealthAI-Agent/issues](https://github.com/karlmehta/XSpan-HealthAI-Agent/issues)
+- **Subscribe:** [XSpan Pro — $20/month](https://buy.stripe.com/test_dRmdR90Ei2iO3CFf3LgnK00)
 
 ---
 
