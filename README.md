@@ -67,13 +67,26 @@ npx @xspan/agent setup
 
 ---
 
+## Platform Support
+
+| Platform | Health Data | Wearables | EHR / Labs / Genomics |
+|---|---|---|---|
+| **macOS** | Apple HealthKit (automatic) | Via Apple Health or direct OAuth | Full support |
+| **Windows** | Direct OAuth per device | Direct OAuth per device | Full support |
+| **Linux** | Direct OAuth per device | Direct OAuth per device | Full support |
+
+On **macOS**, wearables connected to Apple Health on your iPhone sync automatically through HealthKit — one connection covers Oura, WHOOP, Garmin, Fitbit, Dexcom, Apple Watch, and Withings.
+
+On **Windows/Linux**, each wearable connects individually via OAuth in your browser (with MFA support). The dashboard detects your platform and shows the right flow.
+
 ## Prerequisites
 
 | Requirement | Version |
 |---|---|
 | Node.js | >= 18.0 |
 | npm | >= 9.0 |
-| macOS (for Apple Health) | >= 13 Ventura |
+| macOS (for Apple Health) | >= 13 Ventura (optional) |
+| Windows | 10/11 (optional) |
 | XSpan Account | [Sign up at xspan.ai](https://xspan.ai) |
 
 ---

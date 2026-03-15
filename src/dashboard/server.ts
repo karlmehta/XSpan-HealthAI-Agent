@@ -97,6 +97,9 @@ function renderDashboard(config: AgentConfig, store: LocalStore): string {
   const todayNudges = store.getTodayNudges();
   const connectedProviders = Object.entries(authState).filter(([_, s]) => s.connected).map(([k]) => k);
   const pendingProviders = Object.entries(authState).filter(([_, s]) => s.pending).map(([k]) => k);
+  const isMac = process.platform === 'darwin';
+  const isWindows = process.platform === 'win32';
+  const platformLabel = isMac ? 'macOS' : isWindows ? 'Windows' : 'Linux';
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -221,12 +224,21 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0B0F1A; col
 
     <div class="section-title">Connected Sources</div>
     <div class="card-grid">
+      ${isMac ? `
       <div class="card" style="${config.connectors.appleHealth.enabled ? 'border-color:#05966944' : ''}">
         <div class="card-icon">🍎</div>
         <h3>Apple Health (HealthKit)</h3>
         <p>${config.connectors.appleHealth.enabled ? 'Syncing steps, heart rate, HRV, sleep, blood oxygen, and 20+ data types every 15 minutes. Wearables connected to Apple Health (Oura, WHOOP, Garmin, Fitbit) sync automatically.' : 'Disabled — set APPLE_HEALTH_ENABLED=true in .env'}</p>
         <span class="badge ${config.connectors.appleHealth.enabled ? 'badge-connected' : ''}">${config.connectors.appleHealth.enabled ? 'CONNECTED' : 'DISABLED'}</span>
       </div>
+      ` : `
+      <div class="card">
+        <div class="card-icon">🖥️</div>
+        <h3>Health Data (${platformLabel})</h3>
+        <p>On ${platformLabel}, connect each wearable directly via the Wearables tab. Each device authenticates via OAuth with MFA support.</p>
+        <span class="badge">GO TO WEARABLES TAB</span>
+      </div>
+      `}
 
       <div class="card" style="${connectedProviders.length > 0 ? 'border-color:#05966944' : ''}">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
@@ -251,7 +263,7 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0B0F1A; col
       <div class="card">
         <div class="card-icon">⌚</div>
         <h3>Wearables</h3>
-        ${config.connectors.appleHealth.enabled ? `
+        ${isMac && config.connectors.appleHealth.enabled ? `
           <p>If your wearables are connected to <strong>Apple Health</strong> on your iPhone, their data syncs automatically through HealthKit. No separate connection needed for:</p>
           <div style="margin-top:8px;font-size:12px;color:#94A3B8;line-height:2">
             &#8226; Oura Ring &nbsp; &#8226; WHOOP &nbsp; &#8226; Garmin &nbsp; &#8226; Fitbit<br>
@@ -259,8 +271,11 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0B0F1A; col
           </div>
           <span class="badge badge-connected" style="margin-top:8px">VIA APPLE HEALTH</span>
         ` : `
-          <p>Click Wearables tab to connect Oura, WHOOP, Dexcom, Garmin, or Fitbit directly.</p>
-          <span class="badge">NOT SET UP</span>
+          <p>Connect each wearable individually via the <strong>Wearables</strong> tab. Each device authenticates via OAuth — log in with MFA in your browser.</p>
+          ${connectedProviders.filter(p => WEARABLE_PROVIDERS.some(w => w.name === p)).length > 0
+            ? connectedProviders.filter(p => WEARABLE_PROVIDERS.some(w => w.name === p)).map(p => '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><span style="color:#22C55E">&#10003;</span> <span style="font-size:13px">' + p + '</span></div>').join('')
+            : '<span class="badge">GO TO WEARABLES TAB</span>'
+          }
         `}
       </div>
 
@@ -301,9 +316,15 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0B0F1A; col
   <!-- ═══ WEARABLES ═══ -->
   <div class="page" id="page-wearables">
     <div class="section-title">Connect Your Wearables</div>
+    ${isMac ? `
     <div class="hipaa-note" style="margin-bottom:20px">
-      🔐 <strong>How it works:</strong> Click "Open Login" to authenticate with your wearable provider in this browser (with MFA). XSpan captures the OAuth token to sync your data. For services with a CLI, you can also authenticate from Terminal.
+      🍎 <strong>macOS detected:</strong> If your wearables sync to <strong>Apple Health</strong> on your iPhone, they automatically flow to this Mac via HealthKit. You can also connect each device directly below for real-time data.
     </div>
+    ` : `
+    <div class="hipaa-note" style="margin-bottom:20px">
+      🖥️ <strong>${platformLabel} detected:</strong> Connect each wearable individually below. Click "Open Login" to authenticate via OAuth in your browser (with MFA support). For devices with a CLI option, you can also authenticate from Terminal.
+    </div>
+    `}
     <div class="card-grid">
       ${WEARABLE_PROVIDERS.map(w => `
         <div class="card">

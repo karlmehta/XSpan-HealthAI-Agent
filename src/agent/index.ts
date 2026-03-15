@@ -141,13 +141,19 @@ async function main() {
 
   startDashboard(config, store, apiClient, pipeline);
 
-  // Open dashboard in browser
-  if (process.platform === 'darwin') {
-    const { execSync } = await import('child_process');
-    setTimeout(() => {
-      try { execSync('open http://localhost:3000'); } catch {}
-    }, 1000);
-  }
+  // Open dashboard in browser (cross-platform)
+  setTimeout(() => {
+    try {
+      const { execSync } = require('child_process');
+      if (process.platform === 'darwin') {
+        execSync('open http://localhost:3000');
+      } else if (process.platform === 'win32') {
+        execSync('start http://localhost:3000');
+      } else {
+        execSync('xdg-open http://localhost:3000');
+      }
+    } catch {}
+  }, 1000);
 
   console.log('');
   console.log('[Agent] Agent is running. Health data syncs locally.');
@@ -202,18 +208,28 @@ async function fetchAndDeliverNudges(
 }
 
 /**
- * Send a macOS notification using osascript.
- * Falls back silently on non-macOS platforms.
+ * Send a desktop notification (cross-platform).
+ * macOS: osascript, Windows: PowerShell toast, Linux: notify-send
  */
 function sendNotification(title: string, message: string): void {
-  if (process.platform !== 'darwin') return;
+  const safeTitle = title.replace(/"/g, '\\"');
+  const safeMsg = message.replace(/"/g, '\\"');
 
-  const script = `display notification "${message.replace(/"/g, '\\"')}" with title "${title.replace(/"/g, '\\"')}"`;
-  execFile('osascript', ['-e', script], (error) => {
-    if (error) {
-      console.warn('[Notify] Failed to send macOS notification:', error.message);
-    }
-  });
+  if (process.platform === 'darwin') {
+    const script = `display notification "${safeMsg}" with title "${safeTitle}"`;
+    execFile('osascript', ['-e', script], (error) => {
+      if (error) console.warn('[Notify] macOS notification failed:', error.message);
+    });
+  } else if (process.platform === 'win32') {
+    const ps = `[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null; $template = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastText02); $text = $template.GetElementsByTagName('text'); $text.Item(0).AppendChild($template.CreateTextNode('${safeTitle}')); $text.Item(1).AppendChild($template.CreateTextNode('${safeMsg}')); $toast = [Windows.UI.Notifications.ToastNotification]::new($template); [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('XSpan HealthAI').Show($toast)`;
+    execFile('powershell', ['-Command', ps], (error) => {
+      if (error) console.warn('[Notify] Windows notification failed:', error.message);
+    });
+  } else {
+    execFile('notify-send', [title, message], (error) => {
+      if (error) console.warn('[Notify] Linux notification failed:', error.message);
+    });
+  }
 }
 
 // ── Launch ────────────────────────────────────────────────────────
