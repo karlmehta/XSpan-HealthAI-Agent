@@ -64,8 +64,27 @@ const LAB_PROVIDERS = [
 ];
 
 const GENOMICS_PROVIDERS = [
-  { id: '23andme', name: '23andMe', icon: '🧬', description: 'Genetic variants — MTHFR, APOE, BRCA, pharmacogenomics', loginUrl: 'https://you.23andme.com', cli: '', note: 'Log in to 23andMe, then download raw data file and upload here' },
-  { id: 'gutid', name: 'Gut.id', icon: '🦠', description: 'Microbiome profile — gut bacteria diversity, enterotypes', loginUrl: 'https://app.gut.id', cli: '', note: 'Log in to Gut.id in this browser first, then click Connect' },
+  { id: '23andme', name: '23andMe', icon: '🧬', description: 'Consumer genetic testing — ancestry, health predispositions, carrier status, pharmacogenomics', loginUrl: 'https://you.23andme.com', note: 'Log in to 23andMe, then download raw data file and upload here' },
+  { id: 'illumina', name: 'Illumina', icon: '🔬', description: 'Whole genome sequencing, clinical-grade NGS, TruSight Oncology', loginUrl: 'https://www.illumina.com/', note: 'Upload VCF/BAM file from your sequencing provider' },
+  { id: 'foundation_medicine', name: 'Foundation Medicine', icon: '🎯', description: 'Comprehensive genomic profiling for cancer — FoundationOne CDx, Liquid CDx', loginUrl: 'https://www.foundationmedicine.com/', note: 'Request your genomic report from your oncologist, then upload here' },
+  { id: 'tempus', name: 'Tempus', icon: '🧫', description: 'AI-enabled precision medicine — Tempus xT, xF, xR panels for oncology', loginUrl: 'https://www.tempus.com/', note: 'Request your Tempus report from your care team' },
+  { id: 'guardant', name: 'Guardant Health', icon: '🩸', description: 'Liquid biopsy — Guardant360, Shield for early cancer detection', loginUrl: 'https://www.guardanthealth.com/', note: 'Request your Guardant360 report from your oncologist' },
+  { id: 'neogenomics', name: 'NeoGenomics Laboratories', icon: '🔬', description: 'Oncology testing — FISH, flow cytometry, molecular, pharma services', loginUrl: 'https://neogenomics.com/', note: 'Request your report from your care team' },
+  { id: 'qiagen', name: 'Qiagen', icon: '🧪', description: 'Clinical genomics — QIAseq panels, companion diagnostics, sample prep', loginUrl: 'https://www.qiagen.com/', note: 'Upload your QIAseq report or VCF file' },
+  { id: 'caris', name: 'Caris Life Sciences', icon: '🎯', description: 'Molecular profiling — MI Profile for tumor comprehensive analysis', loginUrl: 'https://www.carislifesciences.com/', note: 'Request your MI Profile report from your oncologist' },
+  { id: 'exact_sciences', name: 'Exact Sciences', icon: '🛡️', description: 'Cancer screening — Cologuard (colon), Oncotype DX (breast), PreventionGenetics', loginUrl: 'https://www.exactsciences.com/', note: 'Request your test results from your care provider' },
+];
+
+const MICROBIOME_PROVIDERS = [
+  { id: 'viome', name: 'Viome', icon: '🦠', description: 'Full body intelligence — gut, oral, health intelligence test with AI-powered food recommendations', loginUrl: 'https://www.viome.com/', note: 'Log in to Viome and export your results, then upload here' },
+  { id: 'tiny_health', name: 'Tiny Health', icon: '👶', description: 'Gut microbiome test for babies, kids, and adults — vaginal microbiome for pregnancy', loginUrl: 'https://www.tinyhealth.com/', note: 'Log in to Tiny Health and export your results' },
+  { id: 'zoe', name: 'Zoe', icon: '🍎', description: 'Gut microbiome + blood sugar + blood fat test — personalized nutrition program', loginUrl: 'https://joinzoe.com/', note: 'Log in to Zoe and export your gut results' },
+  { id: 'ombre', name: 'Ombre (formerly Thryve)', icon: '🧫', description: 'Gut microbiome test with probiotic recommendations — species-level analysis', loginUrl: 'https://www.ombrelab.com/', note: 'Log in to Ombre and export your results' },
+  { id: 'biohm', name: 'BIOHM', icon: '🍄', description: 'Gut test measuring bacteria AND fungi — gut lining integrity score', loginUrl: 'https://biohmhealth.com/', note: 'Log in to BIOHM and export your results' },
+  { id: 'vibrant_wellness', name: 'Vibrant Wellness (Gut Zoomer)', icon: '🔬', description: 'Gut Zoomer — most comprehensive gut test: bacteria, yeast, parasites, viruses, leaky gut markers', loginUrl: 'https://vibrant-wellness.com/', note: 'Log in to Vibrant Wellness portal and export your Gut Zoomer results' },
+  { id: 'daytwo', name: 'DayTwo', icon: '🩸', description: 'Microbiome-based blood sugar prediction — personalized glycemic response scoring', loginUrl: 'https://www.daytwo.com/', note: 'Log in to DayTwo and export your microbiome results' },
+  { id: 'genova', name: 'Genova Diagnostics', icon: '🧪', description: 'GI Effects Comprehensive Profile — digestive function, gut microbiome, inflammation, parasitology', loginUrl: 'https://www.gdx.net/', note: 'Request your GI Effects report from your provider' },
+  { id: 'gutid', name: 'Gut.id', icon: '🧬', description: 'AI-powered gut health platform — microbiome diversity, enterotype classification', loginUrl: 'https://app.gut.id', note: 'Log in to Gut.id in this browser first, then click Connect' },
 ];
 
 // OAuth callback port — listens for redirects after browser login
@@ -160,7 +179,8 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0B0F1A; col
   <a onclick="showPage('ehr',this)">EHR</a>
   <a onclick="showPage('wearables',this)">Wearables</a>
   <a onclick="showPage('labs',this)">Labs</a>
-  <a onclick="showPage('genomics',this)">Genomics</a>
+  <a onclick="showPage('genomics',this)">Genomics &amp; DNA</a>
+  <a onclick="showPage('microbiome',this)">Microbiome</a>
   <a onclick="showPage('subscription',this)">Subscription</a>
 </div>
 
@@ -329,9 +349,9 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0B0F1A; col
 
   <!-- ═══ GENOMICS ═══ -->
   <div class="page" id="page-genomics">
-    <div class="section-title">Connect Genomics Profiles</div>
+    <div class="section-title">Genomics &amp; DNA Profiling</div>
     <div class="hipaa-note" style="margin-bottom:20px">
-      🔐 <strong>How it works:</strong> For 23andMe, log in and download your raw data file, then upload it here. For Gut.id, log in first in this browser, then click Connect.
+      🧬 <strong>How it works:</strong> For consumer tests (23andMe), download your raw data and upload here. For clinical genomics (Foundation Medicine, Tempus, Guardant), request your report from your oncologist or care team, then upload the PDF or VCF file.
     </div>
     <div class="card-grid">
       ${GENOMICS_PROVIDERS.map(g => `
@@ -342,11 +362,34 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0B0F1A; col
           <p style="font-size:11px;color:#64748B;margin-bottom:8px">${g.note}</p>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
             <span class="badge badge-free">FREE</span>
-            <button class="btn btn-secondary" style="font-size:12px;padding:6px 14px" onclick="window.open('${g.loginUrl}','_blank')">1️⃣ Log in to ${g.name}</button>
+            <button class="btn btn-secondary" style="font-size:12px;padding:6px 14px" onclick="window.open('${g.loginUrl}','_blank')">Visit ${g.name}</button>
             ${g.id === '23andme'
-              ? `<button class="btn btn-primary" style="font-size:12px;padding:6px 14px" onclick="uploadGenomics('${g.id}','${g.name}')">2️⃣ Upload Raw Data</button>`
-              : `<button class="btn btn-primary" style="font-size:12px;padding:6px 14px" onclick="connectAfterLogin('genomics','${g.id}','${g.name}')">2️⃣ Connect</button>`
+              ? `<button class="btn btn-primary" style="font-size:12px;padding:6px 14px" onclick="uploadGenomics('${g.id}','${g.name}')">Upload Raw Data</button>`
+              : `<button class="btn btn-primary" style="font-size:12px;padding:6px 14px" onclick="uploadGenomics('${g.id}','${g.name}')">Upload Report</button>`
             }
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  </div>
+
+  <!-- ═══ MICROBIOME ═══ -->
+  <div class="page" id="page-microbiome">
+    <div class="section-title">Microbiome Testing</div>
+    <div class="hipaa-note" style="margin-bottom:20px">
+      🦠 <strong>How it works:</strong> Log in to your microbiome test provider, export or download your results, then upload here. XSpan maps your gut bacteria diversity, enterotypes, and inflammation markers into your Digital Twin.
+    </div>
+    <div class="card-grid">
+      ${MICROBIOME_PROVIDERS.map(m => `
+        <div class="card">
+          <div class="card-icon">${m.icon}</div>
+          <h3>${m.name}</h3>
+          <p>${m.description}</p>
+          <p style="font-size:11px;color:#64748B;margin-bottom:8px">${m.note}</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <span class="badge badge-free">FREE</span>
+            <button class="btn btn-secondary" style="font-size:12px;padding:6px 14px" onclick="window.open('${m.loginUrl}','_blank')">1️⃣ Log in to ${m.name}</button>
+            <button class="btn btn-primary" style="font-size:12px;padding:6px 14px" onclick="connectAfterLogin('microbiome','${m.id}','${m.name}')">2️⃣ Connect</button>
           </div>
         </div>
       `).join('')}
