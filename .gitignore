@@ -48,3 +48,4 @@ logs/
 # Temp
 tmp/
 temp/
+certs/xspan-key.pem
