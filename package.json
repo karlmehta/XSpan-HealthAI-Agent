@@ -1,0 +1,98 @@
+{
+  "name": "@xspan/agent",
+  "version": "1.0.0",
+  "description": "XSpan AI Health Agent — Open Source autonomous health intelligence running on your laptop",
+  "main": "dist/agent/index.js",
+  "bin": {
+    "xspan-agent": "dist/cli.js"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "start": "node dist/agent/index.js",
+    "dev": "tsx watch src/agent/index.ts",
+    "mcp": "node dist/mcp/index.js",
+    "mcp:dev": "tsx src/mcp/index.ts",
+    "build": "tsc",
+    "build:swift": "swift build -C scripts/apple-health-bridge --configuration release",
+    "setup": "node scripts/install.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "format": "prettier --write src",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "axios": "^1.6.7",
+    "better-sqlite3": "^9.4.3",
+    "chalk": "^5.3.0",
+    "dotenv": "^16.4.1",
+    "inquirer": "^9.2.12",
+    "keytar": "^7.9.0",
+    "node-cron": "^3.0.3",
+    "node-notifier": "^10.0.1",
+    "open": "^10.1.0",
+    "ora": "^8.0.1",
+    "pdfkit": "^0.15.0",
+    "uuid": "^9.0.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.8",
+    "@types/node": "^20.11.5",
+    "@types/node-cron": "^3.0.11",
+    "@types/node-notifier": "^8.0.5",
+    "@types/pdfkit": "^0.13.3",
+    "@types/uuid": "^9.0.7",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "@vitest/coverage-v8": "^1.2.1",
+    "eslint": "^8.56.0",
+    "msw": "^2.1.5",
+    "prettier": "^3.2.4",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.1"
+  },
+  "files": [
+    "dist",
+    "scripts/install.js",
+    "scripts/setup.sh",
+    "scripts/apple-health-bridge/.build/release/AppleHealthBridge",
+    ".env.example",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "health",
+    "ai-agent",
+    "mcp",
+    "apple-health",
+    "healthkit",
+    "fhir",
+    "ehr",
+    "digital-twin",
+    "health-passport",
+    "biomarkers",
+    "xspan",
+    "preventive-health",
+    "typescript",
+    "open-source"
+  ],
+  "author": "XSpan.ai <engineering@xspan.ai>",
+  "license": "MIT",
+  "homepage": "https://github.com/karlmehta/XSpan-HealthAI-Agent#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/karlmehta/XSpan-HealthAI-Agent.git"
+  },
+  "bugs": {
+    "url": "https://github.com/karlmehta/XSpan-HealthAI-Agent/issues"
+  }
+}

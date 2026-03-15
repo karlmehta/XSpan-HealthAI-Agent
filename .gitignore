@@ -1,0 +1,50 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build output
+dist/
+*.js.map
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Local data
+*.db
+*.db-shm
+*.db-wal
+.xspan/
+
+# macOS
+.DS_Store
+*.dmg
+*.pkg
+
+# TypeScript
+*.tsbuildinfo
+
+# Testing
+coverage/
+.nyc_output/
+
+# Swift build artifacts (keep source, not binaries)
+scripts/apple-health-bridge/.build/
+scripts/apple-health-bridge/*.xcodeproj/
+scripts/apple-health-bridge/Package.resolved
+
+# Logs
+*.log
+logs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temp
+tmp/
+temp/
