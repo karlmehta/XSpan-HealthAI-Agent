@@ -76,7 +76,8 @@ const OAUTH_CALLBACK_PORT = 9877;
 function renderDashboard(config: AgentConfig, store: LocalStore): string {
   const snapshot = store.getLatestSnapshot();
   const todayNudges = store.getTodayNudges();
-  const isPro = false; // Will be checked via API
+  const connectedProviders = Object.entries(authState).filter(([_, s]) => s.connected).map(([k]) => k);
+  const pendingProviders = Object.entries(authState).filter(([_, s]) => s.pending).map(([k]) => k);
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -200,22 +201,53 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0B0F1A; col
 
     <div class="section-title">Connected Sources</div>
     <div class="card-grid">
-      <div class="card">
+      <div class="card" style="${config.connectors.appleHealth.enabled ? 'border-color:#05966944' : ''}">
         <div class="card-icon">🍎</div>
-        <h3>Apple Health</h3>
-        <p>${config.connectors.appleHealth.enabled ? 'Connected — syncing every 15 minutes' : 'Not connected'}</p>
+        <h3>Apple Health (HealthKit)</h3>
+        <p>${config.connectors.appleHealth.enabled ? 'Syncing steps, heart rate, HRV, sleep, blood oxygen, and 20+ data types every 15 minutes. Wearables connected to Apple Health (Oura, WHOOP, Garmin, Fitbit) sync automatically.' : 'Disabled — set APPLE_HEALTH_ENABLED=true in .env'}</p>
         <span class="badge ${config.connectors.appleHealth.enabled ? 'badge-connected' : ''}">${config.connectors.appleHealth.enabled ? 'CONNECTED' : 'DISABLED'}</span>
       </div>
-      <div class="card">
-        <div class="card-icon">🏥</div>
-        <h3>EHR</h3>
-        <p>${config.connectors.ehr.enabled ? 'Connected to ' + (config.connectors.ehr.provider ?? 'EHR') : 'Not connected — click EHR tab to set up'}</p>
-        <span class="badge ${config.connectors.ehr.enabled ? 'badge-connected' : ''}">${config.connectors.ehr.enabled ? 'CONNECTED' : 'NOT SET UP'}</span>
+
+      <div class="card" style="${connectedProviders.length > 0 ? 'border-color:#05966944' : ''}">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <svg width="28" height="28" viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="8" fill="#862074"/><text x="18" y="23" text-anchor="middle" fill="white" font-family="Arial" font-weight="800" font-size="14">M</text></svg>
+          <h3 style="margin:0">EHR (MyChart)</h3>
+        </div>
+        ${connectedProviders.length > 0 ? `
+          <p style="color:#6EE7B7;font-weight:600;margin-bottom:8px">Connected:</p>
+          ${connectedProviders.map(p => '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><span style="color:#22C55E">&#10003;</span> <span style="font-size:13px">' + p + '</span></div>').join('')}
+          <span class="badge badge-connected" style="margin-top:8px">CONNECTED</span>
+        ` : `
+          <p>No EHR connected yet. Go to the EHR tab to connect your health system via MyChart.</p>
+          <span class="badge">NOT SET UP</span>
+        `}
+        ${connectedProviders.some(p => p.includes('Sandbox')) ? `
+          <div style="margin-top:12px;padding:10px;background:#D9770611;border:1px solid #D9770633;border-radius:8px;font-size:11px;color:#FBBF24">
+            <strong>Production status:</strong> Your Epic client ID is propagating to UCLA Health, Stanford, Kaiser, and other health systems. This takes 1-2 weeks from Epic. You will be able to connect your real MyChart once ready.
+          </div>
+        ` : ''}
       </div>
+
       <div class="card">
         <div class="card-icon">⌚</div>
         <h3>Wearables</h3>
-        <p>Click Wearables tab to connect Oura, WHOOP, Dexcom, Garmin, or Fitbit</p>
+        ${config.connectors.appleHealth.enabled ? `
+          <p>If your wearables are connected to <strong>Apple Health</strong> on your iPhone, their data syncs automatically through HealthKit. No separate connection needed for:</p>
+          <div style="margin-top:8px;font-size:12px;color:#94A3B8;line-height:2">
+            &#8226; Oura Ring &nbsp; &#8226; WHOOP &nbsp; &#8226; Garmin &nbsp; &#8226; Fitbit<br>
+            &#8226; Dexcom CGM &nbsp; &#8226; Apple Watch &nbsp; &#8226; Withings
+          </div>
+          <span class="badge badge-connected" style="margin-top:8px">VIA APPLE HEALTH</span>
+        ` : `
+          <p>Click Wearables tab to connect Oura, WHOOP, Dexcom, Garmin, or Fitbit directly.</p>
+          <span class="badge">NOT SET UP</span>
+        `}
+      </div>
+
+      <div class="card">
+        <div class="card-icon">🧪</div>
+        <h3>Labs &amp; Genomics</h3>
+        <p>Click Labs or Genomics tabs to connect Quest, LabCorp, Function Health, 23andMe, or Gut.id.</p>
         <span class="badge">NOT SET UP</span>
       </div>
     </div>
