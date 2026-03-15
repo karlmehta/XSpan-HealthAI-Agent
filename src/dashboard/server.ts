@@ -76,6 +76,7 @@ const GENOMICS_PROVIDERS = [
 ];
 
 const MICROBIOME_PROVIDERS = [
+  { id: 'gutid', name: 'Gut.id', icon: '🧬', description: 'AI-powered gut health platform — microbiome diversity, enterotype classification', loginUrl: 'https://app.gut.id', note: 'Log in to Gut.id in this browser first, then click Connect' },
   { id: 'viome', name: 'Viome', icon: '🦠', description: 'Full body intelligence — gut, oral, health intelligence test with AI-powered food recommendations', loginUrl: 'https://www.viome.com/', note: 'Log in to Viome and export your results, then upload here' },
   { id: 'tiny_health', name: 'Tiny Health', icon: '👶', description: 'Gut microbiome test for babies, kids, and adults — vaginal microbiome for pregnancy', loginUrl: 'https://www.tinyhealth.com/', note: 'Log in to Tiny Health and export your results' },
   { id: 'zoe', name: 'Zoe', icon: '🍎', description: 'Gut microbiome + blood sugar + blood fat test — personalized nutrition program', loginUrl: 'https://joinzoe.com/', note: 'Log in to Zoe and export your gut results' },
@@ -84,7 +85,6 @@ const MICROBIOME_PROVIDERS = [
   { id: 'vibrant_wellness', name: 'Vibrant Wellness (Gut Zoomer)', icon: '🔬', description: 'Gut Zoomer — most comprehensive gut test: bacteria, yeast, parasites, viruses, leaky gut markers', loginUrl: 'https://vibrant-wellness.com/', note: 'Log in to Vibrant Wellness portal and export your Gut Zoomer results' },
   { id: 'daytwo', name: 'DayTwo', icon: '🩸', description: 'Microbiome-based blood sugar prediction — personalized glycemic response scoring', loginUrl: 'https://www.daytwo.com/', note: 'Log in to DayTwo and export your microbiome results' },
   { id: 'genova', name: 'Genova Diagnostics', icon: '🧪', description: 'GI Effects Comprehensive Profile — digestive function, gut microbiome, inflammation, parasitology', loginUrl: 'https://www.gdx.net/', note: 'Request your GI Effects report from your provider' },
-  { id: 'gutid', name: 'Gut.id', icon: '🧬', description: 'AI-powered gut health platform — microbiome diversity, enterotype classification', loginUrl: 'https://app.gut.id', note: 'Log in to Gut.id in this browser first, then click Connect' },
 ];
 
 // OAuth callback port — listens for redirects after browser login
