@@ -47,9 +47,8 @@ const configSchema = z.object({
   NOTIFICATIONS_ENABLED: z.string().transform(v => v === 'true').default('true'),
   NUDGE_WEBHOOK_URL: z.string().url().optional(),
 
-  // MCP
-  MCP_TRANSPORT: z.enum(['stdio', 'tcp']).default('stdio'),
-  MCP_PORT: z.string().transform(Number).default('3456'),
+  // HIPAA: Health data is NEVER exposed to third-party AI tools
+  // All health queries go through XSpan's HIPAA-compliant H-LLM only
 });
 
 // ── Config Loader ─────────────────────────────────────────────
@@ -109,10 +108,6 @@ function loadConfig(): AgentConfig {
     notifications: {
       enabled: env.NOTIFICATIONS_ENABLED,
       webhookUrl: env.NUDGE_WEBHOOK_URL,
-    },
-    mcp: {
-      transport: env.MCP_TRANSPORT,
-      port: env.MCP_PORT,
     },
   };
 }

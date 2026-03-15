@@ -305,10 +305,8 @@ export interface AgentConfig {
     enabled: boolean;
     webhookUrl?: string;
   };
-  mcp: {
-    transport: 'stdio' | 'tcp';
-    port: number;
-  };
+  // HIPAA: No MCP server — health data never exposed to third-party AI tools
+  // All queries processed exclusively by XSpan's HIPAA-compliant H-LLM
 }
 
 // ── Apple Health Bridge Types ─────────────────────────────────
@@ -352,35 +350,7 @@ export interface AppleHealthRawSample {
   metadata?: Record<string, unknown>;
 }
 
-// ── MCP Tool Input Schemas ────────────────────────────────────
-
-export interface GetHealthSummaryInput {
-  date?: string;              // YYYY-MM-DD, defaults to today
-}
-
-export interface GetBiomarkersInput {
-  category?: 'cardiovascular' | 'metabolic' | 'sleep' | 'activity' | 'nutrition' | 'labs' | 'all';
-  days?: number;
-}
-
-export interface LogNutritionInput {
-  description: string;
-  meal_type?: MealType;
-  time?: string;
-}
-
-export interface GetNudgesInput {
-  unread_only?: boolean;
-}
-
-export interface GetHealthPassportInput {
-  week_ending?: string;
-}
-
-export interface AskHealthInput {
-  question: string;
-}
-
-export interface SyncAppleHealthInput {
-  hours?: number;
-}
+// ── HIPAA Compliance ─────────────────────────────────────────
+// No MCP tool schemas — health data is not exposed to external AI tools.
+// All health queries are processed by XSpan's HIPAA-compliant H-LLM.
+// Users interact with their health data exclusively through xspan.ai

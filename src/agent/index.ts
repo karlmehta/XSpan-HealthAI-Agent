@@ -4,14 +4,21 @@ import { loadConfig } from '../config/index.js';
 import { LocalStore } from '../storage/local-store.js';
 import { XSpanApiClient } from '../sync/xspan-api.js';
 import { DataPipeline } from '../sync/data-pipeline.js';
-import { startMcpServer } from '../mcp/server.js';
 
 // ── XSpan Health AI Agent — Main Daemon ─────────────────────────
+//
+// PRIVACY & HIPAA COMPLIANCE:
+// - All raw health data is stored locally in encrypted SQLite
+// - Only synthesized biomarker vectors are sent to XSpan cloud
+// - All health queries are processed by XSpan's HIPAA-compliant H-LLM
+// - Health data is NEVER exposed to third-party AI tools (Claude, GPT, etc.)
+// - No MCP server — health data stays within XSpan's secure perimeter
+//
 
 async function main() {
   console.log('╔═══════════════════════════════════════════╗');
   console.log('║  XSpan HealthAI Agent v1.0.0              ║');
-  console.log('║  Local-first health intelligence daemon   ║');
+  console.log('║  HIPAA-compliant health intelligence      ║');
   console.log('╚═══════════════════════════════════════════╝');
 
   // Load configuration
@@ -20,13 +27,23 @@ async function main() {
 
   // Initialize local store
   const store = new LocalStore(config.storage.dataDir);
-  console.log(`[Agent] SQLite store initialized at ${config.storage.dataDir}/xspan.db`);
+  console.log(`[Agent] Encrypted SQLite store initialized at ${config.storage.dataDir}/xspan.db`);
 
-  // Create API client
+  // Create API client (with subscription gate)
   const apiClient = new XSpanApiClient(config);
   const connected = await apiClient.checkConnectivity();
   if (connected) {
-    console.log('[Agent] XSpan Cloud API connected');
+    console.log('[Agent] XSpan Cloud API connected (HIPAA-compliant endpoint)');
+
+    // Check subscription status
+    const status = await apiClient.subscription.checkSubscription();
+    if (status.tier === 'pro' && status.active) {
+      console.log('[Agent] Subscription: XSpan Pro (active)');
+    } else {
+      console.log('[Agent] Subscription: Free tier');
+      console.log('[Agent] Upgrade to Pro ($20/mo) for AI nudges, Health Passport, and risk scores');
+      console.log('[Agent] Visit: https://xspan.ai/agent#pricing');
+    }
   } else {
     console.warn('[Agent] XSpan Cloud API unreachable — will retry on next sync');
   }
@@ -44,7 +61,7 @@ async function main() {
 
   // ── Scheduled Jobs ──────────────────────────────────────────────
 
-  // Health data sync (every N minutes)
+  // Health data sync (every N minutes) — FREE
   const syncInterval = config.schedules.syncIntervalMinutes;
   cron.schedule(`*/${syncInterval} * * * *`, async () => {
     console.log('[Cron] Running scheduled health sync...');
@@ -56,23 +73,23 @@ async function main() {
   });
   console.log(`[Agent] Health sync scheduled every ${syncInterval} minutes`);
 
-  // Morning nudges
+  // Morning nudges — PRO ONLY
   cron.schedule(config.schedules.nudgeMorning, async () => {
     await fetchAndDeliverNudges(store, apiClient, config.notifications.enabled, 'morning');
   });
 
-  // Midday nudges
+  // Midday nudges — PRO ONLY
   cron.schedule(config.schedules.nudgeMidday, async () => {
     await fetchAndDeliverNudges(store, apiClient, config.notifications.enabled, 'midday');
   });
 
-  // Evening nudges
+  // Evening nudges — PRO ONLY
   cron.schedule(config.schedules.nudgeEvening, async () => {
     await fetchAndDeliverNudges(store, apiClient, config.notifications.enabled, 'evening');
   });
-  console.log('[Agent] Nudge schedule configured (3x daily)');
+  console.log('[Agent] Nudge schedule configured (3x daily — requires Pro)');
 
-  // Cloud sync (every N minutes — synthesize biomarkers and push to XSpan)
+  // Cloud sync (every N minutes — synthesize biomarkers and push to XSpan) — PRO ONLY
   const cloudInterval = config.schedules.cloudSyncIntervalMinutes;
   cron.schedule(`*/${cloudInterval} * * * *`, async () => {
     console.log('[Cron] Running cloud sync...');
@@ -82,13 +99,17 @@ async function main() {
       if (response) {
         console.log(`[Cron] Cloud sync complete — twin updated: ${response.digitalTwinUpdated}`);
       }
-    } catch (error) {
-      console.error('[Cron] Cloud sync failed:', error);
+    } catch (error: unknown) {
+      if (error instanceof Error && error.name === 'SubscriptionRequiredError') {
+        console.log('[Cron] Cloud sync requires Pro subscription — data saved locally');
+      } else {
+        console.error('[Cron] Cloud sync failed:', error);
+      }
     }
   });
   console.log(`[Agent] Cloud sync scheduled every ${cloudInterval} minutes`);
 
-  // Weekly Health Passport generation (default: Sunday 7 AM)
+  // Weekly Health Passport generation — PRO ONLY
   cron.schedule(config.schedules.passportGeneration, async () => {
     console.log('[Cron] Generating weekly Health Passport...');
     try {
@@ -100,20 +121,26 @@ async function main() {
         if (config.notifications.enabled) {
           sendNotification(
             'Weekly Health Passport Ready',
-            `Overall Score: ${passport.overallScore}/100. Open Claude to review.`,
+            `Overall Score: ${passport.overallScore}/100. View at xspan.ai/passport`,
           );
         }
       }
-    } catch (error) {
-      console.error('[Cron] Passport generation failed:', error);
+    } catch (error: unknown) {
+      if (error instanceof Error && error.name === 'SubscriptionRequiredError') {
+        console.log('[Cron] Health Passport requires Pro subscription');
+        console.log('[Cron] Subscribe at https://xspan.ai/agent#pricing');
+      } else {
+        console.error('[Cron] Passport generation failed:', error);
+      }
     }
   });
-  console.log('[Agent] Weekly passport generation scheduled');
+  console.log('[Agent] Weekly passport generation scheduled (requires Pro)');
 
-  // ── Start MCP Server ───────────────────────────────────────────
-
-  console.log('[Agent] Starting MCP server...');
-  await startMcpServer(store, apiClient, pipeline);
+  console.log('');
+  console.log('[Agent] Agent is running. Health data syncs locally.');
+  console.log('[Agent] All health queries go through XSpan HIPAA-compliant H-LLM only.');
+  console.log('[Agent] No health data is exposed to third-party AI tools.');
+  console.log('');
 
   // ── Graceful Shutdown ───────────────────────────────────────────
 
@@ -125,6 +152,9 @@ async function main() {
 
   process.on('SIGINT', shutdown);
   process.on('SIGTERM', shutdown);
+
+  // Keep process alive
+  await new Promise(() => {});
 }
 
 // ── Nudge Delivery ────────────────────────────────────────────────
@@ -149,8 +179,12 @@ async function fetchAndDeliverNudges(
     }
 
     console.log(`[Cron] Delivered ${nudges.length} ${timeOfDay} nudges`);
-  } catch (error) {
-    console.error(`[Cron] ${timeOfDay} nudge fetch failed:`, error);
+  } catch (error: unknown) {
+    if (error instanceof Error && error.name === 'SubscriptionRequiredError') {
+      console.log(`[Cron] Nudges require Pro subscription — visit https://xspan.ai/agent#pricing`);
+    } else {
+      console.error(`[Cron] ${timeOfDay} nudge fetch failed:`, error);
+    }
   }
 }
 
