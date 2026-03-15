@@ -90,6 +90,183 @@ const MICROBIOME_PROVIDERS = [
 // OAuth callback port — listens for redirects after browser login
 const OAUTH_CALLBACK_PORT = 9877;
 
+// ── Auth State ───────────────────────────────────────────────
+
+let currentUser: { email: string; name: string; apiKey: string; token: string; tier: string } | null = null;
+
+// ── Login / Signup Page ─────────────────────────────────────
+
+function renderAuthPage(apiUrl: string, error?: string): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XSpan HealthAI Agent — Sign In</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, 'Inter', sans-serif; background: #0B0F1A; color: #E2E8F0; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+.auth-container { width: 100%; max-width: 420px; padding: 20px; }
+.logo { text-align: center; margin-bottom: 32px; }
+.logo h1 { font-size: 28px; font-weight: 800; color: #fff; }
+.logo h1 span { color: #E8751A; }
+.logo p { color: #64748B; font-size: 13px; margin-top: 8px; }
+.auth-card { background: #1E293B; border: 1px solid #334155; border-radius: 16px; padding: 32px; }
+.tabs { display: flex; margin-bottom: 24px; border-bottom: 1px solid #334155; }
+.tab-btn { flex: 1; padding: 12px; text-align: center; font-size: 14px; font-weight: 600; color: #64748B; cursor: pointer; border: none; background: none; border-bottom: 2px solid transparent; transition: all 0.15s; }
+.tab-btn.active { color: #E8751A; border-bottom-color: #E8751A; }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 13px; font-weight: 600; color: #CBD5E1; margin-bottom: 6px; }
+.form-group input { width: 100%; padding: 12px 14px; background: #0F172A; border: 1px solid #334155; border-radius: 8px; color: #E2E8F0; font-size: 14px; }
+.form-group input:focus { outline: none; border-color: #E8751A; }
+.auth-btn { width: 100%; padding: 14px; background: #E8751A; color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.15s; margin-top: 8px; }
+.auth-btn:hover { background: #D06A15; }
+.auth-btn:disabled { background: #334155; color: #64748B; cursor: not-allowed; }
+.error-msg { background: #DC262622; border: 1px solid #DC262644; color: #FCA5A5; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; display: ${error ? 'block' : 'none'}; }
+.divider { text-align: center; color: #475569; font-size: 12px; margin: 20px 0; position: relative; }
+.divider::before, .divider::after { content: ''; position: absolute; top: 50%; width: 40%; height: 1px; background: #334155; }
+.divider::before { left: 0; }
+.divider::after { right: 0; }
+.hipaa-badge { text-align: center; margin-top: 24px; font-size: 11px; color: #64748B; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.signup-form { display: none; }
+.signin-form { display: block; }
+</style>
+</head>
+<body>
+<div class="auth-container">
+  <div class="logo">
+    <h1><span>XSpan</span> HealthAI</h1>
+    <p>Your Personal Health Intelligence Agent</p>
+  </div>
+
+  <div class="auth-card">
+    <div class="tabs">
+      <button class="tab-btn active" onclick="showTab('signin',this)">Sign In</button>
+      <button class="tab-btn" onclick="showTab('signup',this)">Create Account</button>
+    </div>
+
+    <div class="error-msg" id="error-msg">${error || ''}</div>
+
+    <!-- Sign In Form -->
+    <div id="form-signin" class="signin-form">
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="signin-email" placeholder="you@example.com">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="signin-password" placeholder="Your password">
+      </div>
+      <button class="auth-btn" onclick="doSignIn()">Sign In</button>
+    </div>
+
+    <!-- Sign Up Form -->
+    <div id="form-signup" class="signup-form">
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="signup-name" placeholder="Jane Smith">
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="signup-email" placeholder="you@example.com">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="signup-password" placeholder="Minimum 8 characters">
+      </div>
+      <button class="auth-btn" onclick="doSignUp()">Create Account</button>
+
+      <div class="divider">then</div>
+      <p style="text-align:center;font-size:12px;color:#94A3B8">Free tier includes: EHR sync, Apple Health, wearables, labs, genomics, and local biomarker synthesis. <a href="https://xspan.ai/agent#pricing" target="_blank" style="color:#E8751A">Upgrade to Pro ($20/mo)</a> for AI nudges, Health Passport, and risk scores.</p>
+    </div>
+  </div>
+
+  <div class="hipaa-badge">
+    🔒 HIPAA Compliant — All health data processed by XSpan H-LLM only
+  </div>
+</div>
+
+<script>
+function showTab(tab, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('form-signin').style.display = tab === 'signin' ? 'block' : 'none';
+  document.getElementById('form-signup').style.display = tab === 'signup' ? 'block' : 'none';
+  document.getElementById('error-msg').style.display = 'none';
+}
+
+function showError(msg) {
+  var el = document.getElementById('error-msg');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+async function doSignIn() {
+  var email = document.getElementById('signin-email').value;
+  var password = document.getElementById('signin-password').value;
+  if (!email || !password) { showError('Please enter email and password'); return; }
+
+  var btn = document.querySelector('#form-signin .auth-btn');
+  btn.textContent = 'Signing in...';
+  btn.disabled = true;
+
+  try {
+    var res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, password: password }),
+    });
+    var data = await res.json();
+    if (data.success) {
+      window.location.href = '/dashboard';
+    } else {
+      showError(data.error || 'Invalid email or password');
+      btn.textContent = 'Sign In';
+      btn.disabled = false;
+    }
+  } catch (e) {
+    showError('Cannot connect to XSpan Cloud. Is the server running?');
+    btn.textContent = 'Sign In';
+    btn.disabled = false;
+  }
+}
+
+async function doSignUp() {
+  var name = document.getElementById('signup-name').value;
+  var email = document.getElementById('signup-email').value;
+  var password = document.getElementById('signup-password').value;
+  if (!name || !email || !password) { showError('Please fill in all fields'); return; }
+  if (password.length < 8) { showError('Password must be at least 8 characters'); return; }
+
+  var btn = document.querySelector('#form-signup .auth-btn');
+  btn.textContent = 'Creating account...';
+  btn.disabled = true;
+
+  try {
+    var res = await fetch('/api/auth/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: name, email: email, password: password }),
+    });
+    var data = await res.json();
+    if (data.success) {
+      window.location.href = '/dashboard';
+    } else {
+      showError(data.error || 'Could not create account');
+      btn.textContent = 'Create Account';
+      btn.disabled = false;
+    }
+  } catch (e) {
+    showError('Cannot connect to XSpan Cloud. Is the server running?');
+    btn.textContent = 'Create Account';
+    btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>`;
+}
+
 // ── Dashboard HTML ──────────────────────────────────────────
 
 function renderDashboard(config: AgentConfig, store: LocalStore): string {
@@ -173,7 +350,9 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0B0F1A; col
     <div class="status-dot on"></div>
     <span style="color:#22C55E">Running</span>
     <span style="color:#64748B;margin-left:8px">|</span>
-    <span style="color:#64748B;margin-left:8px">${config.xspan.userId}</span>
+    <span style="color:#fff;margin-left:8px">${currentUser?.name || config.xspan.userId}</span>
+    <span style="color:#64748B;margin-left:4px">(${currentUser?.tier || 'free'})</span>
+    <a href="/api/auth/logout" style="color:#64748B;margin-left:12px;font-size:12px;text-decoration:underline">Sign Out</a>
   </div>
 </div>
 
@@ -779,9 +958,16 @@ export function startDashboard(
     res.end();
   });
 
-  callbackServer.listen(OAUTH_CALLBACK_PORT, '127.0.0.1', () => {
-    console.log(`[OAuth] HTTPS callback server listening on https://localhost:${OAUTH_CALLBACK_PORT}/callback`);
-  });
+  try {
+    callbackServer.listen(OAUTH_CALLBACK_PORT, '0.0.0.0', () => {
+      console.log(`[OAuth] HTTPS callback server listening on https://localhost:${OAUTH_CALLBACK_PORT}/callback`);
+    });
+    callbackServer.on('error', (err: Error) => {
+      console.warn(`[OAuth] HTTPS callback server failed: ${err.message} — EHR OAuth will not work until fixed`);
+    });
+  } catch (err) {
+    console.warn(`[OAuth] Could not start HTTPS callback server — EHR OAuth will not work`);
+  }
 
   // ── Main Dashboard Server (port 3000) ───────────────────────
 
@@ -796,6 +982,78 @@ export function startDashboard(
 
     if (req.method === 'OPTIONS') {
       res.writeHead(200);
+      res.end();
+      return;
+    }
+
+    // API: Sign Up — create account on XSpan cloud
+    if (url === '/api/auth/signup' && req.method === 'POST') {
+      let body = '';
+      req.on('data', (chunk: Buffer) => body += chunk);
+      req.on('end', async () => {
+        try {
+          const { name, email, password } = JSON.parse(body);
+          const apiUrl = config.xspan.apiUrl;
+          const resp = await fetch(`${apiUrl}/auth/signup`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, password }),
+          });
+          const data = await resp.json() as Record<string, unknown>;
+          if (resp.ok && data['api_key']) {
+            currentUser = { email: email, name: name, apiKey: data['api_key'] as string, token: data['token'] as string, tier: 'free' };
+            console.log(`[Auth] Account created: ${email}`);
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: true }));
+          } else {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: false, error: (data['detail'] as string) || 'Signup failed' }));
+          }
+        } catch (err) {
+          console.error('[Auth] Signup error:', err);
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'Cannot connect to XSpan Cloud at ' + config.xspan.apiUrl }));
+        }
+      });
+      return;
+    }
+
+    // API: Sign In — authenticate with XSpan cloud
+    if (url === '/api/auth/login' && req.method === 'POST') {
+      let body = '';
+      req.on('data', (chunk: Buffer) => body += chunk);
+      req.on('end', async () => {
+        try {
+          const { email, password } = JSON.parse(body);
+          const apiUrl = config.xspan.apiUrl;
+          const resp = await fetch(`${apiUrl}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password }),
+          });
+          const data = await resp.json() as Record<string, unknown>;
+          if (resp.ok && data['token']) {
+            currentUser = { email: email, name: (data['name'] as string) || email, apiKey: (data['api_key'] as string) || '', token: data['token'] as string, tier: (data['tier'] as string) || 'free' };
+            console.log(`[Auth] Signed in: ${email} (${currentUser.tier})`);
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: true }));
+          } else {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: false, error: (data['detail'] as string) || 'Invalid email or password' }));
+          }
+        } catch (err) {
+          console.error('[Auth] Login error:', err);
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'Cannot connect to XSpan Cloud at ' + config.xspan.apiUrl }));
+        }
+      });
+      return;
+    }
+
+    // API: Sign Out
+    if (url === '/api/auth/logout') {
+      currentUser = null;
+      res.writeHead(302, { 'Location': '/' });
       res.end();
       return;
     }
@@ -892,12 +1150,33 @@ export function startDashboard(
       return;
     }
 
-    // Dashboard HTML
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end(renderDashboard(config, store));
+    // Route: /dashboard — main dashboard (requires auth)
+    if (url === '/dashboard') {
+      if (!currentUser) {
+        res.writeHead(302, { 'Location': '/' });
+        res.end();
+        return;
+      }
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      res.end(renderDashboard(config, store));
+      return;
+    }
+
+    // Route: / — login page (or redirect to dashboard if already signed in)
+    if (!currentUser) {
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      res.end(renderAuthPage(config.xspan.apiUrl));
+    } else {
+      res.writeHead(302, { 'Location': '/dashboard' });
+      res.end();
+    }
   });
 
-  server.listen(DASHBOARD_PORT, '127.0.0.1', () => {
+  server.on('error', (err: Error) => {
+    console.error(`[Dashboard] Failed to start: ${err.message}`);
+  });
+
+  server.listen(DASHBOARD_PORT, '::', () => {
     console.log(`[Dashboard] XSpan Dashboard running at http://localhost:${DASHBOARD_PORT}`);
   });
 }
