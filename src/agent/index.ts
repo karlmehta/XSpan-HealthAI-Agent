@@ -4,6 +4,7 @@ import { loadConfig } from '../config/index.js';
 import { LocalStore } from '../storage/local-store.js';
 import { XSpanApiClient } from '../sync/xspan-api.js';
 import { DataPipeline } from '../sync/data-pipeline.js';
+import { startDashboard } from '../dashboard/server.js';
 
 // ── XSpan Health AI Agent — Main Daemon ─────────────────────────
 //
@@ -136,10 +137,22 @@ async function main() {
   });
   console.log('[Agent] Weekly passport generation scheduled (requires Pro)');
 
+  // ── Start Dashboard ──────────────────────────────────────────
+
+  startDashboard(config, store, apiClient, pipeline);
+
+  // Open dashboard in browser
+  if (process.platform === 'darwin') {
+    const { execSync } = await import('child_process');
+    setTimeout(() => {
+      try { execSync('open http://localhost:3000'); } catch {}
+    }, 1000);
+  }
+
   console.log('');
   console.log('[Agent] Agent is running. Health data syncs locally.');
+  console.log('[Agent] Dashboard: http://localhost:3000');
   console.log('[Agent] All health queries go through XSpan HIPAA-compliant H-LLM only.');
-  console.log('[Agent] No health data is exposed to third-party AI tools.');
   console.log('');
 
   // ── Graceful Shutdown ───────────────────────────────────────────
