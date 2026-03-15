@@ -6,6 +6,7 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import type { LocalStore } from '../storage/local-store.js';
 import type { XSpanApiClient } from '../sync/xspan-api.js';
+import { SubscriptionRequiredError } from '../sync/xspan-api.js';
 import type { DataPipeline } from '../sync/data-pipeline.js';
 
 // ── MCP Server ────────────────────────────────────────────────
@@ -171,6 +172,13 @@ export function createMcpServer(
           return errorResponse(`Unknown tool: ${name}`);
       }
     } catch (error) {
+      // If subscription required, return the upgrade message (not a generic error)
+      if (error instanceof SubscriptionRequiredError) {
+        return {
+          content: [{ type: 'text' as const, text: error.message }],
+          isError: false, // Not an error — it's a subscription prompt
+        };
+      }
       const message = error instanceof Error ? error.message : String(error);
       return errorResponse(`Tool execution failed: ${message}`);
     }

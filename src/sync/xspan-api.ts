@@ -9,15 +9,18 @@ import type {
   RiskScore,
   NutritionEntry,
 } from '../types/index.js';
+import { SubscriptionManager } from '../billing/subscription.js';
 
 // ── XSpan API Client ─────────────────────────────────────────
 
 export class XSpanApiClient {
   private client: AxiosInstance;
   private userId: string;
+  public subscription: SubscriptionManager;
 
   constructor(config: AgentConfig) {
     this.userId = config.xspan.userId;
+    this.subscription = new SubscriptionManager(config);
 
     this.client = axios.create({
       baseURL: config.xspan.apiUrl,
@@ -52,9 +55,19 @@ export class XSpanApiClient {
     }
   }
 
+  // ── Subscription Check ─────────────────────────────────────
+
+  private async requirePro(method: string): Promise<void> {
+    const gate = await this.subscription.gateCloudCall(method);
+    if (!gate.allowed) {
+      throw new SubscriptionRequiredError(gate.message ?? 'XSpan Pro subscription required');
+    }
+  }
+
   // ── Biomarker Sync ──────────────────────────────────────────
 
   async syncBiomarkers(vector: BiomarkerVector): Promise<XSpanSyncResponse | null> {
+    await this.requirePro('syncBiomarkers');
     return this.withRetry(async () => {
       const response = await this.client.post<XSpanSyncResponse>('/sync', {
         userId: this.userId,
@@ -68,6 +81,7 @@ export class XSpanApiClient {
   // ── Nudges ───────────────────────────────────────────────────
 
   async getNudges(since?: Date, limit = 10): Promise<XSpanNudge[]> {
+    await this.requirePro('getNudges');
     const result = await this.withRetry(async () => {
       const params: Record<string, string | number> = { limit };
       if (since) params['since'] = since.toISOString();
@@ -81,6 +95,7 @@ export class XSpanApiClient {
   // ── Health Passport ──────────────────────────────────────────
 
   async getHealthPassport(weekEnding?: string): Promise<HealthPassport | null> {
+    await this.requirePro('getHealthPassport');
     return this.withRetry(async () => {
       const url = weekEnding ? `/passport/${weekEnding}` : '/passport/latest';
       const response = await this.client.get<HealthPassport>(url);
@@ -91,6 +106,7 @@ export class XSpanApiClient {
   // ── Natural Language Health Q&A ──────────────────────────────
 
   async askHealth(question: string, context?: BiomarkerVector): Promise<HealthAnswer | null> {
+    await this.requirePro('askHealth');
     return this.withRetry(async () => {
       const response = await this.client.post<HealthAnswer>('/ask', {
         userId: this.userId,
@@ -104,6 +120,7 @@ export class XSpanApiClient {
   // ── Digital Twin ─────────────────────────────────────────────
 
   async synthesizeDigitalTwin(): Promise<void> {
+    await this.requirePro('synthesizeDigitalTwin');
     await this.withRetry(async () => {
       await this.client.post('/digital-twin/synthesize', {
         userId: this.userId,
@@ -114,6 +131,7 @@ export class XSpanApiClient {
   // ── Risk Scores ──────────────────────────────────────────────
 
   async getRiskScores(): Promise<RiskScore[]> {
+    await this.requirePro('getRiskScores');
     const result = await this.withRetry(async () => {
       const response = await this.client.get<{ scores: RiskScore[] }>('/risk-scores');
       return response.data.scores;
@@ -124,6 +142,7 @@ export class XSpanApiClient {
   // ── Nutrition Parsing ─────────────────────────────────────────
 
   async parseNutrition(description: string): Promise<NutritionEntry | null> {
+    await this.requirePro('parseNutrition');
     return this.withRetry(async () => {
       const response = await this.client.post<NutritionEntry>('/nutrition/parse', {
         userId: this.userId,
@@ -179,4 +198,13 @@ export class XSpanApiClient {
 
 function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// ── Subscription Error ──────────────────────────────────────
+
+export class SubscriptionRequiredError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'SubscriptionRequiredError';
+  }
 }
