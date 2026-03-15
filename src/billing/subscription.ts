@@ -59,7 +59,7 @@ export const PRO_REQUIRED_TOOLS = new Set([
 
 // ── Stripe Configuration ────────────────────────────────────
 
-const STRIPE_CHECKOUT_BASE = 'https://xspan.ai/subscribe';
+const STRIPE_CHECKOUT_BASE = 'https://buy.stripe.com/test_dRmdR90Ei2iO3CFf3LgnK00';
 const SUBSCRIPTION_CHECK_URL = '/subscription/status';
 
 // ── Subscription Manager ────────────────────────────────────
@@ -181,11 +181,7 @@ export class SubscriptionManager {
   // ── Open Stripe Checkout ──────────────────────────────────
 
   openCheckout(): void {
-    const checkoutUrl = `${STRIPE_CHECKOUT_BASE}?` + new URLSearchParams({
-      user_id: this.userId,
-      email: this.userId, // userId is email in this system
-      plan: 'pro_monthly',
-    }).toString();
+    const checkoutUrl = STRIPE_CHECKOUT_BASE;
 
     console.log(`\n${'='.repeat(60)}`);
     console.log('  XSpan Pro — $20/month');
@@ -253,7 +249,7 @@ export class SubscriptionManager {
           'AI-powered meal parsing',
         ],
       },
-      subscribe_url: checkoutUrl,
+      subscribe_url: STRIPE_CHECKOUT_BASE,
       free_features: [
         'Apple Health / Google Health sync',
         'EHR connection (Epic, Cerner)',
