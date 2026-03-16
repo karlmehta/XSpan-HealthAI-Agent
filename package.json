@@ -16,6 +16,7 @@
     "build": "tsc",
     "build:swift": "swift build -C scripts/apple-health-bridge --configuration release",
     "setup": "node scripts/install.js",
+    "gen-certs": "mkdir -p certs && openssl req -x509 -newkey rsa:2048 -keyout certs/xspan-key.pem -out certs/xspan-cert.pem -days 365 -nodes -subj '/CN=localhost'",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
