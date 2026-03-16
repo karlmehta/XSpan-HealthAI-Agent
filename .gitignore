@@ -48,4 +48,5 @@ logs/
 # Temp
 tmp/
 temp/
-certs/xspan-key.pem
+# SSL certs (regenerate locally with: npm run gen-certs)
+certs/*.pem
