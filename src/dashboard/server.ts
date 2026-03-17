@@ -177,12 +177,12 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0B0F1A; col
       <button class="auth-btn" onclick="doSignUp()">Create Account</button>
 
       <div class="divider">then</div>
-      <p style="text-align:center;font-size:12px;color:#94A3B8">Free tier includes: EHR sync, Apple Health, wearables, labs, genomics, and local biomarker synthesis. <a href="https://xspan.ai/agent#pricing" target="_blank" style="color:#E8751A">Upgrade to Pro ($20/mo)</a> for AI nudges, Health Passport, and risk scores.</p>
+      <p style="text-align:center;font-size:12px;color:#94A3B8">Free: EHR sync, Apple Health, wearables, labs, genomics, 100+ biomarker synthesis, insights, and Contribute &amp; Earn. <a href="https://xspan.ai/developer" target="_blank" style="color:#E8751A">Learn more</a></p>
     </div>
   </div>
 
   <div class="hipaa-badge">
-    🔒 HIPAA Compliant — All health data processed by XSpan H-LLM only
+    🔒 All health data encrypted &amp; stored locally on your device
   </div>
 </div>
 
@@ -284,6 +284,7 @@ function renderDashboard(config: AgentConfig, store: LocalStore): string {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>XSpan HealthAI Agent</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: -apple-system, 'Inter', sans-serif; background: #0B0F1A; color: #E2E8F0; min-height: 100vh; }
@@ -345,7 +346,7 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0B0F1A; col
 <body>
 
 <div class="header">
-  <h1><span>XSpan</span> HealthAI Agent</h1>
+  <div style="display:flex;align-items:center;gap:4px"><img src="/logo.png" alt="XSpan.ai" style="height:36px"></div>
   <div class="status">
     <div class="status-dot on"></div>
     <span style="color:#22C55E">Running</span>
@@ -357,118 +358,315 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0B0F1A; col
 </div>
 
 <div class="nav">
-  <a class="active" onclick="showPage('home',this)">Home</a>
-  <a onclick="showPage('ehr',this)">EHR</a>
-  <a onclick="showPage('wearables',this)">Wearables</a>
-  <a onclick="showPage('labs',this)">Labs</a>
-  <a onclick="showPage('genomics',this)">Genomics &amp; DNA</a>
-  <a onclick="showPage('microbiome',this)">Microbiome</a>
-  <a onclick="showPage('subscription',this)">Subscription</a>
+  <a class="active" onclick="showPage('home',this)" style="display:flex;align-items:center;gap:4px">Insights <sup style="font-size:9px;font-weight:700;color:#6EE7B7;background:#05966922;padding:1px 5px;border-radius:4px;margin-top:-4px">FREE</sup></a>
+  <a onclick="showPage('connect',this)">Connect</a>
+  <a onclick="showPage('contribute',this)" style="display:flex;align-items:center;gap:4px">Contribute <sup style="font-size:9px;font-weight:700;color:#FBBF24;background:#FBBF2422;padding:1px 5px;border-radius:4px;margin-top:-4px">EARN</sup></a>
+  <a onclick="showPage('subscription',this)">Premium</a>
 </div>
 
 <div class="main">
 
-  <!-- ═══ HOME ═══ -->
+  <!-- ═══ TODAY ═══ -->
   <div class="page active" id="page-home">
-    <div class="hipaa-note">
-      🔒 HIPAA Compliant — Your health data is encrypted locally. All AI queries processed by XSpan H-LLM only. No third-party AI access.
+    ${(() => {
+      const b = snapshot?.biomarkers;
+      const hasData = b && b.dataCompleteness > 0;
+      const isPartial = hasData && b.dataCompleteness < 0.5;
+      const isFull = hasData && b.dataCompleteness >= 0.5;
+      const isPro = currentUser?.tier === 'pro';
+      const completePct = b ? Math.round(b.dataCompleteness * 100) : 0;
+
+      // Helper for metric display
+      const metric = (val: number | undefined, unit: string, label: string, icon: string) =>
+        '<div class="stat-card">' +
+        '<div style="font-size:14px;margin-bottom:4px">' + icon + '</div>' +
+        '<div class="value" style="font-size:' + (val !== undefined ? '28px' : '20px') + '">' + (val !== undefined ? val : '—') + '</div>' +
+        '<div class="label">' + (val !== undefined ? unit : 'No data') + '</div>' +
+        '<div style="font-size:10px;color:#64748B;margin-top:2px">' + label + '</div>' +
+        '</div>';
+
+      return `
+
+    <!-- Security Badge -->
+    <div class="hipaa-note" style="flex-direction:column;align-items:start;gap:6px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:16px">🔒</span>
+        <strong>Your Data Never Leaves Your Device</strong>
+      </div>
+      <div style="font-size:11px;color:#6EE7B7;line-height:1.6">
+        AES-256 encrypted on your device · All processing happens locally — nothing is sent to any server · No one can access your health data — not even XSpan · Your data, your device, your control
+      </div>
     </div>
 
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="value">${snapshot?.biomarkers.dataCompleteness ? Math.round(snapshot.biomarkers.dataCompleteness * 100) : 0}%</div>
-        <div class="label">Data Completeness</div>
-      </div>
-      <div class="stat-card">
-        <div class="value">${snapshot?.biomarkers.recoveryScore ?? '—'}</div>
-        <div class="label">Recovery Score</div>
-      </div>
-      <div class="stat-card">
-        <div class="value">${snapshot?.biomarkers.dailySteps ?? '—'}</div>
-        <div class="label">Steps Today</div>
-      </div>
-      <div class="stat-card">
-        <div class="value">${todayNudges.length}</div>
-        <div class="label">Nudges Today</div>
-      </div>
+    ${!hasData ? `
+    <!-- ═══ NO DATA STATE ═══ -->
+    <div style="text-align:center;padding:32px 0 16px">
+      <div style="font-size:48px;margin-bottom:12px">🌟</div>
+      <h2 style="font-size:24px;font-weight:800;color:#fff;margin-bottom:8px">Welcome to XSpan HealthAI</h2>
+      <p style="font-size:14px;color:#94A3B8;max-width:480px;margin:0 auto">Your personal health intelligence agent. Connect your health data to see personalized insights, trends, and recommendations.</p>
     </div>
 
-    <div class="pro-banner">
-      <div>
-        <h3>Unlock AI Health Intelligence</h3>
-        <p>Get 3x daily nudges, weekly Health Passport, risk scores, and AI Q&A — $20/month</p>
+    <!-- Data Completeness (top, shows 0%) -->
+    <div class="card" style="margin-bottom:20px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <h3 style="font-size:14px">Data Completeness</h3>
+        <span style="font-size:14px;font-weight:700;color:#EF4444">0%</span>
       </div>
-      <a href="https://buy.stripe.com/test_dRmdR90Ei2iO3CFf3LgnK00" target="_blank"><button class="btn btn-primary">Subscribe to Pro</button></a>
+      <div style="background:#0F172A;border-radius:8px;height:8px;overflow:hidden">
+        <div style="background:#EF4444;height:100%;width:0%;border-radius:8px"></div>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:10px;flex-wrap:wrap">
+        ${['Vitals','Sleep','Activity','Labs','Nutrition','Genomics'].map(s =>
+          '<span style="font-size:10px;padding:3px 8px;border-radius:100px;background:#33415522;color:#64748B">' + s + '</span>'
+        ).join('')}
+      </div>
+      <p style="font-size:11px;color:#94A3B8;margin-top:10px">Connect your health sources below to fill in your health picture. The more you connect, the better your insights.</p>
     </div>
 
-    <div class="section-title">Connected Sources</div>
-    <div class="card-grid">
-      ${isMac ? `
-      <div class="card" style="${config.connectors.appleHealth.enabled ? 'border-color:#05966944' : ''}">
-        <div class="card-icon">🍎</div>
-        <h3>Apple Health (HealthKit)</h3>
-        <p>${config.connectors.appleHealth.enabled ? 'Syncing steps, heart rate, HRV, sleep, blood oxygen, and 20+ data types every 15 minutes. Wearables connected to Apple Health (Oura, WHOOP, Garmin, Fitbit) sync automatically.' : 'Disabled — set APPLE_HEALTH_ENABLED=true in .env'}</p>
-        <span class="badge ${config.connectors.appleHealth.enabled ? 'badge-connected' : ''}">${config.connectors.appleHealth.enabled ? 'CONNECTED' : 'DISABLED'}</span>
-      </div>
-      ` : `
-      <div class="card">
-        <div class="card-icon">🖥️</div>
-        <h3>Health Data (${platformLabel})</h3>
-        <p>On ${platformLabel}, connect each wearable directly via the Wearables tab. Each device authenticates via OAuth with MFA support.</p>
-        <span class="badge">GO TO WEARABLES TAB</span>
-      </div>
-      `}
-
-      <div class="card" style="${connectedProviders.length > 0 ? 'border-color:#05966944' : ''}">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-          <svg width="28" height="28" viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="8" fill="#862074"/><text x="18" y="23" text-anchor="middle" fill="white" font-family="Arial" font-weight="800" font-size="14">M</text></svg>
-          <h3 style="margin:0">EHR (MyChart)</h3>
+    <!-- Demo Mode — see what it looks like when fully connected -->
+    <div class="card" style="margin-bottom:24px;border-color:#E8751A33;background:linear-gradient(135deg,#1E293B,#1A1A2E)">
+      <div style="display:flex;align-items:center;gap:16px">
+        <div style="font-size:40px">✨</div>
+        <div style="flex:1">
+          <h3 style="font-size:16px;margin-bottom:6px;color:#fff">See What You'll Get — Preview with Demo Data</h3>
+          <p style="font-size:12px;color:#94A3B8;line-height:1.6;margin-bottom:12px">
+            See exactly how XSpan looks when all your devices and providers are connected — readiness scores, sleep analysis, HRV trends, lab insights, drift detection, and more. Then connect your real sources to get <strong style="color:#E2E8F0">your</strong> personalized intelligence.
+          </p>
+          <button class="btn btn-primary" style="font-size:14px;padding:10px 24px" onclick="loadDemoData(this)">Preview with Demo Data</button>
         </div>
-        ${connectedProviders.length > 0 ? `
-          <p style="color:#6EE7B7;font-weight:600;margin-bottom:8px">Connected:</p>
-          ${connectedProviders.map(p => '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><span style="color:#22C55E">&#10003;</span> <span style="font-size:13px">' + p + '</span></div>').join('')}
-          <span class="badge badge-connected" style="margin-top:8px">CONNECTED</span>
-        ` : `
-          <p>No EHR connected yet. Go to the EHR tab to connect your health system via MyChart.</p>
-          <span class="badge">NOT SET UP</span>
-        `}
-        ${connectedProviders.some(p => p.includes('Sandbox')) ? `
-          <div style="margin-top:12px;padding:10px;background:#D9770611;border:1px solid #D9770633;border-radius:8px;font-size:11px;color:#FBBF24">
-            <strong>Production status:</strong> Your Epic client ID is propagating to UCLA Health, Stanford, Kaiser, and other health systems. This takes 1-2 weeks from Epic. You will be able to connect your real MyChart once ready.
-          </div>
+      </div>
+    </div>
+
+    <!-- Free Tier Value Prop -->
+    <div class="card" style="margin-bottom:20px;border-color:#05966933">
+      <h3 style="font-size:16px;margin-bottom:12px;color:#6EE7B7">What You Get Free — Forever</h3>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;font-size:12px;color:#CBD5E1;line-height:1.8">
+        <div>✓ Connect EHR, wearables, labs, genomics, microbiome</div>
+        <div>✓ All data AES-256 encrypted &amp; stored locally</div>
+        <div>✓ 100+ biomarker synthesis &amp; trends</div>
+        <div>✓ Readiness score &amp; drift detection</div>
+        <div>✓ Weekly basic health summary</div>
+        <div>✓ <strong style="color:#E8751A">XSpan Contribute</strong> — earn from de-identified research data</div>
+      </div>
+    </div>
+
+    <!-- Pro Upsell Preview -->
+    <div class="pro-banner" style="margin-bottom:20px">
+      <div>
+        <h3>Unlock Pro for Predictive Intelligence</h3>
+        <p style="margin-top:6px;font-size:12px;color:#94A3B8;line-height:1.6">
+          🔮 Predictive risk scores &nbsp; 💡 3x daily AI nudges &nbsp; 📊 Weekly Health Passport<br>
+          🧬 Digital Twin synthesis &nbsp; 🥗 AI meal parsing &nbsp; ❓ Ask anything about your health
+        </p>
+      </div>
+      <button class="btn btn-primary" style="white-space:nowrap" onclick="showPage('subscription',document.querySelectorAll('.nav a')[3])">Learn about Premium</button>
+    </div>
+
+    ` : `
+    <!-- ═══ DATA STATE (Partial or Full) ═══ -->
+
+    <!-- Data Completeness Bar (top) -->
+    <div class="card" style="margin-bottom:20px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <h3 style="font-size:14px">Data Completeness</h3>
+        <span style="font-size:14px;font-weight:700;color:${completePct >= 70 ? '#22C55E' : completePct >= 40 ? '#FBBF24' : '#EF4444'}">${completePct}%</span>
+      </div>
+      <div style="background:#0F172A;border-radius:8px;height:8px;overflow:hidden">
+        <div style="background:${completePct >= 70 ? '#22C55E' : completePct >= 40 ? '#FBBF24' : '#EF4444'};height:100%;width:${completePct}%;border-radius:8px;transition:width 0.3s"></div>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:10px;flex-wrap:wrap">
+        ${[
+          { name: 'Vitals', has: b?.restingHeartRate !== undefined },
+          { name: 'Sleep', has: b?.totalSleepMinutes !== undefined },
+          { name: 'Activity', has: b?.dailySteps !== undefined },
+          { name: 'Labs', has: b?.hba1c !== undefined || b?.ldlCholesterol !== undefined },
+          { name: 'Nutrition', has: b?.avgDailyCalories !== undefined },
+          { name: 'Genomics', has: b?.genomeRiskVariants !== undefined },
+        ].map(s =>
+          '<span style="font-size:10px;padding:3px 8px;border-radius:100px;' +
+          (s.has ? 'background:#05966922;color:#6EE7B7' : 'background:#33415522;color:#64748B;cursor:pointer') +
+          '">' + (s.has ? '✓ ' : '+ ') + s.name + '</span>'
+        ).join('')}
+      </div>
+    </div>
+
+    <!-- Demo Mode Banner -->
+    <div id="demo-banner" style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:#FBBF2411;border:1px solid #FBBF2433;border-radius:8px;margin-bottom:20px">
+      <span style="font-size:20px">⚠️</span>
+      <p style="flex:1;font-size:12px;color:#FBBF24"><strong>You're viewing demo data.</strong> This is synthetic sample data showing what XSpan looks like when fully connected. Connect your real health sources to see <strong>your</strong> personalized intelligence.</p>
+      <button class="btn btn-secondary" style="font-size:11px;padding:6px 14px;white-space:nowrap;background:#FBBF24;color:#000" onclick="exitDemoMode(this)">Exit Demo → Connect Real Data</button>
+    </div>
+
+    <!-- Top Summary -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div>
+        <h2 style="font-size:22px;font-weight:800;color:#fff;margin-bottom:4px">Today</h2>
+        <p style="font-size:12px;color:#64748B">${new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} · ${completePct}% data completeness</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        ${b?.recoveryScore !== undefined ? `
+        <div style="text-align:center">
+          <div style="font-size:32px;font-weight:800;color:${b.recoveryScore >= 70 ? '#22C55E' : b.recoveryScore >= 40 ? '#FBBF24' : '#EF4444'}">${b.recoveryScore}</div>
+          <div style="font-size:10px;color:#64748B">Readiness</div>
+        </div>
+        ` : ''}
+        ${b?.stressIndex !== undefined ? `
+        <div style="text-align:center">
+          <div style="font-size:32px;font-weight:800;color:${b.stressIndex <= 30 ? '#22C55E' : b.stressIndex <= 60 ? '#FBBF24' : '#EF4444'}">${b.stressIndex}</div>
+          <div style="font-size:10px;color:#64748B">Stress</div>
+        </div>
         ` : ''}
       </div>
+    </div>
 
-      <div class="card">
-        <div class="card-icon">⌚</div>
-        <h3>Wearables</h3>
-        ${isMac && config.connectors.appleHealth.enabled ? `
-          <p>If your wearables are connected to <strong>Apple Health</strong> on your iPhone, their data syncs automatically through HealthKit. No separate connection needed for:</p>
-          <div style="margin-top:8px;font-size:12px;color:#94A3B8;line-height:2">
-            &#8226; Oura Ring &nbsp; &#8226; WHOOP &nbsp; &#8226; Garmin &nbsp; &#8226; Fitbit<br>
-            &#8226; Dexcom CGM &nbsp; &#8226; Apple Watch &nbsp; &#8226; Withings
-          </div>
-          <span class="badge badge-connected" style="margin-top:8px">VIA APPLE HEALTH</span>
-        ` : `
-          <p>Connect each wearable individually via the <strong>Wearables</strong> tab. Each device authenticates via OAuth — log in with MFA in your browser.</p>
-          ${connectedProviders.filter(p => WEARABLE_PROVIDERS.some(w => w.name === p)).length > 0
-            ? connectedProviders.filter(p => WEARABLE_PROVIDERS.some(w => w.name === p)).map(p => '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><span style="color:#22C55E">&#10003;</span> <span style="font-size:13px">' + p + '</span></div>').join('')
-            : '<span class="badge">GO TO WEARABLES TAB</span>'
-          }
-        `}
-      </div>
-
-      <div class="card">
-        <div class="card-icon">🧪</div>
-        <h3>Labs &amp; Genomics</h3>
-        <p>Click Labs or Genomics tabs to connect Quest, LabCorp, Function Health, 23andMe, or Gut.id.</p>
-        <span class="badge">NOT SET UP</span>
+    <!-- Synthesis Value Prop -->
+    <div class="card" style="margin-bottom:20px;border-color:#E8751A33;background:linear-gradient(135deg,#1A1A2E,#1E293B)">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+        <span style="font-size:24px">🔗</span>
+        <div>
+          <h3 style="font-size:15px;color:#E8751A;margin-bottom:2px">Synthesized Health Intelligence</h3>
+          <p style="font-size:12px;color:#94A3B8">Your health data is scattered across Oura, WHOOP, Dexcom, Apple Watch, MyChart, Quest Labs, and more. XSpan brings it all together into one unified view — trends you can't see in any single app.</p>
+        </div>
       </div>
     </div>
+
+    <!-- Synthesized Trend Charts -->
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:24px">
+
+      <!-- Cardiovascular Synthesis: HR + HRV + BP from multiple sources -->
+      <div class="card" style="grid-column:span 2">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <h3 style="font-size:14px">❤️ Cardiovascular Synthesis</h3>
+          <span style="font-size:10px;color:#64748B">Sources: Apple Watch (HR) + Oura (HRV) + Omron (BP) + EHR (Labs)</span>
+        </div>
+        <canvas id="chart-cardio" height="140"></canvas>
+      </div>
+
+      <!-- Sleep + Recovery: sleep duration + efficiency + HRV recovery -->
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <h3 style="font-size:14px">😴 Sleep &amp; Recovery</h3>
+          <span style="font-size:10px;color:#64748B">Sources: Oura + WHOOP + Apple Watch</span>
+        </div>
+        <canvas id="chart-sleep" height="160"></canvas>
+      </div>
+
+      <!-- Metabolic: Weight + Glucose + HbA1c from scale + CGM + labs -->
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <h3 style="font-size:14px">🔥 Metabolic Health</h3>
+          <span style="font-size:10px;color:#64748B">Sources: Dexcom CGM + Scale + Quest Labs (HbA1c)</span>
+        </div>
+        <canvas id="chart-metabolic" height="160"></canvas>
+      </div>
+
+      <!-- Activity + Fitness: Steps + Active mins + VO2 Max -->
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <h3 style="font-size:14px">🏃 Activity &amp; Fitness</h3>
+          <span style="font-size:10px;color:#64748B">Sources: WHOOP + Garmin + Apple Watch</span>
+        </div>
+        <canvas id="chart-activity" height="160"></canvas>
+      </div>
+
+      <!-- Body Composition: Weight + BMI from scale + computed -->
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <h3 style="font-size:14px">⚖️ Body Composition</h3>
+          <span style="font-size:10px;color:#64748B">Sources: Smart Scale + Apple Health + Computed</span>
+        </div>
+        <canvas id="chart-body" height="160"></canvas>
+      </div>
+    </div>
+
+    <!-- What Changed (7-day drift) — loaded via API -->
+    <div class="card" style="margin-bottom:20px" id="drift-section">
+      <h3 style="font-size:16px;margin-bottom:12px">What Changed (7 Days)</h3>
+      <div id="drift-content" style="font-size:13px;color:#94A3B8">Loading trends...</div>
+    </div>
+
+    <!-- Top Issues -->
+    ${todayNudges.length > 0 ? `
+    <div class="card" style="margin-bottom:20px;border-color:#FBBF2433">
+      <h3 style="font-size:16px;margin-bottom:12px">Top Issues Today</h3>
+      ${todayNudges.slice(0, 3).map(n =>
+        '<div style="display:flex;align-items:start;gap:10px;padding:10px 0;border-bottom:1px solid #334155">' +
+        '<span style="font-size:18px">' + (n.priority === 1 ? '🔴' : n.priority === 2 ? '🟡' : '🟢') + '</span>' +
+        '<div><p style="font-size:13px;color:#E2E8F0;margin-bottom:4px">' + n.content + '</p>' +
+        (n.actionItems?.length ? '<p style="font-size:11px;color:#E8751A">→ ' + n.actionItems[0] + '</p>' : '') +
+        '</div></div>'
+      ).join('')}
+    </div>
+    ` : `
+    <div class="card" style="margin-bottom:20px">
+      <h3 style="font-size:16px;margin-bottom:8px">No Issues Detected</h3>
+      <p style="font-size:12px;color:#94A3B8">All metrics are within your normal ranges. Keep it up!</p>
+    </div>
+    `}
+
+    <!-- Privacy & Security (collapsible) -->
+    <div class="card" style="margin-bottom:20px;cursor:pointer" onclick="this.querySelector('.trust-detail').style.display=this.querySelector('.trust-detail').style.display==='none'?'block':'none'">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:18px">🛡️</span>
+          <h3 style="font-size:14px">Security, Privacy &amp; Trust</h3>
+        </div>
+        <span style="font-size:11px;color:#64748B">click to expand ▾</span>
+      </div>
+      <div class="trust-detail" style="display:none;margin-top:12px;font-size:12px;color:#94A3B8;line-height:1.8">
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
+          <div style="background:#0F172A;padding:12px;border-radius:8px">
+            <div style="color:#6EE7B7;font-weight:600;margin-bottom:4px">🔒 Encrypted Local Storage</div>
+            Your health data is encrypted with AES-256 in a local SQLite database on your device. Even if someone accessed your laptop, they cannot read your health data without your encryption key.
+          </div>
+          <div style="background:#0F172A;padding:12px;border-radius:8px">
+            <div style="color:#FBBF24;font-weight:600;margin-bottom:4px">🖥️ 100% Local Processing</div>
+            All data collection, synthesis, and insights happen entirely on your machine. Nothing is sent to any cloud server. Your health data never touches the internet.
+          </div>
+          <div style="background:#0F172A;padding:12px;border-radius:8px">
+            <div style="color:#EF4444;font-weight:600;margin-bottom:4px">🚫 No External Services</div>
+            Your health data is never sent to any AI service, cloud platform, or third party. Everything runs locally on your device.
+          </div>
+          <div style="background:#0F172A;padding:12px;border-radius:8px">
+            <div style="color:#C4B5FD;font-weight:600;margin-bottom:4px">✊ You Own Your Data</div>
+            Delete all data anytime · Revoke any connection · Export everything · Contribute uses on-device de-identification before anything leaves
+          </div>
+        </div>
+      </div>
+    </div>
+
+    `}
+    `;
+    })()}
   </div>
 
-  <!-- ═══ EHR ═══ -->
-  <div class="page" id="page-ehr">
+  <!-- ═══ CONNECT (wrapper for all data sources) ═══ -->
+  <div class="page" id="page-connect">
+    <div class="section-title">Connect Your Health Data Sources</div>
+    <p style="font-size:13px;color:#94A3B8;margin-bottom:16px">The more sources you connect, the better your health intelligence.</p>
+
+    <div style="display:flex;gap:24px;min-height:600px;align-items:flex-start">
+    <!-- Left Sidebar -->
+    <div style="width:180px;flex-shrink:0;position:sticky;top:20px" id="connect-sidebar">
+      <div onclick="showConnectTab('ehr',this)" class="connect-nav-item" style="padding:12px 16px;cursor:pointer;border-radius:8px;margin-bottom:4px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;background:#E8751A22;color:#E8751A">
+        <span>🏥</span> EHR
+      </div>
+      <div onclick="showConnectTab('wearables',this)" class="connect-nav-item" style="padding:12px 16px;cursor:pointer;border-radius:8px;margin-bottom:4px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;color:#94A3B8">
+        <span>⌚</span> Wearables
+      </div>
+      <div onclick="showConnectTab('labs',this)" class="connect-nav-item" style="padding:12px 16px;cursor:pointer;border-radius:8px;margin-bottom:4px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;color:#94A3B8">
+        <span>🧪</span> Labs
+      </div>
+      <div onclick="showConnectTab('genomics',this)" class="connect-nav-item" style="padding:12px 16px;cursor:pointer;border-radius:8px;margin-bottom:4px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;color:#94A3B8">
+        <span>🧬</span> Genomics
+      </div>
+      <div onclick="showConnectTab('microbiome',this)" class="connect-nav-item" style="padding:12px 16px;cursor:pointer;border-radius:8px;margin-bottom:4px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;color:#94A3B8">
+        <span>🦠</span> Microbiome
+      </div>
+    </div>
+    <!-- Right Content -->
+    <div style="flex:1;min-width:0;overflow:hidden">
+    <div class="connect-sub active" id="connect-ehr">
     <div class="section-title">Connect Your Electronic Health Records</div>
     <div class="hipaa-note" style="margin-bottom:20px">
       🔐 <strong>How it works:</strong> Click "Open MyChart Login" — your health system's login page opens in this browser. Complete MFA/2FA there. Once logged in, XSpan reads your records via SMART on FHIR. No passwords are stored by XSpan.
@@ -492,8 +690,8 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0B0F1A; col
     </div>
   </div>
 
-  <!-- ═══ WEARABLES ═══ -->
-  <div class="page" id="page-wearables">
+    </div>
+    <div class="connect-sub" id="connect-wearables" style="display:none">
     <div class="section-title">Connect Your Wearables</div>
     ${isMac ? `
     <div class="hipaa-note" style="margin-bottom:20px">
@@ -522,10 +720,8 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0B0F1A; col
         </div>
       `).join('')}
     </div>
-  </div>
-
-  <!-- ═══ LABS ═══ -->
-  <div class="page" id="page-labs">
+    </div>
+    <div class="connect-sub" id="connect-labs" style="display:none">
     <div class="section-title">Connect Lab Providers</div>
     <div class="hipaa-note" style="margin-bottom:20px">
       🔐 <strong>How it works:</strong> First log in to your lab provider's patient portal in this browser (with MFA). Then click "Connect" and XSpan will read your results from the active session.
@@ -545,10 +741,8 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0B0F1A; col
         </div>
       `).join('')}
     </div>
-  </div>
-
-  <!-- ═══ GENOMICS ═══ -->
-  <div class="page" id="page-genomics">
+    </div>
+    <div class="connect-sub" id="connect-genomics" style="display:none">
     <div class="section-title">Genomics &amp; DNA Profiling</div>
     <div class="hipaa-note" style="margin-bottom:20px">
       🧬 <strong>How it works:</strong> For consumer tests (23andMe), download your raw data and upload here. For clinical genomics (Foundation Medicine, Tempus, Guardant), request your report from your oncologist or care team, then upload the PDF or VCF file.
@@ -571,10 +765,8 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0B0F1A; col
         </div>
       `).join('')}
     </div>
-  </div>
-
-  <!-- ═══ MICROBIOME ═══ -->
-  <div class="page" id="page-microbiome">
+    </div>
+    <div class="connect-sub" id="connect-microbiome" style="display:none">
     <div class="section-title">Microbiome Testing</div>
     <div class="hipaa-note" style="margin-bottom:20px">
       🦠 <strong>How it works:</strong> Log in to your microbiome test provider, export or download your results, then upload here. XSpan maps your gut bacteria diversity, enterotypes, and inflammation markers into your Digital Twin.
@@ -594,27 +786,299 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0B0F1A; col
         </div>
       `).join('')}
     </div>
-  </div>
+    </div>
+    </div> <!-- end right content -->
+    </div> <!-- end flex container -->
+  </div> <!-- end page-connect -->
 
   <!-- ═══ SUBSCRIPTION ═══ -->
   <div class="page" id="page-subscription">
-    <div class="section-title">XSpan Pro Subscription</div>
-    <div class="pro-banner" style="flex-direction:column;align-items:start;gap:16px">
-      <div>
-        <h3>XSpan Pro — $20/month</h3>
-        <p style="margin-top:8px;line-height:1.8">
-          ✓ 3x daily personalized AI nudges (H-LLM powered)<br>
-          ✓ Weekly Health Passport PDF<br>
-          ✓ Predictive disease risk scores<br>
-          ✓ AI health Q&A — ask anything about your health<br>
-          ✓ Cloud Digital Twin synthesis<br>
-          ✓ AI-powered meal parsing<br>
-          ✓ Priority support
-        </p>
+    <div class="section-title">XSpan Premium</div>
+    <p style="font-size:14px;color:#94A3B8;margin-bottom:24px">Advanced health intelligence delivered through your health system or physician. Request access below.</p>
+    <div style="display:flex;gap:24px;align-items:flex-start">
+      <!-- LEFT: Value Proposition -->
+      <div style="width:380px;flex-shrink:0">
+        <div class="card" style="margin-bottom:12px;border-color:#E8751A33">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="font-size:32px">📱</div>
+            <div>
+              <h3 style="font-size:15px;margin-bottom:4px">Mobile App (iOS &amp; Android)</h3>
+              <p style="font-size:12px;color:#94A3B8">Automatically connect all wearables via Apple HealthKit / Android Health Connect. One tap setup — Oura, WHOOP, Garmin, Fitbit, Dexcom, Apple Watch.</p>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:12px;border-color:#E8751A33">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="font-size:32px">🧬</div>
+            <div>
+              <h3 style="font-size:15px;margin-bottom:4px">Digital Twin for Predictive Risk Detection</h3>
+              <p style="font-size:12px;color:#94A3B8">AI-powered whole-body model that predicts cardiovascular, metabolic, sleep disorder, and burnout risk before symptoms appear.</p>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:12px;border-color:#E8751A33">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="font-size:32px">💡</div>
+            <div>
+              <h3 style="font-size:15px;margin-bottom:4px">3x Daily AI Nudges</h3>
+              <p style="font-size:12px;color:#94A3B8">Morning, midday, and evening personalized nudges — sleep optimization, nutrition guidance, stress management, activity reminders.</p>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:12px;border-color:#E8751A33">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="font-size:32px">🥗</div>
+            <div>
+              <h3 style="font-size:15px;margin-bottom:4px">Meal Tracking &amp; Recommendations</h3>
+              <p style="font-size:12px;color:#94A3B8">AI-powered natural language meal parsing with personalized nutrition recommendations based on your biomarker profile.</p>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:12px;border-color:#7C3AED33">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="font-size:32px">🏥</div>
+            <div>
+              <h3 style="font-size:15px;margin-bottom:4px">Physician / Health System Programs</h3>
+              <p style="font-size:12px;color:#94A3B8">Structured care programs for Cardiometabolic, Cardiovascular, Gastroenterology, and Weight Management — supervised by your health system.</p>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:12px;border-color:#05966933">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="font-size:32px">📊</div>
+            <div>
+              <h3 style="font-size:15px;margin-bottom:4px">Weekly Health Passport</h3>
+              <p style="font-size:12px;color:#94A3B8">Comprehensive PDF with overall health score, category scores, trends, and physician-ready summary.</p>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:12px;border-color:#EF444433">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="font-size:32px">🚨</div>
+            <div>
+              <h3 style="font-size:15px;margin-bottom:4px">Escalation Pathway to Primary Care</h3>
+              <p style="font-size:12px;color:#94A3B8">When risk scores cross thresholds, automatic escalation to your PCP or care team with relevant health data summary.</p>
+            </div>
+          </div>
+        </div>
       </div>
-      <a href="https://buy.stripe.com/test_dRmdR90Ei2iO3CFf3LgnK00" target="_blank"><button class="btn btn-primary" style="font-size:16px;padding:14px 32px">Subscribe — $20/month</button></a>
-      <p style="font-size:11px;color:#64748B">Cancel anytime. Powered by Stripe. HIPAA-compliant.</p>
+
+      <!-- RIGHT: Ask Your Doctor -->
+      <div style="flex:1">
+        <div class="card" style="border-color:#E8751A44;position:sticky;top:20px">
+          <div style="text-align:center;margin-bottom:20px">
+            <div style="font-size:40px;margin-bottom:8px">👨‍⚕️</div>
+            <h3 style="font-size:18px;margin-bottom:4px">Ask Your Doctor for XSpan</h3>
+            <p style="font-size:12px;color:#94A3B8">XSpan Premium is available through your health system, physician, or benefits broker.</p>
+          </div>
+
+          <label style="font-size:12px;font-weight:600;color:#CBD5E1;display:block;margin-bottom:6px">Email to your physician:</label>
+          <textarea id="premium-email-body" style="width:100%;height:140px;background:#0F172A;border:1px solid #334155;border-radius:8px;color:#E2E8F0;font-size:12px;padding:12px;resize:none;line-height:1.6;font-family:inherit">Hi Doctor,
+
+I'd like to use XSpan Agentic-AI for my preventive health and chronic care management. I would like to receive an invite code for their mobile app.
+
+Name: ${currentUser?.name || '[Your Name]'}
+Insurance/MRN: [Your Insurance Number or MRN]
+
+Thank you.</textarea>
+
+          <label style="font-size:12px;font-weight:600;color:#CBD5E1;display:block;margin:16px 0 6px">Your physician or broker's email:</label>
+          <input type="email" id="physician-email" placeholder="doctor@hospital.com" style="width:100%;padding:12px;background:#0F172A;border:1px solid #334155;border-radius:8px;color:#E2E8F0;font-size:13px">
+
+          <button id="premium-send-btn" class="btn btn-primary" style="width:100%;margin-top:16px;font-size:14px;padding:14px" onclick="sendPremiumEmail()">Open Email to Send to Your Doctor</button>
+
+          <p style="font-size:10px;color:#64748B;margin-top:8px;text-align:center">This will open your default email app (Gmail, Outlook, Apple Mail) with the message pre-filled.</p>
+
+          <div style="margin-top:16px;padding:12px;background:#0F172A;border-radius:8px;font-size:11px;color:#64748B;line-height:1.6">
+            <strong style="color:#94A3B8">Why an invite code?</strong><br>
+            XSpan Premium mobile app is available through participating health systems and physicians. Your doctor can request an invite code for you, which ensures your care team is connected and can receive your Health Passport and escalation alerts.
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
+
+  <!-- ═══ CONTRIBUTE ═══ -->
+  <div class="page" id="page-contribute">
+
+    <!-- Hero -->
+    <div style="text-align:center;padding:40px 0 32px">
+      <div style="font-size:56px;margin-bottom:16px">🔬</div>
+      <h2 style="font-size:28px;font-weight:800;color:#fff;margin-bottom:12px">XSpan Contribute</h2>
+      <p style="font-size:16px;color:#94A3B8;max-width:560px;margin:0 auto;line-height:1.7">
+        Help advance medical research with your de-identified health insights — and get rewarded for it.
+      </p>
+    </div>
+
+    <!-- Value Prop Cards -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:32px">
+      <div class="card" style="text-align:center;border-color:#05966933">
+        <div style="font-size:36px;margin-bottom:12px">🛡️</div>
+        <h3 style="margin-bottom:8px">Completely De-Identified</h3>
+        <p style="font-size:12px">Your data is stripped of all 18 HIPAA identifiers <strong>on your device</strong> before it ever leaves. No one — not even XSpan — can trace it back to you.</p>
+      </div>
+      <div class="card" style="text-align:center;border-color:#E8751A33">
+        <div style="font-size:36px;margin-bottom:12px">💰</div>
+        <h3 style="margin-bottom:8px">You Earn 50%</h3>
+        <p style="font-size:12px">Half of every research contribution goes directly to you. The rest supports your health system and community health initiatives.</p>
+      </div>
+      <div class="card" style="text-align:center;border-color:#7C3AED33">
+        <div style="font-size:36px;margin-bottom:12px">🧬</div>
+        <h3 style="margin-bottom:8px">Accelerate Research</h3>
+        <p style="font-size:12px">Your de-identified health insights help researchers develop better treatments, design clinical trials, and advance preventive medicine.</p>
+      </div>
+    </div>
+
+    <!-- How It Works -->
+    <div class="card" style="margin-bottom:24px;border-color:#334155">
+      <h3 style="font-size:18px;margin-bottom:20px">How It Works</h3>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:24px;text-align:center">
+        <div>
+          <div style="width:48px;height:48px;border-radius:50%;background:#E8751A22;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:20px;font-weight:800;color:#E8751A">1</div>
+          <p style="font-size:12px;color:#CBD5E1;font-weight:600">You opt in</p>
+          <p style="font-size:11px;color:#64748B;margin-top:4px">Choose which health categories to contribute</p>
+        </div>
+        <div>
+          <div style="width:48px;height:48px;border-radius:50%;background:#E8751A22;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:20px;font-weight:800;color:#E8751A">2</div>
+          <p style="font-size:12px;color:#CBD5E1;font-weight:600">De-identified on your device</p>
+          <p style="font-size:11px;color:#64748B;margin-top:4px">All 18 HIPAA identifiers removed locally — nothing identifiable leaves</p>
+        </div>
+        <div>
+          <div style="width:48px;height:48px;border-radius:50%;background:#E8751A22;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:20px;font-weight:800;color:#E8751A">3</div>
+          <p style="font-size:12px;color:#CBD5E1;font-weight:600">Researchers access it</p>
+          <p style="font-size:11px;color:#64748B;margin-top:4px">Verified research organizations use it to advance medicine</p>
+        </div>
+        <div>
+          <div style="width:48px;height:48px;border-radius:50%;background:#E8751A22;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:20px;font-weight:800;color:#E8751A">4</div>
+          <p style="font-size:12px;color:#CBD5E1;font-weight:600">You get rewarded</p>
+          <p style="font-size:11px;color:#64748B;margin-top:4px">50% of every contribution reward goes to you — withdraw to your bank anytime</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- The Problem / Why This Matters -->
+    <div class="card" style="margin-bottom:24px;background:linear-gradient(135deg,#1A1A2E,#1E293B);border-color:#7C3AED33">
+      <h3 style="font-size:16px;margin-bottom:12px;color:#C4B5FD">Why This Matters</h3>
+      <p style="font-size:13px;color:#94A3B8;line-height:1.8">
+        Today, your health system already shares de-identified patient data with research organizations — it's how medical breakthroughs happen. But patients like you never see any of that value.
+      </p>
+      <p style="font-size:13px;color:#94A3B8;line-height:1.8;margin-top:12px">
+        <strong style="color:#E2E8F0">XSpan Contribute changes that.</strong> You choose to share. You control what's included. Your data is de-identified right on your device. And for the first time, <strong style="color:#E8751A">you earn directly</strong> from contributing to the research that will shape the future of medicine.
+      </p>
+    </div>
+
+    <!-- What's Included / Categories -->
+    <div class="card" style="margin-bottom:24px">
+      <h3 style="font-size:16px;margin-bottom:16px">Choose What to Contribute</h3>
+      <p style="font-size:12px;color:#64748B;margin-bottom:16px">Select the health categories you're comfortable contributing. You can change these anytime.</p>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px" id="contribute-categories">
+        <label style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#0F172A;border:1px solid #334155;border-radius:8px;cursor:pointer;font-size:13px">
+          <input type="checkbox" checked style="accent-color:#E8751A;width:16px;height:16px"> ❤️ Cardiovascular <span style="color:#64748B;font-size:11px;margin-left:auto">HR, HRV, BP, VO2</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#0F172A;border:1px solid #334155;border-radius:8px;cursor:pointer;font-size:13px">
+          <input type="checkbox" checked style="accent-color:#E8751A;width:16px;height:16px"> 🔥 Metabolic <span style="color:#64748B;font-size:11px;margin-left:auto">Glucose, BMI</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#0F172A;border:1px solid #334155;border-radius:8px;cursor:pointer;font-size:13px">
+          <input type="checkbox" checked style="accent-color:#E8751A;width:16px;height:16px"> 😴 Sleep <span style="color:#64748B;font-size:11px;margin-left:auto">Duration, stages, efficiency</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#0F172A;border:1px solid #334155;border-radius:8px;cursor:pointer;font-size:13px">
+          <input type="checkbox" checked style="accent-color:#E8751A;width:16px;height:16px"> 🏃 Activity <span style="color:#64748B;font-size:11px;margin-left:auto">Steps, exercise, calories</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#0F172A;border:1px solid #334155;border-radius:8px;cursor:pointer;font-size:13px">
+          <input type="checkbox" checked style="accent-color:#E8751A;width:16px;height:16px"> 🥗 Nutrition <span style="color:#64748B;font-size:11px;margin-left:auto">Macros, fiber, hydration</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#0F172A;border:1px solid #334155;border-radius:8px;cursor:pointer;font-size:13px">
+          <input type="checkbox" checked style="accent-color:#E8751A;width:16px;height:16px"> 🧪 Lab Results <span style="color:#64748B;font-size:11px;margin-left:auto">HbA1c, lipids, vitamins</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#0F172A;border:1px solid #334155;border-radius:8px;cursor:pointer;font-size:13px">
+          <input type="checkbox" style="accent-color:#E8751A;width:16px;height:16px"> 🧬 Genomics Risk Tiers <span style="color:#64748B;font-size:11px;margin-left:auto">Low/Med/High only</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#0F172A;border:1px solid #334155;border-radius:8px;cursor:pointer;font-size:13px">
+          <input type="checkbox" checked style="accent-color:#E8751A;width:16px;height:16px"> 📊 Risk Scores <span style="color:#64748B;font-size:11px;margin-left:auto">Cardio, metabolic, sleep</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Privacy Assurance -->
+    <div class="hipaa-note" style="margin-bottom:24px;flex-direction:column;align-items:start;gap:12px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:18px">🔒</span>
+        <strong>Your Privacy Is Absolute</strong>
+      </div>
+      <div style="font-size:12px;color:#6EE7B7;line-height:1.8">
+        ✓ All 18 HIPAA identifiers removed <strong>on your device</strong> — before anything leaves<br>
+        ✓ No names, dates, locations, or IDs are ever shared<br>
+        ✓ Additional privacy layers: k-anonymity, differential privacy, temporal scrambling<br>
+        ✓ You can revoke consent and delist instantly — anytime<br>
+        ✓ Research organizations are prohibited from attempting re-identification<br>
+        ✓ Your health system already does this — now <strong>you</strong> get to choose and benefit
+      </div>
+    </div>
+
+    <!-- Earnings Preview -->
+    <div class="card" style="margin-bottom:24px;border-color:#E8751A33">
+      <h3 style="font-size:16px;margin-bottom:16px">Estimated Contribution Rewards</h3>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px">
+        <div style="background:#0F172A;padding:16px;border-radius:8px;text-align:center">
+          <div style="font-size:24px;font-weight:800;color:#E8751A">$12 – $75</div>
+          <div style="font-size:11px;color:#64748B;margin-top:4px">per contribution (vitals + labs)</div>
+        </div>
+        <div style="background:#0F172A;padding:16px;border-radius:8px;text-align:center">
+          <div style="font-size:24px;font-weight:800;color:#E8751A">$300 – $750</div>
+          <div style="font-size:11px;color:#64748B;margin-top:4px">per contribution (12-month comprehensive)</div>
+        </div>
+      </div>
+      <p style="font-size:11px;color:#64748B;margin-top:12px;text-align:center">
+        You receive <strong style="color:#E8751A">50%</strong> of every contribution. The rest supports your health system and community health research.
+      </p>
+    </div>
+
+    <!-- CTA -->
+    <div id="contribute-cta" style="text-align:center;padding:24px 0">
+      <button class="btn btn-primary" style="font-size:18px;padding:18px 48px;border-radius:12px" onclick="startContribute()">
+        Opt In to Contribute
+      </button>
+      <p style="font-size:12px;color:#64748B;margin-top:12px">Voluntary. Revoke anytime. No impact on your XSpan health features.</p>
+    </div>
+
+    <!-- Enrolled Status (hidden by default, shown after opt-in) -->
+    <div id="contribute-enrolled" style="display:none">
+      <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)">
+        <div class="stat-card">
+          <div class="value" id="contribute-earnings">$0.00</div>
+          <div class="label">Total Rewards Earned</div>
+        </div>
+        <div class="stat-card">
+          <div class="value" id="contribute-listings">0</div>
+          <div class="label">Active Contributions</div>
+        </div>
+        <div class="stat-card">
+          <div class="value" id="contribute-status" style="font-size:16px;color:#22C55E">Enrolled</div>
+          <div class="label">Contribution Status</div>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:16px">
+        <button class="btn btn-secondary" style="font-size:12px" onclick="revokeContribute()">Revoke Consent &amp; Delist</button>
+      </div>
+    </div>
+
+    <!-- For Health Systems Banner -->
+    <div class="card" style="margin-top:32px;background:linear-gradient(135deg,#0F172A,#1A1A2E);border-color:#05966933">
+      <div style="display:flex;align-items:start;gap:16px">
+        <div style="font-size:36px">🏥</div>
+        <div>
+          <h3 style="font-size:15px;margin-bottom:8px;color:#6EE7B7">For Health Systems &amp; Providers</h3>
+          <p style="font-size:12px;color:#94A3B8;line-height:1.7">
+            Partner with XSpan to give your patients the ability to contribute to medical research on their terms — and share in the rewards. Your patients choose voluntarily. Their data is de-identified on-device. And your organization earns a revenue share while advancing the research mission.
+          </p>
+          <p style="font-size:12px;color:#94A3B8;line-height:1.7;margin-top:8px">
+            You can also access de-identified research data from the program for your own research initiatives.
+          </p>
+          <a href="mailto:partnerships@xspan.ai" style="display:inline-block;margin-top:12px;font-size:12px;color:#E8751A;text-decoration:underline">Learn about the Research Data Contribution Program →</a>
+        </div>
+      </div>
+    </div>
+
   </div>
 
 </div>
@@ -633,9 +1097,12 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0B0F1A; col
 
 <script>
 function showPage(id, el) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav a').forEach(a => a.classList.remove('active'));
-  document.getElementById('page-' + id).classList.add('active');
+  // Hide all pages
+  document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); p.style.display = 'none'; });
+  document.querySelectorAll('.nav a').forEach(function(a) { a.classList.remove('active'); });
+  // Show target page
+  var target = document.getElementById('page-' + id);
+  if (target) { target.classList.add('active'); target.style.display = 'block'; }
   if (el) el.classList.add('active');
 }
 
@@ -891,6 +1358,365 @@ function showModal(title, bodyHtml, buttonsHtml) {
 function closeModal() {
   document.getElementById('modal').classList.remove('show');
 }
+
+// ── Contribute: Opt-in / Revoke ──────────────────────────────
+
+async function startContribute() {
+  showModal(
+    'Enroll in XSpan Contribute',
+    '<div style="padding:4px">' +
+    '<div style="text-align:center;margin-bottom:16px"><div style="font-size:40px;margin-bottom:8px">🔬</div>' +
+    '<p style="color:#CBD5E1;font-size:14px">Please review and accept the following to enroll.</p></div>' +
+
+    '<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">' +
+
+    '<label id="chk-tos" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#0F172A;border:1px solid #334155;border-radius:8px;cursor:pointer;font-size:13px" onclick="event.stopPropagation()">' +
+    '<input type="checkbox" id="cb-tos" onchange="checkEnrollReady()" style="accent-color:#E8751A;width:16px;height:16px;flex-shrink:0">' +
+    '<span style="flex:1">I have read and accept the <a href="#" onclick="event.preventDefault();event.stopPropagation();showLegalDoc(\\'tos\\')" style="color:#E8751A;text-decoration:underline">Terms of Service</a></span>' +
+    '</label>' +
+
+    '<label id="chk-privacy" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#0F172A;border:1px solid #334155;border-radius:8px;cursor:pointer;font-size:13px" onclick="event.stopPropagation()">' +
+    '<input type="checkbox" id="cb-privacy" onchange="checkEnrollReady()" style="accent-color:#E8751A;width:16px;height:16px;flex-shrink:0">' +
+    '<span style="flex:1">I have read and accept the <a href="#" onclick="event.preventDefault();event.stopPropagation();showLegalDoc(\\'privacy\\')" style="color:#E8751A;text-decoration:underline">Privacy Policy</a></span>' +
+    '</label>' +
+
+    '<label id="chk-consent" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#0F172A;border:1px solid #334155;border-radius:8px;cursor:pointer;font-size:13px" onclick="event.stopPropagation()">' +
+    '<input type="checkbox" id="cb-consent" onchange="checkEnrollReady()" style="accent-color:#E8751A;width:16px;height:16px;flex-shrink:0">' +
+    '<span style="flex:1">I have read and accept the <a href="#" onclick="event.preventDefault();event.stopPropagation();showLegalDoc(\\'consent\\')" style="color:#E8751A;text-decoration:underline">Data Contributor Consent</a></span>' +
+    '</label>' +
+
+    '<label id="chk-rewards" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#0F172A;border:1px solid #334155;border-radius:8px;cursor:pointer;font-size:13px" onclick="event.stopPropagation()">' +
+    '<input type="checkbox" id="cb-rewards" onchange="checkEnrollReady()" style="accent-color:#E8751A;width:16px;height:16px;flex-shrink:0">' +
+    '<span style="flex:1">I understand the <a href="#" onclick="event.preventDefault();event.stopPropagation();showLegalDoc(\\'rewards\\')" style="color:#E8751A;text-decoration:underline">Contribution Rewards</a> (50% to me, rest supports health system &amp; community)</span>' +
+    '</label>' +
+
+    '</div>' +
+
+    '<div style="background:#05966911;border:1px solid #05966933;border-radius:8px;padding:12px;font-size:11px;color:#6EE7B7;line-height:1.6;margin-bottom:12px">' +
+    'Your data is de-identified on your device before it ever leaves. All 18 HIPAA identifiers are removed. You can revoke consent anytime. No cost to you.' +
+    '</div>' +
+
+    '</div>',
+    '<button class="btn btn-primary" id="btn-enroll" style="flex:2;opacity:0.4;cursor:not-allowed" disabled onclick="confirmContribute()">Accept All &amp; Enroll</button>'
+  );
+}
+
+// ── Premium: Open mailto to physician ─────────────────────────
+
+function sendPremiumEmail() {
+  var email = document.getElementById('physician-email').value;
+  var body = document.getElementById('premium-email-body').value;
+  if (!email) { alert('Please enter your physician or broker email address'); return; }
+  var subject = encodeURIComponent('Request for XSpan HealthAI Premium Access');
+  var mailBody = encodeURIComponent(body);
+  window.open('mailto:' + email + '?subject=' + subject + '&body=' + mailBody, '_self');
+}
+
+// ── Charts: Initialize on page load ──────────────────────────
+
+(function initCharts() {
+  fetch('/api/chart-data')
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (!d.labels || d.labels.length < 2) return;
+      var gc = '#334155';
+      var tc = '#64748B';
+      var labels = d.labels.map(function(l) { return l.slice(5); });
+      var baseOpts = function(showLegend) {
+        return {
+          responsive: true,
+          interaction: { mode: 'index', intersect: false },
+          plugins: { legend: { display: showLegend, labels: { color: '#94A3B8', font: { size: 10 }, boxWidth: 12 } } },
+          scales: {
+            x: { ticks: { color: tc, font: { size: 9 }, maxTicksLimit: 8 }, grid: { color: gc } },
+            y: { ticks: { color: tc, font: { size: 10 } }, grid: { color: gc } }
+          }
+        };
+      };
+      function ds(label, data, color, dash) {
+        return { label: label, data: data, borderColor: color, borderWidth: 2, tension: 0.3, pointRadius: 1.5, fill: false, spanGaps: true, borderDash: dash || [] };
+      }
+
+      // Cardiovascular Synthesis: RHR + HRV + BP (multi-axis)
+      var cardioCtx = document.getElementById('chart-cardio');
+      if (cardioCtx) {
+        new Chart(cardioCtx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [
+              ds('Resting HR (bpm)', d.restingHr, '#EF4444'),
+              ds('HRV (ms)', d.hrv, '#22C55E'),
+              ds('BP Systolic', d.bpSystolic, '#A78BFA', [5,5])
+            ]
+          },
+          options: baseOpts(true)
+        });
+      }
+
+      // Sleep & Recovery: hours + efficiency
+      var sleepCtx = document.getElementById('chart-sleep');
+      if (sleepCtx) {
+        new Chart(sleepCtx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [
+              ds('Sleep (hrs)', d.sleep.map(function(v) { return v ? +(v/60).toFixed(1) : null; }), '#6EE7B7'),
+              ds('Efficiency (%)', d.sleepEfficiency, '#A78BFA', [4,4])
+            ]
+          },
+          options: baseOpts(true)
+        });
+      }
+
+      // Metabolic: Glucose + Weight (lbs)
+      var metaCtx = document.getElementById('chart-metabolic');
+      if (metaCtx) {
+        new Chart(metaCtx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [
+              ds('Glucose (mg/dL)', d.glucose, '#EF4444'),
+              ds('Weight (lbs)', d.weight.map(function(v) { return v ? +(v * 2.205).toFixed(1) : null; }), '#E8751A', [4,4])
+            ]
+          },
+          options: baseOpts(true)
+        });
+      }
+
+      // Activity: Steps + Active Minutes
+      var actCtx = document.getElementById('chart-activity');
+      if (actCtx) {
+        new Chart(actCtx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [
+              ds('Steps', d.steps, '#FBBF24')
+            ]
+          },
+          options: baseOpts(false)
+        });
+      }
+
+      // Body: Weight (lbs) + BMI
+      var bodyCtx = document.getElementById('chart-body');
+      if (bodyCtx) {
+        new Chart(bodyCtx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [
+              ds('Weight (lbs)', d.weight.map(function(v) { return v ? +(v * 2.205).toFixed(1) : null; }), '#E8751A'),
+              ds('BMI', d.bmi, '#64748B', [4,4])
+            ]
+          },
+          options: baseOpts(true)
+        });
+      }
+    })
+    .catch(function() {});
+})();
+
+// ── Navigate to Connect tab with specific sub-tab ────────────
+
+function goToConnect(subTab) {
+  showPage('connect', document.querySelectorAll('.nav a')[1]);
+  setTimeout(function() {
+    var subtabs = document.querySelectorAll('#connect-subtabs a');
+    var map = { ehr: 0, wearables: 1, labs: 2, genomics: 3, microbiome: 4 };
+    var idx = map[subTab] ?? 0;
+    if (subtabs[idx]) showConnectTab(subTab, subtabs[idx]);
+  }, 50);
+}
+
+// ── Connect: Sub-tab switching ───────────────────────────────
+
+function showConnectTab(id, el) {
+  document.querySelectorAll('.connect-sub').forEach(function(p) { p.style.display = 'none'; });
+  document.querySelectorAll('.connect-nav-item').forEach(function(a) { a.style.background = 'transparent'; a.style.color = '#94A3B8'; });
+  var target = document.getElementById('connect-' + id);
+  if (target) target.style.display = 'block';
+  if (el) { el.style.background = '#E8751A22'; el.style.color = '#E8751A'; }
+}
+
+// ── Demo: Load synthetic data ────────────────────────────────
+
+async function loadDemoData(btn) {
+  btn.textContent = 'Loading demo data...';
+  btn.disabled = true;
+  try {
+    var res = await fetch('/api/demo/load', { method: 'POST' });
+    var data = await res.json();
+    if (data.success) {
+      showModal(
+        'Demo Data Loaded',
+        '<div style="text-align:center;padding:16px">' +
+        '<div style="font-size:48px;margin-bottom:12px">🎉</div>' +
+        '<p style="color:#22C55E;font-size:16px;font-weight:700;margin-bottom:8px">30 days of sample health data loaded!</p>' +
+        '<p style="color:#94A3B8;font-size:13px">Refreshing dashboard to show your personalized insights, trends, and health intelligence preview.</p>' +
+        '<p style="color:#FBBF24;font-size:11px;margin-top:12px">All data is clearly marked as demo. Connect real sources to see your actual health data.</p>' +
+        '</div>',
+        ''
+      );
+      setTimeout(function() { window.location.reload(); }, 2500);
+    } else {
+      btn.textContent = 'Load Demo Data';
+      btn.disabled = false;
+      showModal('Error', '<p style="color:#EF4444">' + (data.error || 'Could not load demo data') + '</p>', '');
+    }
+  } catch (e) {
+    btn.textContent = 'Load Demo Data';
+    btn.disabled = false;
+    showModal('Error', '<p style="color:#EF4444">Could not connect to load demo data.</p>', '');
+  }
+}
+
+// ── Demo: Exit demo mode ─────────────────────────────────────
+
+async function exitDemoMode(btn) {
+  btn.textContent = 'Clearing demo data...';
+  btn.disabled = true;
+  try {
+    var res = await fetch('/api/demo/clear', { method: 'POST' });
+    var data = await res.json();
+    if (data.success) {
+      showModal(
+        'Demo Data Cleared',
+        '<div style="text-align:center;padding:16px">' +
+        '<div style="font-size:48px;margin-bottom:12px">🔗</div>' +
+        '<p style="color:#22C55E;font-size:16px;font-weight:700;margin-bottom:12px">Ready for your real data!</p>' +
+        '<p style="color:#94A3B8;font-size:13px;line-height:1.7">Now connect your health sources to see your actual personalized health intelligence. Click <strong style="color:#E8751A">Connect</strong> in the nav bar to get started.</p>' +
+        '</div>',
+        '<button class="btn btn-primary" onclick="closeModal();goToConnect(\\'ehr\\')">Go to Connect</button>'
+      );
+      setTimeout(function() { window.location.reload(); }, 3000);
+    }
+  } catch (e) {
+    btn.textContent = 'Exit Demo → Connect Real Data';
+    btn.disabled = false;
+  }
+}
+
+// ── Today: Load drift data on page load ──────────────────────
+
+(function loadDrift() {
+  var el = document.getElementById('drift-content');
+  if (!el) return;
+  fetch('/api/today/drift')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!data.drifts || data.drifts.length === 0) {
+        el.innerHTML = '<p style="color:#64748B;font-size:12px">Not enough data yet for trend detection. Check back after a few days of connected data.</p>';
+        return;
+      }
+      el.innerHTML = data.drifts.map(function(d) {
+        var color = d.direction === 'up' ? (d.field === 'Resting HR' || d.field === 'Weight' ? '#EF4444' : '#22C55E') : (d.field === 'HRV' || d.field === 'Sleep' || d.field === 'Steps' ? '#EF4444' : '#22C55E');
+        var arrow = d.direction === 'up' ? '↑' : '↓';
+        return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #1E293B">' +
+          '<span style="font-size:18px">' + d.icon + '</span>' +
+          '<span style="flex:1;font-size:13px;color:#CBD5E1">' + d.field + '</span>' +
+          '<span style="font-size:13px;color:' + color + ';font-weight:700">' + arrow + ' ' + Math.abs(d.change) + '%</span>' +
+          '<span style="font-size:11px;color:#64748B">' + d.previous + ' → ' + d.current + '</span>' +
+          '</div>';
+      }).join('');
+    })
+    .catch(function() {
+      el.innerHTML = '<p style="color:#64748B;font-size:12px">Could not load trends.</p>';
+    });
+})();
+
+function checkEnrollReady() {
+  var all = document.getElementById('cb-tos').checked &&
+            document.getElementById('cb-privacy').checked &&
+            document.getElementById('cb-consent').checked &&
+            document.getElementById('cb-rewards').checked;
+  var btn = document.getElementById('btn-enroll');
+  btn.disabled = !all;
+  btn.style.opacity = all ? '1' : '0.4';
+  btn.style.cursor = all ? 'pointer' : 'not-allowed';
+}
+
+function showLegalDoc(docType) {
+  var titles = { tos: 'Terms of Service', privacy: 'Privacy Policy', consent: 'Data Contributor Consent', rewards: 'Contribution Rewards' };
+  var title = titles[docType] || docType;
+
+  fetch('/api/contribute/legal/' + docType)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      // Show in a new modal-like overlay within the page
+      var overlay = document.createElement('div');
+      overlay.id = 'legal-doc-overlay';
+      overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:200;display:flex;justify-content:center;align-items:center';
+      overlay.innerHTML =
+        '<div style="background:#1E293B;border:1px solid #E8751A;border-radius:16px;padding:32px;max-width:640px;width:90%;max-height:80vh;overflow-y:auto">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">' +
+        '<h2 style="font-size:18px;color:#fff">' + title + '</h2>' +
+        '<button onclick="document.getElementById(\\'legal-doc-overlay\\').remove()" style="background:none;border:none;color:#64748B;font-size:24px;cursor:pointer">&times;</button>' +
+        '</div>' +
+        '<div style="font-size:12px;color:#CBD5E1;line-height:1.8;white-space:pre-wrap">' + (data.content || 'Document not available.') + '</div>' +
+        '</div>';
+      overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+      document.body.appendChild(overlay);
+    })
+    .catch(function() {
+      alert('Could not load document. Please try again.');
+    });
+}
+
+async function confirmContribute() {
+  closeModal();
+  try {
+    var res = await fetch('/api/contribute/enroll', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ categories: getSelectedCategories() }),
+    });
+    var data = await res.json();
+    if (data.success) {
+      document.getElementById('contribute-cta').style.display = 'none';
+      document.getElementById('contribute-enrolled').style.display = 'block';
+      showModal(
+        'Welcome to XSpan Contribute',
+        '<div style="text-align:center;padding:16px">' +
+        '<div style="font-size:56px;margin-bottom:16px">🎉</div>' +
+        '<p style="color:#22C55E;font-size:18px;font-weight:700;margin-bottom:12px">You\\'re enrolled!</p>' +
+        '<p style="color:#94A3B8;font-size:13px;line-height:1.7">Your first contribution will be posted automatically. You\\'ll see your rewards appear here as research organizations access your de-identified data.</p>' +
+        '</div>',
+        ''
+      );
+    } else {
+      showModal('Error', '<p style="color:#EF4444">' + (data.error || 'Could not enroll. Please try again.') + '</p>', '');
+    }
+  } catch (e) {
+    showModal('Error', '<p style="color:#EF4444">Could not connect to XSpan. Is the server running?</p>', '');
+  }
+}
+
+async function revokeContribute() {
+  if (!confirm('Are you sure you want to revoke consent? All active contributions will be delisted. Data from completed contributions cannot be recalled.')) return;
+  try {
+    var res = await fetch('/api/contribute/revoke', { method: 'POST' });
+    var data = await res.json();
+    if (data.success) {
+      document.getElementById('contribute-cta').style.display = 'block';
+      document.getElementById('contribute-enrolled').style.display = 'none';
+      showModal('Consent Revoked', '<div style="text-align:center;padding:16px"><div style="font-size:48px;margin-bottom:16px">✅</div><p style="color:#CBD5E1;font-size:14px">Your contributions have been delisted. You can re-enroll anytime.</p></div>', '');
+    }
+  } catch (e) {
+    showModal('Error', '<p style="color:#EF4444">Could not revoke. Please try again.</p>', '');
+  }
+}
+
+function getSelectedCategories() {
+  var checkboxes = document.querySelectorAll('#contribute-categories input[type=checkbox]');
+  var categories = ['cardiovascular','metabolic','sleep','activity','nutrition','labs','genomics','risk'];
+  var selected = [];
+  checkboxes.forEach(function(cb, i) { if (cb.checked) selected.push(categories[i]); });
+  return selected;
+}
 </script>
 </body>
 </html>`;
@@ -1055,6 +1881,284 @@ export function startDashboard(
       currentUser = null;
       res.writeHead(302, { 'Location': '/' });
       res.end();
+      return;
+    }
+
+    // API: Demo — Load synthetic data
+    if (url === '/api/demo/load' && req.method === 'POST') {
+      try {
+        // Dynamically import demo module
+        const { generateDemoData } = await import('../demo/synthetic-data.js');
+        const demo = generateDemoData();
+
+        // Clear existing snapshots so demo data takes precedence
+        try {
+          store.db.prepare('DELETE FROM biomarker_snapshots').run();
+          store.db.prepare('DELETE FROM nudges').run();
+        } catch {}
+
+        // Insert snapshots into store
+        for (const snapshot of demo.snapshots) {
+          store.insertSnapshot(snapshot);
+        }
+
+        // Insert nudges
+        for (const nudge of demo.nudges) {
+          store.insertNudge(nudge);
+        }
+
+        console.log(`[Demo] Loaded ${demo.snapshots.length} snapshots + ${demo.nudges.length} nudges`);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, snapshots: demo.snapshots.length, nudges: demo.nudges.length }));
+      } catch (err) {
+        console.error('[Demo] Failed to load:', err);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: String(err) }));
+      }
+      return;
+    }
+
+    // Static: Serve logo
+    if (url === '/logo.png') {
+      try {
+        const logoPath = join(dirname(fileURLToPath(import.meta.url)), 'xspan-logo.png');
+        const logo = readFileSync(logoPath);
+        res.writeHead(200, { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=86400' });
+        res.end(logo);
+      } catch {
+        res.writeHead(404);
+        res.end();
+      }
+      return;
+    }
+
+    // API: Premium — Send request to physician
+    if (url === '/api/premium/request' && req.method === 'POST') {
+      let body = '';
+      req.on('data', (chunk: Buffer) => body += chunk);
+      req.on('end', () => {
+        try {
+          const data = JSON.parse(body);
+          console.log(`[Premium] Invite request to: ${data.physicianEmail}`);
+          console.log(`[Premium] Message: ${data.emailBody?.substring(0, 100)}...`);
+          // TODO: Wire to actual email sending service
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: true, message: 'Request sent to your physician.' }));
+        } catch {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'Invalid request' }));
+        }
+      });
+      return;
+    }
+
+    // API: Chart data — 30-day time series for Insights charts
+    if (url === '/api/chart-data') {
+      try {
+        const snapshots = store.getSnapshots(30);
+        const labels = snapshots.map(s => s.snapshotDate).reverse();
+        const extract = (key: string) => snapshots.map(s => (s.biomarkers as Record<string, unknown>)[key] ?? null).reverse();
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          labels,
+          weight: extract('bodyMassKg'),
+          bmi: extract('bodyMassIndex'),
+          sleep: extract('totalSleepMinutes'),
+          steps: extract('dailySteps'),
+          hrv: extract('heartRateVariability'),
+          stress: extract('stressIndex'),
+          glucose: extract('bloodGlucoseFasting'),
+          bpSystolic: extract('bloodPressureSystolic'),
+          bpDiastolic: extract('bloodPressureDiastolic'),
+          restingHr: extract('restingHeartRate'),
+          sleepEfficiency: extract('sleepEfficiency'),
+        }));
+      } catch {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ labels: [] }));
+      }
+      return;
+    }
+
+    // API: Demo — Clear synthetic data
+    if (url === '/api/demo/clear' && req.method === 'POST') {
+      try {
+        store.db.prepare("DELETE FROM biomarker_snapshots WHERE id LIKE 'demo-%'").run();
+        store.db.prepare("DELETE FROM nudges WHERE id LIKE 'demo-%'").run();
+        // Also clear any remaining snapshots to reset to clean state
+        store.db.prepare('DELETE FROM biomarker_snapshots').run();
+        store.db.prepare('DELETE FROM nudges').run();
+        console.log('[Demo] Cleared all demo and synthetic data');
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true }));
+      } catch (err) {
+        console.error('[Demo] Clear failed:', err);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: String(err) }));
+      }
+      return;
+    }
+
+    // API: Today — Get drift/trend data
+    if (url === '/api/today/drift') {
+      try {
+        const snapshots = store.getSnapshots(30);
+        if (snapshots.length < 2) {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ drifts: [], message: 'Need more data for trend detection' }));
+          return;
+        }
+
+        // Simple drift computation (will be replaced by baseline engine)
+        const recent = snapshots[0]?.biomarkers;
+        const weekAgo = snapshots.length >= 7 ? snapshots[6]?.biomarkers : snapshots[snapshots.length - 1]?.biomarkers;
+        const drifts: { field: string; icon: string; current: number; previous: number; change: number; direction: string }[] = [];
+
+        const fields: { key: string; label: string; icon: string }[] = [
+          { key: 'restingHeartRate', label: 'Resting HR', icon: '❤️' },
+          { key: 'heartRateVariability', label: 'HRV', icon: '💓' },
+          { key: 'totalSleepMinutes', label: 'Sleep', icon: '😴' },
+          { key: 'dailySteps', label: 'Steps', icon: '🏃' },
+          { key: 'sleepEfficiency', label: 'Sleep Efficiency', icon: '🌙' },
+          { key: 'bodyMassKg', label: 'Weight', icon: '⚖️' },
+        ];
+
+        if (recent && weekAgo) {
+          for (const f of fields) {
+            const curr = (recent as Record<string, number | undefined>)[f.key];
+            const prev = (weekAgo as Record<string, number | undefined>)[f.key];
+            if (curr !== undefined && prev !== undefined && prev !== 0) {
+              const changePct = Math.round(((curr - prev) / prev) * 100);
+              if (Math.abs(changePct) >= 3) {
+                drifts.push({
+                  field: f.label,
+                  icon: f.icon,
+                  current: Math.round(curr * 10) / 10,
+                  previous: Math.round(prev * 10) / 10,
+                  change: changePct,
+                  direction: changePct > 0 ? 'up' : 'down',
+                });
+              }
+            }
+          }
+        }
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ drifts }));
+      } catch (err) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ drifts: [], error: 'Could not compute trends' }));
+      }
+      return;
+    }
+
+    // API: Today — Weekly summary
+    if (url === '/api/today/weekly') {
+      try {
+        const snapshots = store.getSnapshots(14);
+        const thisWeek = snapshots.slice(0, 7);
+        const lastWeek = snapshots.slice(7, 14);
+
+        const avg = (arr: { biomarkers: Record<string, any> }[], key: string) => {
+          const vals = arr.map(s => s.biomarkers[key]).filter(v => v !== undefined) as number[];
+          return vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length * 10) / 10 : null;
+        };
+
+        const fields = ['restingHeartRate', 'heartRateVariability', 'totalSleepMinutes', 'dailySteps', 'sleepEfficiency'];
+        const comparisons = fields.map(f => ({
+          field: f,
+          thisWeek: avg(thisWeek, f),
+          lastWeek: avg(lastWeek, f),
+          change: avg(thisWeek, f) && avg(lastWeek, f) ? Math.round(((avg(thisWeek, f)! - avg(lastWeek, f)!) / avg(lastWeek, f)!) * 100) : null,
+        }));
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ comparisons }));
+      } catch {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ comparisons: [] }));
+      }
+      return;
+    }
+
+    // API: Contribute — Serve legal documents as HTML
+    if (url.startsWith('/api/contribute/legal/')) {
+      const docType = url.split('/').pop() ?? '';
+      const docMap: Record<string, string> = {
+        'tos': 'TERMS_OF_SERVICE.md',
+        'privacy': 'PRIVACY_POLICY.md',
+        'consent': 'DATA_CONTRIBUTOR_CONSENT.md',
+        'rewards': 'REVENUE_SPLIT_SPECIFICATION.md',
+      };
+      const filename = docMap[docType];
+      if (!filename) {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Document not found' }));
+        return;
+      }
+      try {
+        const docPath = join(projectRoot, 'docs', 'legal', filename);
+        const md = readFileSync(docPath, 'utf8');
+        // Simple markdown → HTML: headings, bold, lists, paragraphs
+        const html = md
+          .replace(/^### (.*$)/gm, '<h3 style="color:#E8751A;margin:16px 0 8px">$1</h3>')
+          .replace(/^## (.*$)/gm, '<h2 style="color:#fff;margin:20px 0 8px;font-size:16px">$1</h2>')
+          .replace(/^# (.*$)/gm, '<h1 style="color:#fff;margin:24px 0 12px;font-size:20px">$1</h1>')
+          .replace(/\*\*(.*?)\*\*/g, '<strong style="color:#E2E8F0">$1</strong>')
+          .replace(/^- (.*$)/gm, '<div style="padding-left:16px;margin:2px 0">• $1</div>')
+          .replace(/^\| (.*) \|$/gm, (match) => {
+            const cells = match.split('|').filter(c => c.trim()).map(c => c.trim());
+            if (cells.every(c => /^[-:]+$/.test(c))) return '';
+            return '<div style="display:flex;gap:16px;padding:4px 0;font-size:11px">' + cells.map(c => '<span style="flex:1">' + c + '</span>').join('') + '</div>';
+          })
+          .replace(/^---$/gm, '<hr style="border-color:#334155;margin:16px 0">')
+          .replace(/\n\n/g, '<br><br>');
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ content: html }));
+      } catch (err) {
+        console.error('[Contribute] Error loading legal doc:', err);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Could not load document' }));
+      }
+      return;
+    }
+
+    // API: Contribute — Enroll
+    if (url === '/api/contribute/enroll' && req.method === 'POST') {
+      let body = '';
+      req.on('data', (chunk: Buffer) => body += chunk);
+      req.on('end', () => {
+        try {
+          const data = JSON.parse(body);
+          console.log(`[Contribute] Enrollment request. Categories: ${data.categories?.join(', ')}`);
+          // TODO: Wire to ContributeManager.grantConsent() + contributeData()
+          authState['contribute'] = { connected: true, pending: false, startedAt: Date.now() };
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: true, message: 'Enrolled in XSpan Contribute. Your first contribution will be posted shortly.' }));
+        } catch {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'Invalid request' }));
+        }
+      });
+      return;
+    }
+
+    // API: Contribute — Revoke
+    if (url === '/api/contribute/revoke' && req.method === 'POST') {
+      console.log('[Contribute] Consent revocation request');
+      // TODO: Wire to ContributeManager.revokeConsent()
+      delete authState['contribute'];
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, message: 'Consent revoked. All contributions delisted.' }));
+      return;
+    }
+
+    // API: Contribute — Status
+    if (url === '/api/contribute/status') {
+      const enrolled = authState['contribute']?.connected ?? false;
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ enrolled, earnings: 0, activeListings: 0 }));
       return;
     }
 

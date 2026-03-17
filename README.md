@@ -1,146 +1,118 @@
 # XSpan HealthAI Agent
 
-**Your Personal Health Intelligence — Running Locally, Protected by HIPAA**
+**Own Your Health Data. Get Synthesized Insights. Contribute & Earn.**
 
-XSpan HealthAI Agent is an open-source health data collector that runs on your desktop. It connects to your Electronic Health Records (Epic, Cerner, eClinicalWorks), Apple Health / Google Health, wearables (Oura, WHOOP, Dexcom, Garmin, Fitbit), lab providers (Quest, LabCorp, Function Health), and genomics profiles (23andMe, Gut.id) — then syncs your data securely to XSpan's HIPAA-compliant cloud for AI-powered health intelligence.
+Your health data is scattered across Oura, WHOOP, Dexcom, Apple Watch, MyChart, Quest Labs, 23andMe, and more. No single app gives you the full picture. XSpan brings it all together — synthesized, encrypted, and running 100% on your machine.
 
-**Your health data is never sent to third-party AI tools.** All AI processing happens exclusively on XSpan's HIPAA-compliant H-LLM infrastructure.
+```
+Install → Connect → Insights → Contribute & Earn
+```
 
----
-
-## What It Does
-
-| Feature | Tier | Description |
-|---|---|---|
-| Apple Health Sync | Free | Reads activity, sleep, HRV, vitals from macOS HealthKit |
-| Google Health Sync | Free | Reads Fit/Health data via OAuth2 |
-| EHR Connection | Free | Connects to Epic, Cerner, Redox via SMART on FHIR R4 |
-| Wearables | Free | Oura, WHOOP, Dexcom CGM, Garmin, Fitbit |
-| Lab Results | Free | Quest Diagnostics, LabCorp, Function Health |
-| Genomics | Free | 23andMe genetic variants, Gut.id microbiome |
-| Local Biomarker Synthesis | Free | 100+ biomarkers synthesized locally |
-| Encrypted Local Storage | Free | AES-256 encrypted SQLite at ~/.xspan/data |
-| AI Health Nudges | **Pro $20/mo** | 3 personalized nudges/day from XSpan H-LLM |
-| Weekly Health Passport | **Pro $20/mo** | Comprehensive PDF report every Sunday |
-| Predictive Risk Scores | **Pro $20/mo** | Cardiovascular, metabolic, sleep disorder risk |
-| AI Health Q&A | **Pro $20/mo** | Ask anything about your health via XSpan H-LLM |
-| Cloud Digital Twin | **Pro $20/mo** | Full Digital Twin synthesis on XSpan cloud |
-| AI Meal Parsing | **Pro $20/mo** | Natural language nutrition logging |
-
-**[Subscribe to Pro — $20/month](https://buy.stripe.com/test_dRmdR90Ei2iO3CFf3LgnK00)**
+**Zero cloud dependency. Zero cost. Your data never leaves your device.**
 
 ---
 
-## HIPAA Compliance & Data Privacy
+## Why XSpan?
 
-> **Your health data is NEVER sent to ChatGPT, Claude, Gemini, or any third-party AI tool.**
+Your wearable shows you sleep. Your CGM shows glucose. Your lab portal shows HbA1c. But none of them show you **how they connect**.
 
-Sending Protected Health Information (PHI) to general-purpose AI tools violates HIPAA. XSpan takes a different approach:
+XSpan synthesizes data from **all** your health sources into unified trend charts that no single app can provide:
 
-- Raw health data is **encrypted locally** (AES-256) on your machine
-- Only **synthesized biomarker vectors** are sent to XSpan's cloud
-- All AI queries are processed by **XSpan's HIPAA-compliant H-LLM**
-- XSpan cloud runs on **BAA-covered infrastructure** (SOC 2 Type II)
-- OAuth2 PKCE for all EHR connections
-- Credentials stored in **OS keychain** (macOS Keychain / Windows Credential Manager)
+### Synthesized Insights (Free)
 
-**Do not pipe your local health database to third-party AI tools.** The `~/.xspan/data/xspan.db` file contains PHI that is protected under HIPAA. All health queries, nudges, risk scores, and Health Passport generation are processed exclusively through XSpan's cloud at `api.xspan.ai`.
+| Chart | What You See | Sources Combined |
+|-------|-------------|-----------------|
+| **Cardiovascular Synthesis** | Resting HR + HRV + Blood Pressure on one timeline | Apple Watch + Oura + Omron + EHR Labs |
+| **Sleep & Recovery** | Sleep duration + efficiency + overnight HRV recovery | Oura + WHOOP + Apple Watch |
+| **Metabolic Health** | Fasting glucose + weight + HbA1c trends | Dexcom CGM + Smart Scale + Quest Labs |
+| **Activity & Fitness** | Steps + active minutes + exercise sessions | WHOOP + Garmin + Fitbit + Apple Watch |
+| **Body Composition** | Weight (lbs) + BMI over time | Smart Scale + Apple Health |
+
+**Plus:** 7-day drift detection ("HRV down 14% from your 30-day average"), weekly health summaries, and 100+ biomarker synthesis.
+
+> You can't get these synthesized views from Oura, WHOOP, Apple Health, or MyChart alone. That's why XSpan exists.
 
 ---
 
-## Quick Install
+## Quick Start
 
-### Option A — Clone from GitHub (Recommended)
 ```bash
 git clone https://github.com/karlmehta/XSpan-HealthAI-Agent.git
 cd XSpan-HealthAI-Agent
 npm install
-cp .env.example .env
-# Edit .env with your XSpan API key
 npm run dev
 ```
 
-### Option B — Install via npx
-```bash
-npx @xspan/agent setup
-```
+Open **http://localhost:3000** — click **"Preview with Demo Data"** to see synthesized charts with 30 days of sample data.
+
+No accounts needed. No API keys. No cloud services. Just clone and run.
+
+---
+
+## What You Get (All Free)
+
+### 1. Own Your Data
+- All health data AES-256 encrypted in a local SQLite database on your device
+- No data is ever sent to any server — not even XSpan
+- Connect once, own forever — export anytime
+
+### 2. Synthesized Insights
+- Unified trend charts combining data from multiple devices, labs, and EHR
+- Personal baseline computation with drift detection
+- Weekly health summaries with top positives and concerns
+- 100+ biomarkers synthesized from all connected sources
+
+### 3. Contribute & Earn
+- Opt-in to contribute de-identified health data to advance medical research
+- All 18 identifiers removed **on your device** before anything leaves
+- You earn 50% of every research contribution
+- Researchers get consented, de-identified data — patients get rewarded for the first time
+
+### 4. Connect to Premium (via your doctor)
+- Request XSpan Premium access through your physician or health system
+- Premium includes: mobile app, Digital Twin, AI nudges, meal tracking, Health Passport
+- Your doctor gets the request and can issue an invite code
+
+---
+
+## Dashboard
+
+The agent runs a localhost dashboard (port 3000) with 4 tabs:
+
+| Tab | What It Does |
+|-----|-------------|
+| **Insights** ^FREE^ | Synthesized trend charts, drift detection, weekly summaries, data completeness |
+| **Connect** | Link EHR (MyChart), wearables, labs, genomics, microbiome — left sidebar navigation |
+| **Contribute & Earn** | Opt-in to research data contribution, see earnings, manage consent |
+| **Premium** | Request access via your doctor — value proposition + email form |
+
+---
+
+## Supported Sources
+
+| Category | Providers |
+|----------|----------|
+| **EHR** | Epic MyChart, Cerner, eClinicalWorks (SMART on FHIR R4) |
+| **Apple Health** | Steps, HR, HRV, sleep, SpO2, temperature, blood pressure |
+| **Google Health** | Activity, sleep, heart rate (OAuth2) |
+| **Wearables** | Oura, WHOOP, Dexcom CGM, Garmin, Fitbit |
+| **Labs** | Quest Diagnostics, LabCorp, Function Health |
+| **Genomics** | 23andMe, Illumina, Foundation Medicine, Tempus, Guardant Health |
+| **Microbiome** | Gut.id, Viome, Zoe, BIOHM, Tiny Health, Ombre |
 
 ---
 
 ## Platform Support
 
 | Platform | Health Data | Wearables | EHR / Labs / Genomics |
-|---|---|---|---|
+|----------|-----------|-----------|----------------------|
 | **macOS** | Apple HealthKit (automatic) | Via Apple Health or direct OAuth | Full support |
 | **Windows** | Direct OAuth per device | Direct OAuth per device | Full support |
 | **Linux** | Direct OAuth per device | Direct OAuth per device | Full support |
 
-On **macOS**, wearables connected to Apple Health on your iPhone sync automatically through HealthKit — one connection covers Oura, WHOOP, Garmin, Fitbit, Dexcom, Apple Watch, and Withings.
-
-On **Windows/Linux**, each wearable connects individually via OAuth in your browser (with MFA support). The dashboard detects your platform and shows the right flow.
-
-## Prerequisites
-
-| Requirement | Version |
-|---|---|
-| Node.js | >= 18.0 |
-| npm | >= 9.0 |
-| macOS (for Apple Health) | >= 13 Ventura (optional) |
-| Windows | 10/11 (optional) |
-| XSpan Account | [Sign up at xspan.ai](https://xspan.ai) |
-
 ---
 
-## Configuration
-
-Copy `.env.example` to `.env` and configure:
-
-```env
-# XSpan Cloud (Required)
-XSPAN_API_KEY=your_api_key_here
-XSPAN_USER_ID=your_user_id
-XSPAN_API_URL=https://api.xspan.ai/v1
-
-# Apple Health (macOS only)
-APPLE_HEALTH_ENABLED=true
-
-# EHR Connection
-EHR_ENABLED=false
-EHR_PROVIDER=epic         # epic | cerner | redox | generic_fhir
-EHR_FHIR_BASE_URL=https://fhir.example.org/api/FHIR/R4
-EHR_CLIENT_ID=your_ehr_client_id
-```
-
-### Connecting Your EHR
-
-1. Run the agent: `npm run dev`
-2. Browse **Health System Options** to find yours (lookup available via Apple Health directory and web registries)
-3. Select your health system and its EHR (Epic MyChart, Cerner, eClinicalWorks, etc.)
-4. Enter your EHR portal credentials (username/password)
-5. Authorize XSpan to read your health records via SMART on FHIR
-
-See [docs/EHR_SETUP.md](docs/EHR_SETUP.md) for detailed per-provider instructions.
-
-### Connecting Wearables, Labs & Genomics
-
-| Provider | Auth Method | Status |
-|---|---|---|
-| Apple Health | macOS HealthKit (automatic) | Available |
-| Google Health | OAuth2 | Available |
-| Oura Ring | OAuth2 API key | v1.1 |
-| WHOOP | OAuth2 | v1.1 |
-| Dexcom CGM | OAuth2 | v1.1 |
-| Garmin | OAuth2 | v1.1 |
-| Fitbit | OAuth2 | v1.1 |
-| Quest Diagnostics | Credential login | v1.2 |
-| LabCorp | Credential login | v1.2 |
-| Function Health | API key | v1.2 |
-| 23andMe | OAuth2 + file import | v1.2 |
-| Gut.id | API key | v1.2 |
-
----
-
-## How It Works
+## Architecture
 
 ```
 +-----------------------------------------------------+
@@ -155,157 +127,83 @@ See [docs/EHR_SETUP.md](docs/EHR_SETUP.md) for detailed per-provider instruction
 |                            |                         |
 |                    +-------v--------+                |
 |                    |  XSpan HealthAI |                |
-|                    |     Agent       |<-- Nutrition   |
-|                    +-------+--------+    23andMe     |
-|                            |             Gut.id      |
-|                  +---------v----------+              |
-|                  |  Local Data Store  |              |
-|                  |  (~/.xspan/data)   |  ENCRYPTED   |
-|                  |  AES-256 SQLite    |  LOCAL ONLY  |
-|                  +---------+----------+              |
+|                    |     Agent       |                |
+|                    +-------+--------+                |
 |                            |                         |
 |                  +---------v----------+              |
-|                  |  Biomarker Vectors |              |
-|                  |  (synthesized only)|              |
-|                  +--------------------+              |
-+------------------------+----------------------------+
-                         | HTTPS (TLS 1.3)
-                         | Biomarker vectors only
-                         | NO raw PHI leaves device
-                         v
-          +------------------------------+
-          |  XSpan Cloud (HIPAA / BAA)   |
-          |  api.xspan.ai/v1            |
-          |                              |
-          |  +--------+  +-----------+  |
-          |  | H-LLM  |  | Digital   |  |
-          |  | Engine  |  | Twin      |  |
-          |  +--------+  +-----------+  |
-          |  +--------+  +-----------+  |
-          |  | Nudge  |  | Health    |  |
-          |  | Engine |  | Passport  |  |
-          |  +--------+  +-----------+  |
-          |  +--------+  +-----------+  |
-          |  | Risk   |  | AI Q&A    |  |
-          |  | Scores |  | Engine    |  |
-          |  +--------+  +-----------+  |
-          +------------------------------+
-              All AI processing here
-              HIPAA compliant only
-              No third-party AI access
+|                  |  Local Data Store  |  AES-256     |
+|                  |  (~/.xspan/data)   |  ENCRYPTED   |
+|                  +---------+----------+              |
+|                            |                         |
+|              +-------------+-------------+           |
+|              |             |             |           |
+|     +--------v---+ +------v------+ +----v-------+   |
+|     | Synthesized| | Baseline &  | | Contribute |   |
+|     | Insights   | | Drift Engine| | & Earn     |   |
+|     +------------+ +-------------+ +------------+   |
++-----------------------------------------------------+
+     100% local · Zero cloud dependency · Your device
 ```
 
 ---
 
-## Pricing
+## Privacy & Security
 
-### Free (Open Source)
-- Data collection from all sources (EHR, Apple Health, wearables, labs, genomics)
-- Local 100+ biomarker synthesis
-- AES-256 encrypted local storage
-
-### Pro — $20/month
-- 3x daily personalized AI nudges (H-LLM powered)
-- Weekly Health Passport PDF
-- Predictive disease risk scores
-- AI health Q&A — ask anything about your health
-- Cloud Digital Twin synthesis
-- AI-powered meal parsing
-
-**[Subscribe to Pro](https://buy.stripe.com/test_dRmdR90Ei2iO3CFf3LgnK00)** | Cancel anytime. Powered by Stripe.
+- **AES-256 encrypted** local SQLite database
+- **Zero cloud dependency** — nothing is sent to any server
+- **No AI services** — no ChatGPT, Claude, Gemini, or any third-party AI
+- **100% local processing** — all synthesis and insights run on your machine
+- **Contribute is opt-in** — de-identification happens on-device before anything leaves
+- **You control everything** — delete, export, or revoke anytime
 
 ---
 
-## Project Structure
+## Extending the Agent
 
+XSpan uses a plugin architecture. Build custom data sources and analyzers:
+
+```typescript
+// Example: Custom analyzer plugin
+const myAnalyzer: Plugin = {
+  name: 'my-sleep-analyzer',
+  version: '1.0.0',
+  type: 'analyzer',
+  async init() { /* setup */ },
+  async execute(ctx) { /* analyze snapshots, return insights */ },
+};
 ```
-XSpan-HealthAI-Agent/
-  src/
-    agent/
-      index.ts              # Main daemon orchestrator
-    billing/
-      subscription.ts       # Stripe subscription gate (free vs pro)
-    connectors/
-      ehr/
-        fhir-client.ts      # SMART on FHIR R4 (Epic, Cerner)
-      wearables/
-        index.ts             # Oura, WHOOP, Dexcom, Garmin, Fitbit
-      labs/
-        index.ts             # Quest, LabCorp, Function Health
-      genomics/
-        index.ts             # 23andMe, Gut.id
-    sync/
-      xspan-api.ts          # XSpan cloud API client (subscription-gated)
-      data-pipeline.ts      # ETL + biomarker synthesis
-    storage/
-      local-store.ts        # SQLite encrypted local store
-    config/
-      index.ts              # Config loader + Zod validation
-    types/
-      index.ts              # TypeScript interfaces
-  docs/
-    EHR_SETUP.md
-    SPEC.md
-  .env.example
-  package.json
-  tsconfig.json
-  README.md
-  LICENSE
-```
+
+See `src/plugins/examples/` for working examples.
 
 ---
 
-## Development
+## Prerequisites
 
-```bash
-# Install dependencies
-npm install
-
-# Run in development mode (with hot reload)
-npm run dev
-
-# Build for production
-npm run build
-
-# Run tests
-npm test
-
-# Type check
-npm run type-check
-```
-
----
-
-## API Endpoints
-
-| Environment | Base URL | Purpose |
-|---|---|---|
-| Production | `https://api.xspan.ai/v1` | Live environment |
-| QA/Testing | `https://api-qa.xspan.ai/v1` | Test with demo data |
-| Documentation | `https://wiki.xspan.ai` | API reference |
+| Requirement | Version |
+|-------------|---------|
+| Node.js | >= 18.0 |
+| npm | >= 9.0 |
+| macOS / Windows / Linux | Any modern version |
 
 ---
 
 ## Contributing
 
-We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+We welcome contributions! This project uses **AGPL-3.0** — all modifications must be shared back.
 
-**Important:** Do not submit PRs that expose local health data to third-party AI tools. All health data queries must go through XSpan's HIPAA-compliant H-LLM at api.xspan.ai.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ---
 
 ## License
 
-MIT License — see [LICENSE](LICENSE)
+**AGPL-3.0** — see [LICENSE](LICENSE)
+
+- You can use, modify, and distribute this software
+- Modifications must be shared under the same license
+- Extensions/plugins via the documented API can use different licenses
+- Network use (SaaS) triggers the share-alike requirement
 
 ---
 
-## Support
-
-- **Docs:** [wiki.xspan.ai](https://wiki.xspan.ai)
-- **Issues:** [github.com/karlmehta/XSpan-HealthAI-Agent/issues](https://github.com/karlmehta/XSpan-HealthAI-Agent/issues)
-- **Subscribe:** [XSpan Pro — $20/month](https://buy.stripe.com/test_dRmdR90Ei2iO3CFf3LgnK00)
-
----
-
-*Built by [XSpan.ai](https://xspan.ai) — Whole Body Intelligence*
+*Built by [XSpan.ai](https://xspan.ai) — The Physics of Biology*

@@ -11,6 +11,7 @@ dist/
 .env
 .env.local
 .env.*.local
+.env.contribute
 
 # Local data
 *.db
@@ -48,5 +49,18 @@ logs/
 # Temp
 tmp/
 temp/
+
 # SSL certs (regenerate locally with: npm run gen-certs)
 certs/*.pem
+
+# Dev server (local mock, not for distribution)
+dev-server/
+
+# Smart contract build artifacts
+contracts/broadcast/
+contracts/cache/
+contracts/out/
+
+# Contribute config (contains API keys)
+.env.contribute
+contracts/lib/
