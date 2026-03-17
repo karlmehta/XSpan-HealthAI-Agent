@@ -1279,7 +1279,8 @@ function openBrowserAuth(type, id, authType, loginUrl) {
 }
 
 async function pollForAuth(id) {
-  for (let i = 0; i < 60; i++) {
+  // Poll for 30 seconds (15 iterations)
+  for (let i = 0; i < 15; i++) {
     await new Promise(r => setTimeout(r, 2000));
     try {
       const res = await fetch('/api/auth-status?provider=' + id);
@@ -1290,6 +1291,44 @@ async function pollForAuth(id) {
         return;
       }
     } catch {}
+  }
+
+  // Timeout — show helpful message with manual connect option
+  showModal(
+    'Complete Connection — ' + id,
+    '<div style="text-align:center;padding:16px">' +
+    '<div style="font-size:40px;margin-bottom:12px">🔗</div>' +
+    '<p style="color:#FBBF24;font-size:15px;font-weight:700;margin-bottom:12px">Almost there!</p>' +
+    '<p style="color:#94A3B8;font-size:13px;line-height:1.7;margin-bottom:16px">' +
+    'If you\'ve already logged in and authorized XSpan in the other tab, click the button below to complete the connection.' +
+    '</p>' +
+    '<p style="color:#64748B;font-size:11px;line-height:1.6">' +
+    'Note: Some wearable providers require you to complete login and grant access in the browser tab that opened. ' +
+    'Once done, come back here and click "I\'ve Authorized — Connect Now".' +
+    '</p>' +
+    '</div>',
+    '<button class="btn btn-primary" style="width:100%" onclick="manualConnect(\'' + id + '\')">I\'ve Authorized — Connect Now</button>'
+  );
+}
+
+async function manualConnect(id) {
+  var btn = document.querySelector('#modal-buttons .btn-primary');
+  btn.textContent = 'Connecting...';
+  btn.disabled = true;
+  try {
+    var res = await fetch('/api/connect', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'wearable', id: id, name: id, method: 'manual_auth' }),
+    });
+    var data = await res.json();
+    if (data.success) {
+      showModal(id, '<div style="text-align:center;padding:20px"><div style="font-size:48px;margin-bottom:16px">✅</div><p style="color:#22C55E;font-size:16px;font-weight:700">Connected!</p><p style="color:#94A3B8;font-size:12px;margin-top:8px">Data sync will begin shortly.</p></div>', '');
+      setTimeout(function() { closeModal(); location.reload(); }, 2000);
+    }
+  } catch {
+    btn.textContent = 'I\'ve Authorized — Connect Now';
+    btn.disabled = false;
   }
 }
 
