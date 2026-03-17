@@ -108,15 +108,17 @@ Data Contributors set their own price for each contribution listing. XSpan provi
 - Longitudinal depth (number of snapshots over time)
 - Demographic demand patterns
 
-### 6.2 Pricing Guidelines
-Based on benchmarks for de-identified health data:
+### 6.2 Indicative Pricing Guidelines*
+Based on industry benchmarks for de-identified health data:
 
-| Dataset Type | Suggested Price Range |
+| Dataset Type | Indicative Price Range* |
 |-------------|----------------------|
-| Basic biomarkers (vitals, activity, sleep) | $10 - $50 |
-| Biomarkers + lab results | $50 - $200 |
-| Biomarkers + labs + longitudinal (6+ months) | $200 - $1,000 |
-| Comprehensive (biomarkers + labs + genomics risk) | $500 - $2,000 |
+| Basic biomarkers (vitals, activity, sleep) | ~$10 - $50 |
+| Biomarkers + lab results | ~$50 - $200 |
+| Biomarkers + labs + longitudinal (6+ months) | ~$200 - $1,000 |
+| Comprehensive (biomarkers + labs + genomics risk) | ~$500 - $2,000 |
+
+*All price ranges are indicative estimates only, based on industry benchmarks, and are not guaranteed. Actual prices are set by the Data Contributor and actual earnings depend on Research Partner demand and market conditions. XSpan does not guarantee any minimum earnings or transaction volume.*
 
 ### 6.3 Research Partner Pricing
 Research Partners may obtain individual Research Access Grants at listed prices or request bulk cohort queries at negotiated rates through the Research Partner portal.

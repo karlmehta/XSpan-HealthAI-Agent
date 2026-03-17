@@ -1016,19 +1016,22 @@ Thank you.</textarea>
 
     <!-- Earnings Preview -->
     <div class="card" style="margin-bottom:24px;border-color:#E8751A33">
-      <h3 style="font-size:16px;margin-bottom:16px">Estimated Contribution Rewards</h3>
+      <h3 style="font-size:16px;margin-bottom:16px">Indicative Contribution Rewards</h3>
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px">
         <div style="background:#0F172A;padding:16px;border-radius:8px;text-align:center">
-          <div style="font-size:24px;font-weight:800;color:#E8751A">$12 – $75</div>
-          <div style="font-size:11px;color:#64748B;margin-top:4px">per contribution (vitals + labs)</div>
+          <div style="font-size:24px;font-weight:800;color:#E8751A">$12 – $75*</div>
+          <div style="font-size:11px;color:#64748B;margin-top:4px">estimated per contribution (vitals + labs)</div>
         </div>
         <div style="background:#0F172A;padding:16px;border-radius:8px;text-align:center">
-          <div style="font-size:24px;font-weight:800;color:#E8751A">$300 – $750</div>
-          <div style="font-size:11px;color:#64748B;margin-top:4px">per contribution (12-month comprehensive)</div>
+          <div style="font-size:24px;font-weight:800;color:#E8751A">$300 – $750*</div>
+          <div style="font-size:11px;color:#64748B;margin-top:4px">estimated per contribution (12-month comprehensive)</div>
         </div>
       </div>
       <p style="font-size:11px;color:#64748B;margin-top:12px;text-align:center">
         You receive <strong style="color:#E8751A">50%</strong> of every contribution. The rest supports your health system and community health research.
+      </p>
+      <p style="font-size:9px;color:#475569;margin-top:8px;text-align:center;line-height:1.5">
+        *Amounts shown are indicative estimates only based on industry benchmarks and are not guaranteed. Actual contribution rewards depend on research partner demand, data completeness, dataset type, and market conditions. XSpan makes no guarantee of any minimum earnings. See Terms of Service for details.
       </p>
     </div>
 
@@ -1123,7 +1126,12 @@ async function connectEHR(btn) {
   const fhirUrl = card.dataset.fhir;
   let authUrl = card.dataset.auth;
   const clientId = card.dataset.clientid;
-  const callbackUrl = 'https://localhost:9877/callback';
+  // Use Vercel-hosted callback for production health systems (they reject localhost)
+  // The Vercel page relays the auth code back to localhost:9877
+  const isSandbox = fhirUrl && fhirUrl.includes('fhir.epic.com');
+  const callbackUrl = isSandbox
+    ? 'https://localhost:9877/callback'
+    : 'https://xspan-research-portal.vercel.app/oauth/callback';
 
   btn.textContent = 'Discovering endpoints...';
   btn.disabled = true;
@@ -1214,6 +1222,27 @@ async function connectEHR(btn) {
     } catch {}
   }
 
+  // Authorization timed out — likely Error 15 (health system hasn't enabled XSpan)
+  showModal(
+    name + ' — Authorization Pending',
+    '<div style="text-align:center;padding:16px">' +
+    '<div style="font-size:48px;margin-bottom:12px">🏥</div>' +
+    '<p style="color:#FBBF24;font-size:16px;font-weight:700;margin-bottom:12px">Your health system hasn\'t enabled XSpan yet</p>' +
+    '<p style="color:#94A3B8;font-size:13px;line-height:1.7;margin-bottom:16px">' +
+    'XSpan is registered with Epic and your health system has received our app credentials, but they haven\'t approved patient data access yet. ' +
+    'This requires your health system\'s privacy and IT team to review and enable XSpan.</p>' +
+    '<div style="background:#0F172A;border:1px solid #334155;border-radius:8px;padding:16px;text-align:left;margin-bottom:16px">' +
+    '<p style="color:#E8751A;font-weight:600;font-size:13px;margin-bottom:8px">What you can do:</p>' +
+    '<p style="color:#CBD5E1;font-size:12px;line-height:1.8">' +
+    '1. Go to the <strong>Premium</strong> tab and send a request to your doctor<br>' +
+    '2. Ask your health system to enable XSpan for patient access<br>' +
+    '3. In the meantime, use the <strong>Epic Sandbox</strong> (test data) to explore the full EHR flow</p>' +
+    '</div>' +
+    '<p style="color:#64748B;font-size:11px">Epic Error 15: Application not yet approved at this organization. ' +
+    'This is a health system decision, not a technical issue. XSpan\'s credentials are valid.</p>' +
+    '</div>',
+    '<button class="btn btn-primary" onclick="closeModal();showPage(\'subscription\',document.querySelectorAll(\'.nav a\')[3])">Go to Premium — Ask Your Doctor</button>'
+  );
   btn.textContent = 'Connect with MyChart';
   btn.disabled = false;
 }

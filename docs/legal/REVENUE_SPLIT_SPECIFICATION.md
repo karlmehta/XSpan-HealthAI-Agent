@@ -91,18 +91,18 @@ uint256 constant COMMUNITY_BPS = 500;              // 5% always
 
 ---
 
-## Contribution Rewards Projections
+## Indicative Contribution Rewards Projections*
 
 ### Per-User Annual Rewards Estimate
 
-| User Profile | Monthly Listings | Avg Contribution Price | Access Grants/Month | Annual Gross | User Rewards (50%) |
+| User Profile | Monthly Listings | Est. Contribution Price | Est. Access Grants/Month | Est. Annual Gross | Est. User Rewards (50%) |
 |-------------|-----------------|---------------|-------------|-------------|-------------------|
-| Basic (vitals only) | 1 dataset | $25 | 2 | $600 | $300 |
-| Standard (vitals + labs) | 1 dataset | $150 | 3 | $5,400 | $2,700 |
-| Premium (longitudinal + labs) | 2 datasets | $500 | 4 | $48,000 | $24,000 |
-| Comprehensive (all + genomics) | 2 datasets | $1,500 | 3 | $108,000 | $54,000 |
+| Basic (vitals only) | 1 dataset | ~$25 | ~2 | ~$600 | ~$300 |
+| Standard (vitals + labs) | 1 dataset | ~$150 | ~3 | ~$5,400 | ~$2,700 |
+| Premium (longitudinal + labs) | 2 datasets | ~$500 | ~4 | ~$48,000 | ~$24,000 |
+| Comprehensive (all + genomics) | 2 datasets | ~$1,500 | ~3 | ~$108,000 | ~$54,000 |
 
-Note: These are illustrative projections based on L.E.K. Consulting pharma pricing benchmarks. Actual rewards depend on Research Partner demand, data completeness, and market conditions.
+*__IMPORTANT DISCLAIMER:__ All amounts, projections, and ranges shown throughout this document are indicative estimates only, based on industry benchmarks (L.E.K. Consulting pharma pricing data) and are provided for illustrative purposes. They do not constitute a guarantee, promise, or commitment of any specific earnings. Actual contribution rewards depend on research partner demand, data completeness, dataset type, market conditions, and other factors outside XSpan's control. XSpan makes no representation or warranty regarding minimum or expected earnings. Contributors should not rely on these estimates when making financial decisions.*
 
 ### Platform Revenue Projection (XSpan Share)
 

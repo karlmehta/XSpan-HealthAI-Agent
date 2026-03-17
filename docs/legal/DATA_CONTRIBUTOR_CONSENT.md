@@ -80,16 +80,18 @@ Research Partners agree to a strict Research Partner Access Agreement that **pro
 | XSpan | 25% (or 45% if no Health System Partner) |
 | Community Health Data Fund | 5% |
 
-### Example Contribution Rewards
+### Indicative Contribution Rewards*
 
-| Dataset Type | Typical Price | Your Rewards (50%) |
+| Dataset Type | Estimated Price | Estimated Rewards (50%) |
 |-------------|-------------------|-------------------|
-| Basic vitals + sleep + activity | $25 | $12.50 |
-| Vitals + lab results | $150 | $75.00 |
-| 12-month longitudinal + labs | $600 | $300.00 |
-| Comprehensive with genomics risk | $1,500 | $750.00 |
+| Basic vitals + sleep + activity | ~$25 | ~$12.50 |
+| Vitals + lab results | ~$150 | ~$75.00 |
+| 12-month longitudinal + labs | ~$600 | ~$300.00 |
+| Comprehensive with genomics risk | ~$1,500 | ~$750.00 |
 
 You set your own price. Contribution rewards are paid in USD to your connected wallet, with optional withdrawal to your bank account.
+
+*__Important: All amounts shown are indicative estimates only__, based on industry benchmarks for de-identified health data. Actual contribution rewards depend on research partner demand, data completeness, dataset type, and market conditions at the time of each research access grant. XSpan does not guarantee any minimum earnings or that any specific amount will be earned. Past indicative ranges are not a guarantee of future rewards.*
 
 ---
 
