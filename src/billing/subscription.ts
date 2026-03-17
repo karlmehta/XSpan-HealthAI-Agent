@@ -1,3 +1,7 @@
+// Subscription management — used only with XSpan Premium
+// This module is NOT imported by the local-only agent. It is retained for future
+// Premium tier integration when users are onboarded through a health system.
+
 import { execSync } from 'child_process';
 import type { AgentConfig } from '../types/index.js';
 

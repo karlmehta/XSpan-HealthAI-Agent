@@ -267,9 +267,9 @@ export interface SyncResult {
 
 export interface AgentConfig {
   xspan: {
-    apiKey: string;
-    userId: string;
-    apiUrl: string;
+    apiKey?: string;
+    userId?: string;
+    apiUrl?: string;
   };
   connectors: {
     appleHealth: {
@@ -290,12 +290,12 @@ export interface AgentConfig {
     };
   };
   schedules: {
-    nudgeMorning: string;
-    nudgeMidday: string;
-    nudgeEvening: string;
-    passportGeneration: string;
+    nudgeMorning?: string;
+    nudgeMidday?: string;
+    nudgeEvening?: string;
+    passportGeneration?: string;
     syncIntervalMinutes: number;
-    cloudSyncIntervalMinutes: number;
+    cloudSyncIntervalMinutes?: number;
   };
   storage: {
     dataDir: string;

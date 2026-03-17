@@ -64,3 +64,4 @@ contracts/out/
 # Contribute config (contains API keys)
 .env.contribute
 contracts/lib/
+.github/

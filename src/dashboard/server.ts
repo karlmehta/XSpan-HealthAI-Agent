@@ -5,7 +5,6 @@ import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import type { AgentConfig } from '../types/index.js';
 import type { LocalStore } from '../storage/local-store.js';
-import type { XSpanApiClient } from '../sync/xspan-api.js';
 import type { DataPipeline } from '../sync/data-pipeline.js';
 
 const DASHBOARD_PORT = 3000;
@@ -1730,7 +1729,6 @@ const authState: Record<string, { connected: boolean; pending: boolean; startedA
 export function startDashboard(
   config: AgentConfig,
   store: LocalStore,
-  apiClient: XSpanApiClient,
   pipeline: DataPipeline,
 ): void {
 

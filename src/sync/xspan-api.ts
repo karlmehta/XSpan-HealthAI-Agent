@@ -1,3 +1,7 @@
+// Cloud API client — used only with XSpan Premium (via health system invite)
+// This module is NOT imported by the local-only agent. It is retained for future
+// Premium tier integration when users are onboarded through a health system.
+
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import type {
   AgentConfig,
