@@ -691,33 +691,56 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0B0F1A; col
 
     </div>
     <div class="connect-sub" id="connect-wearables" style="display:none">
-    <div class="section-title">Connect Your Wearables</div>
-    ${isMac ? `
+    <div class="section-title">Connect Your Wearables & Devices</div>
     <div class="hipaa-note" style="margin-bottom:20px">
-      🍎 <strong>macOS detected:</strong> If your wearables sync to <strong>Apple Health</strong> on your iPhone, they automatically flow to this Mac via HealthKit. You can also connect each device directly below for real-time data.
+      🔗 <strong>One-click connection</strong> via Terra — securely connects to 150+ wearable devices and health apps. Select your device below, log in with your credentials, and authorize XSpan to read your health data. All data stored locally on your device.
     </div>
-    ` : `
-    <div class="hipaa-note" style="margin-bottom:20px">
-      🖥️ <strong>${platformLabel} detected:</strong> Connect each wearable individually below. Click "Open Login" to authenticate via OAuth in your browser (with MFA support). For devices with a CLI option, you can also authenticate from Terminal.
+
+    <!-- Terra Connect Button -->
+    <div class="card" style="margin-bottom:20px;border-color:#E8751A44;text-align:center;padding:32px">
+      <div style="font-size:40px;margin-bottom:12px">⌚</div>
+      <h3 style="font-size:18px;margin-bottom:8px">Connect Any Wearable or Health Device</h3>
+      <p style="font-size:13px;color:#94A3B8;margin-bottom:20px;max-width:500px;margin-left:auto;margin-right:auto">
+        Click below to open the secure connection widget. Select your device (Oura, WHOOP, Dexcom, Garmin, Fitbit, and 150+ more), log in, and authorize.
+      </p>
+      <button class="btn btn-primary" style="font-size:16px;padding:14px 32px" onclick="openTerraWidget()">
+        Connect a Device
+      </button>
+      <p style="font-size:10px;color:#64748B;margin-top:12px">Powered by Terra — your credentials are never stored by XSpan</p>
     </div>
-    `}
-    <div class="card-grid">
-      ${WEARABLE_PROVIDERS.map(w => `
-        <div class="card">
-          <div class="card-icon">${w.icon}</div>
-          <h3>${w.name}</h3>
-          <p>${w.description}</p>
-          <p style="font-size:11px;color:#64748B;margin-bottom:8px">${w.note}</p>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <span class="badge badge-free">FREE</span>
-            ${w.id === 'apple_health'
-              ? `<button class="btn btn-success" style="font-size:12px;padding:6px 14px">Automatic on macOS</button>`
-              : `<button class="btn btn-primary" style="font-size:12px;padding:6px 14px" onclick="openBrowserAuth('wearable','${w.id}','${w.authType}','${w.loginUrl}')">🔗 Open Login</button>`
-            }
-            ${w.cli ? `<button class="btn btn-secondary" style="font-size:12px;padding:6px 14px" onclick="showCLI('${w.name}','${w.cli}')">⌨️ Use CLI</button>` : ''}
-          </div>
+
+    <!-- Supported Devices Grid -->
+    <div class="section-title" style="font-size:14px;margin-bottom:12px">Supported Devices & Apps</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px">
+      ${[
+        { icon: '💍', name: 'Oura Ring' },
+        { icon: '💪', name: 'WHOOP' },
+        { icon: '🩸', name: 'Dexcom CGM' },
+        { icon: '⌚', name: 'Garmin' },
+        { icon: '📱', name: 'Fitbit' },
+        { icon: '🤖', name: 'Google Health' },
+        { icon: '🏋️', name: 'Peloton' },
+        { icon: '💤', name: 'Eight Sleep' },
+        { icon: '⚖️', name: 'Withings' },
+        { icon: '🫀', name: 'Omron' },
+        { icon: '❄️', name: 'Polar' },
+        { icon: '🏃', name: 'Strava' },
+        { icon: '🧬', name: 'Ultrahuman' },
+        { icon: '🔵', name: 'Suunto' },
+        { icon: '🚴', name: 'Wahoo' },
+        { icon: '📊', name: '150+ more' },
+      ].map(d => `
+        <div style="background:#0F172A;border:1px solid #334155;border-radius:8px;padding:10px;text-align:center;font-size:11px">
+          <div style="font-size:20px;margin-bottom:4px">${d.icon}</div>
+          <div style="color:#CBD5E1">${d.name}</div>
         </div>
       `).join('')}
+    </div>
+
+    <!-- Connected Devices -->
+    <div id="terra-connected" style="display:none;margin-top:16px">
+      <div class="section-title" style="font-size:14px;margin-bottom:8px;color:#22C55E">Connected Devices</div>
+      <div id="terra-connected-list"></div>
     </div>
     </div>
     <div class="connect-sub" id="connect-labs" style="display:none">
@@ -1468,6 +1491,42 @@ async function startContribute() {
   );
 }
 
+// ── Terra: Open wearable connection widget ───────────────────
+
+async function openTerraWidget() {
+  try {
+    var res = await fetch('/api/terra/widget-session', { method: 'POST' });
+    var data = await res.json();
+    if (data.status === 'success' && data.url) {
+      // Open Terra widget in a popup window
+      var w = 500, h = 700;
+      var left = (screen.width - w) / 2;
+      var top = (screen.height - h) / 2;
+      var popup = window.open(data.url, 'terra-connect', 'width=' + w + ',height=' + h + ',left=' + left + ',top=' + top + ',toolbar=no,menubar=no');
+
+      // Poll for popup close
+      var check = setInterval(function() {
+        if (!popup || popup.closed) {
+          clearInterval(check);
+          showModal(
+            'Device Connection',
+            '<div style="text-align:center;padding:16px">' +
+            '<div style="font-size:48px;margin-bottom:12px">✅</div>' +
+            '<p style="color:#22C55E;font-size:16px;font-weight:700;margin-bottom:8px">Connection flow completed!</p>' +
+            '<p style="color:#94A3B8;font-size:13px">If you authorized the device, data will begin syncing shortly. It may take a few minutes for the first data to appear in your Insights.</p>' +
+            '</div>',
+            ''
+          );
+        }
+      }, 1000);
+    } else {
+      showModal('Error', '<p style="color:#EF4444">Could not initialize device connection. Please try again.</p>', '');
+    }
+  } catch (e) {
+    showModal('Error', '<p style="color:#EF4444">Could not connect to wearable service. Please try again.</p>', '');
+  }
+}
+
 // ── Premium: Open mailto to physician ─────────────────────────
 
 function sendPremiumEmail() {
@@ -1994,6 +2053,38 @@ export function startDashboard(
       } catch {
         res.writeHead(404);
         res.end();
+      }
+      return;
+    }
+
+    // API: Terra — Generate widget session for wearable connections
+    if (url === '/api/terra/widget-session' && req.method === 'POST') {
+      try {
+        const terraDevId = process.env.TERRA_DEV_ID || 'predixtions-testing-c1Ip106tRu';
+        const terraApiKey = process.env.TERRA_API_KEY || 'wLwQxQti90ZKyQui75IECWBEhZy6zI1a';
+        const userId = config.xspan?.userId || 'local-user';
+
+        const terraResp = await fetch('https://api.tryterra.co/v2/auth/generateWidgetSession', {
+          method: 'POST',
+          headers: {
+            'dev-id': terraDevId,
+            'x-api-key': terraApiKey,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            reference_id: userId,
+            providers: 'OURA,WHOOP,FITBIT,GARMIN,DEXCOM,GOOGLE,WITHINGS,OMRON,POLAR,STRAVA,PELOTON,EIGHTSLEEP,ULTRAHUMAN',
+            language: 'en',
+          }),
+        });
+        const terraData = await terraResp.json() as Record<string, unknown>;
+        console.log(`[Terra] Widget session: ${terraData['session_id']}`);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(terraData));
+      } catch (err) {
+        console.error('[Terra] Widget session error:', err);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ status: 'error', error: 'Could not connect to Terra' }));
       }
       return;
     }
