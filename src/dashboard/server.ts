@@ -1948,26 +1948,41 @@ export function startDashboard(
         // Fetch FHIR data if we got a token
         if (accessToken && fhirBaseUrl) {
           try {
-            console.log(`[OAuth] Fetching FHIR data from: ${fhirBaseUrl}`);
+            // Strip trailing slash from base URL
+            const fhirBase = fhirBaseUrl.replace(/\/+$/, '');
+            console.log(`[OAuth] Fetching FHIR data from: ${fhirBase}`);
 
-            // Fetch key resources
-            const resources = ['Observation', 'Condition', 'MedicationRequest', 'Procedure', 'DiagnosticReport'];
+            // Fetch key resources — Epic uses category filters for Observations
+            const resources = [
+              { name: 'Observation', params: `patient=${patientId}&category=vital-signs&_count=100` },
+              { name: 'Observation', params: `patient=${patientId}&category=laboratory&_count=100`, label: 'Lab Results' },
+              { name: 'Condition', params: `patient=${patientId}&_count=100` },
+              { name: 'MedicationRequest', params: `patient=${patientId}&_count=100` },
+              { name: 'Procedure', params: `patient=${patientId}&_count=50` },
+              { name: 'DiagnosticReport', params: `patient=${patientId}&_count=50` },
+              { name: 'Patient', params: `_id=${patientId}` },
+            ];
             let totalRecords = 0;
 
             for (const resource of resources) {
               try {
+                const fhirUrl2 = `${fhirBase}/${resource.name}?${resource.params}`;
+                console.log(`[OAuth] Fetching: ${fhirUrl2.substring(0, 120)}...`);
                 const fhirResp = await fetch(
-                  `${fhirBaseUrl}/${resource}?patient=${patientId}&_count=100&_sort=-date`,
+                  fhirUrl2,
                   { headers: { 'Authorization': `Bearer ${accessToken}`, 'Accept': 'application/fhir+json' } }
                 );
-                if (fhirResp.ok) {
+                if (!fhirResp.ok) {
+                  const errText = await fhirResp.text();
+                  console.warn(`[OAuth] ${resource.name}: HTTP ${fhirResp.status} — ${errText.substring(0, 200)}`);
+                } else {
                   const bundle = await fhirResp.json() as { total?: number; entry?: unknown[] };
                   const count = bundle.entry?.length || 0;
                   totalRecords += count;
-                  console.log(`[OAuth] ${resource}: ${count} records`);
+                  console.log(`[OAuth] ${resource.label || resource.name}: ${count} records (total in system: ${bundle.total ?? 'unknown'})`);
 
                   // Store observations as health samples
-                  if (resource === 'Observation' && bundle.entry) {
+                  if (resource.name === 'Observation' && bundle.entry) {
                     for (const entry of bundle.entry as { resource: Record<string, unknown> }[]) {
                       const obs = entry.resource;
                       try {
@@ -1986,10 +2001,11 @@ export function startDashboard(
                         }
                       } catch {}
                     }
+                    console.log(`[OAuth] Stored ${count} observation samples in local database`);
                   }
                 }
               } catch (resourceErr) {
-                console.warn(`[OAuth] Failed to fetch ${resource}:`, resourceErr);
+                console.warn(`[OAuth] Failed to fetch ${resource.name}:`, resourceErr);
               }
             }
 
