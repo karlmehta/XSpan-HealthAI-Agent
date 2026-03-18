@@ -1176,7 +1176,7 @@ async function connectEHR(btn) {
     '?response_type=code' +
     '&client_id=' + clientId +
     '&redirect_uri=' + encodeURIComponent(callbackUrl) +
-    '&scope=' + encodeURIComponent('openid fhirUser patient/*.read launch/patient') +
+    '&scope=' + encodeURIComponent('openid fhirUser launch/patient patient/Patient.read patient/Observation.read patient/Condition.read patient/MedicationRequest.read patient/Procedure.read patient/DiagnosticReport.read patient/AllergyIntolerance.read patient/Immunization.read patient/DocumentReference.read') +
     '&state=' + state +
     '&aud=' + encodeURIComponent(fhirUrl);
 
