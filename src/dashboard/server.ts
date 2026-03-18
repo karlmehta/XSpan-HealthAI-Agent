@@ -1289,7 +1289,7 @@ async function connectEHR(btn) {
     '<p style="color:#64748B;font-size:11px">Epic Error 15: Application not yet approved at this organization. ' +
     'This is a health system decision, not a technical issue. XSpan credentials are valid.</p>' +
     '</div>',
-    '<button class="btn btn-primary" onclick="closeModal();showPage(\'subscription\',document.querySelectorAll(\'.nav a\')[3])">Go to Premium — Ask Your Doctor</button>'
+    '<button class="btn btn-primary" onclick="closeModal();showPage(&quot;subscription&quot;,document.querySelectorAll(&quot;.nav a&quot;)[3])">Go to Premium — Ask Your Doctor</button>'
   );
   btn.textContent = 'Connect with MyChart';
   btn.disabled = false;
@@ -1348,14 +1348,14 @@ async function pollForAuth(id) {
     '<div style="font-size:40px;margin-bottom:12px">🔗</div>' +
     '<p style="color:#FBBF24;font-size:15px;font-weight:700;margin-bottom:12px">Almost there!</p>' +
     '<p style="color:#94A3B8;font-size:13px;line-height:1.7;margin-bottom:16px">' +
-    'If you\'ve already logged in and authorized XSpan in the other tab, click the button below to complete the connection.' +
+    'If you have already logged in and authorized XSpan in the other tab, click the button below to complete the connection.' +
     '</p>' +
     '<p style="color:#64748B;font-size:11px;line-height:1.6">' +
     'Note: Some wearable providers require you to complete login and grant access in the browser tab that opened. ' +
-    'Once done, come back here and click "I\'ve Authorized — Connect Now".' +
+    'Once done, come back here and click "I Have Authorized — Connect Now".' +
     '</p>' +
     '</div>',
-    '<button class="btn btn-primary" style="width:100%" onclick="manualConnect(\'' + id + '\')">I\'ve Authorized — Connect Now</button>'
+    '<button class="btn btn-primary" style="width:100%" onclick="manualConnect(\'' + id + '\')">I Have Authorized — Connect Now</button>'
   );
 }
 
@@ -1375,7 +1375,7 @@ async function manualConnect(id) {
       setTimeout(function() { closeModal(); location.reload(); }, 2000);
     }
   } catch {
-    btn.textContent = 'I\'ve Authorized — Connect Now';
+    btn.textContent = 'I Have Authorized — Connect Now';
     btn.disabled = false;
   }
 }
