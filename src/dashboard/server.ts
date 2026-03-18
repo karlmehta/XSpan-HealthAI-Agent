@@ -284,8 +284,6 @@ function renderDashboard(config: AgentConfig, store: LocalStore): string {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>XSpan HealthAI Agent</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
-<link href="https://cdn.fastenhealth.com/connect/v4/fasten-stitch-element.css" rel="stylesheet">
-<script src="https://cdn.fastenhealth.com/connect/v4/fasten-stitch-element.js" type="module"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: -apple-system, 'Inter', sans-serif; background: #0B0F1A; color: #E2E8F0; min-height: 100vh; }
@@ -644,13 +642,13 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0B0F1A; col
   <!-- ═══ CONNECT (wrapper for all data sources) ═══ -->
   <div class="page" id="page-connect">
     <div class="section-title">Connect Your Health Data Sources</div>
-    <p style="font-size:13px;color:#94A3B8;margin-bottom:16px">The more sources you connect, the better your health intelligence.</p>
+    <p style="font-size:13px;color:#94A3B8;margin-bottom:16px">The more sources you connect, the better your synthesized health insights. All data stored locally on your device.</p>
 
     <div style="display:flex;gap:24px;min-height:600px;align-items:flex-start">
     <!-- Left Sidebar -->
-    <div style="width:180px;flex-shrink:0;position:sticky;top:20px" id="connect-sidebar">
-      <div onclick="showConnectTab('ehr',this)" class="connect-nav-item" style="padding:12px 16px;cursor:pointer;border-radius:8px;margin-bottom:4px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;background:#E8751A22;color:#E8751A">
-        <span>🏥</span> EHR
+    <div style="width:200px;flex-shrink:0;position:sticky;top:20px" id="connect-sidebar">
+      <div onclick="showConnectTab('health-systems',this)" class="connect-nav-item" style="padding:12px 16px;cursor:pointer;border-radius:8px;margin-bottom:4px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;background:#E8751A22;color:#E8751A">
+        <span>🏥</span> Health Systems
       </div>
       <div onclick="showConnectTab('wearables',this)" class="connect-nav-item" style="padding:12px 16px;cursor:pointer;border-radius:8px;margin-bottom:4px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;color:#94A3B8">
         <span>⌚</span> Wearables
@@ -667,106 +665,65 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0B0F1A; col
     </div>
     <!-- Right Content -->
     <div style="flex:1;min-width:0;overflow:hidden">
-    <div class="connect-sub active" id="connect-ehr">
-    <div class="section-title">Connect Your Electronic Health Records</div>
 
-    <!-- Fasten Connect — Primary Method (50K+ institutions) -->
-    <div class="card" style="margin-bottom:20px;border-color:#E8751A44;background:linear-gradient(135deg,#1A1A2E,#1E293B);padding:24px">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-        <span style="font-size:28px">🏥</span>
-        <div>
-          <h3 style="font-size:16px;margin-bottom:2px">Connect Any Health System (Recommended)</h3>
-          <p style="font-size:11px;color:#94A3B8">50,000+ hospitals, clinics, and health systems — Epic, Cerner, Athena, and more</p>
-        </div>
-      </div>
-      <p style="font-size:12px;color:#CBD5E1;line-height:1.6;margin-bottom:16px">
-        Search for your health system, log in with your patient portal credentials, and authorize XSpan to read your records. Your credentials are never stored by XSpan — authentication is handled securely by Fasten Connect.
-      </p>
-      <div id="fasten-stitch-container" style="min-height:100px;background:#0F172A;border-radius:8px;padding:8px">
-        <p style="text-align:center;color:#64748B;font-size:12px;padding:20px">Loading health system connection widget...</p>
-      </div>
-      <p style="font-size:9px;color:#475569;margin-top:8px;text-align:center">Powered by Fasten Connect — patient-directed access under the 21st Century Cures Act</p>
-    </div>
+    <!-- ── HEALTH SYSTEMS ── -->
+    <div class="connect-sub active" id="connect-health-systems">
+    <div class="section-title">Connect to Your Health System</div>
+    <p style="font-size:12px;color:#94A3B8;margin-bottom:16px">Search for your hospital or health system. Log in with your patient portal credentials (MyChart, etc.) and authorize XSpan to read your records.</p>
 
-    <!-- Direct SMART on FHIR — Alternative Method -->
-    <div style="margin-bottom:12px;display:flex;align-items:center;gap:8px">
-      <div style="flex:1;height:1px;background:#334155"></div>
-      <span style="font-size:11px;color:#64748B">or connect directly via SMART on FHIR</span>
-      <div style="flex:1;height:1px;background:#334155"></div>
-    </div>
-
-    <input type="text" class="search" placeholder="Search health systems (e.g., Kaiser, UCLA, Stanford, Mayo)..." oninput="filterEHR(this.value)">
+    <input type="text" class="search" placeholder="Search hospitals and health systems (e.g., UCLA, Stanford, Kaiser, Mayo, Cleveland Clinic)..." oninput="filterEHR(this.value)">
     <div class="card-grid" id="ehr-grid">
       ${HEALTH_SYSTEMS.map((hs, i) => `
         <div class="card ehr-card" data-name="${hs.name.toLowerCase()}" data-portal="${hs.portalUrl}" data-ehrname="${hs.name}" data-fhir="${hs.fhirUrl}" data-auth="${hs.authUrl || ''}" data-token="${hs.tokenUrl || ''}" data-clientid="${hs.clientId || '8ce98706-fcb3-4cd9-a4ad-b793ed96e375'}" data-idx="${i}">
-          ${hs.ehr === 'epic' ? `<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-            <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="8" fill="#862074"/><text x="18" y="23" text-anchor="middle" fill="white" font-family="Arial" font-weight="800" font-size="14">M</text></svg>
-            <span style="font-size:12px;color:#A78BFA;font-weight:600">MyChart · SMART on FHIR</span>
-          </div>` : `<div class="card-icon">${hs.ehr === 'cerner' ? '🔶' : '🏥'}</div>`}
-          <h3>${hs.name}</h3>
-          <div class="region">${hs.ehr === 'epic' ? 'Epic MyChart' : hs.ehr === 'cerner' ? 'Oracle Cerner' : 'FHIR R4'} · ${hs.region}</div>
-          <p style="font-size:11px;color:#64748B;margin-bottom:12px">Authorize XSpan via SMART on FHIR — you'll log in with MyChart (incl. MFA) and grant read access.</p>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="btn btn-primary" style="font-size:12px;padding:8px 14px" onclick="connectEHR(this)">🔗 Connect with MyChart</button>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <div style="width:36px;height:36px;border-radius:8px;background:#1E293B;display:flex;align-items:center;justify-content:center;font-size:18px">🏥</div>
+            <div>
+              <h3 style="font-size:14px;margin:0">${hs.name}</h3>
+              <div style="font-size:10px;color:#64748B">${hs.region}</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="btn btn-primary" style="font-size:11px;padding:6px 12px" onclick="connectEHR(this)">Connect</button>
+            ${hs.portalUrl ? '<a href="' + hs.portalUrl + '" target="_blank" style="font-size:10px;color:#64748B">Patient Portal</a>' : ''}
           </div>
         </div>
       `).join('')}
     </div>
-  </div>
-
+    <p style="font-size:10px;color:#475569;margin-top:12px">Connected via SMART on FHIR R4 — you log in with your own credentials. XSpan never stores your password.</p>
     </div>
+
+    <!-- ── WEARABLES ── -->
     <div class="connect-sub" id="connect-wearables" style="display:none">
     <div class="section-title">Connect Your Wearables & Devices</div>
-    <div class="hipaa-note" style="margin-bottom:20px">
-      🔗 <strong>One-click connection</strong> via Terra — securely connects to 150+ wearable devices and health apps. Select your device below, log in with your credentials, and authorize XSpan to read your health data. All data stored locally on your device.
-    </div>
+    <p style="font-size:12px;color:#94A3B8;margin-bottom:16px">Click on your device to connect. You will be redirected to log in with your device account credentials.</p>
 
-    <!-- Terra Connect Button -->
-    <div class="card" style="margin-bottom:20px;border-color:#E8751A44;text-align:center;padding:32px">
-      <div style="font-size:40px;margin-bottom:12px">⌚</div>
-      <h3 style="font-size:18px;margin-bottom:8px">Connect Any Wearable or Health Device</h3>
-      <p style="font-size:13px;color:#94A3B8;margin-bottom:20px;max-width:500px;margin-left:auto;margin-right:auto">
-        Click below to open the secure connection widget. Select your device (Oura, WHOOP, Dexcom, Garmin, Fitbit, and 150+ more), log in, and authorize.
-      </p>
-      <button class="btn btn-primary" style="font-size:16px;padding:14px 32px" onclick="openTerraWidget()">
-        Connect a Device
-      </button>
-      <p style="font-size:10px;color:#64748B;margin-top:12px">Powered by Terra — your credentials are never stored by XSpan</p>
-    </div>
-
-    <!-- Supported Devices Grid -->
-    <div class="section-title" style="font-size:14px;margin-bottom:12px">Supported Devices & Apps</div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
       ${[
-        { icon: '💍', name: 'Oura Ring' },
-        { icon: '💪', name: 'WHOOP' },
-        { icon: '🩸', name: 'Dexcom CGM' },
-        { icon: '⌚', name: 'Garmin' },
-        { icon: '📱', name: 'Fitbit' },
-        { icon: '🤖', name: 'Google Health' },
-        { icon: '🏋️', name: 'Peloton' },
-        { icon: '💤', name: 'Eight Sleep' },
-        { icon: '⚖️', name: 'Withings' },
-        { icon: '🫀', name: 'Omron' },
-        { icon: '❄️', name: 'Polar' },
-        { icon: '🏃', name: 'Strava' },
-        { icon: '🧬', name: 'Ultrahuman' },
-        { icon: '🔵', name: 'Suunto' },
-        { icon: '🚴', name: 'Wahoo' },
-        { icon: '📊', name: '150+ more' },
+        { id: 'OURA', icon: '💍', name: 'Oura Ring', desc: 'Sleep, HRV, readiness, temperature' },
+        { id: 'WHOOP', icon: '💪', name: 'WHOOP', desc: 'Strain, recovery, sleep, HRV' },
+        { id: 'DEXCOM', icon: '🩸', name: 'Dexcom CGM', desc: 'Continuous glucose monitoring' },
+        { id: 'GARMIN', icon: '⌚', name: 'Garmin', desc: 'Activity, sleep, stress, body battery' },
+        { id: 'FITBIT', icon: '📱', name: 'Fitbit', desc: 'Steps, HR, sleep, SpO2' },
+        { id: 'GOOGLE', icon: '🤖', name: 'Google Health', desc: 'Activity, sleep, heart rate' },
+        { id: 'WITHINGS', icon: '⚖️', name: 'Withings', desc: 'Weight, BP, sleep, temp' },
+        { id: 'OMRON', icon: '🫀', name: 'Omron', desc: 'Blood pressure monitoring' },
+        { id: 'POLAR', icon: '❄️', name: 'Polar', desc: 'HR, activity, sleep, training' },
+        { id: 'STRAVA', icon: '🏃', name: 'Strava', desc: 'Running, cycling, workouts' },
+        { id: 'PELOTON', icon: '🏋️', name: 'Peloton', desc: 'Workouts, output, HR' },
+        { id: 'EIGHTSLEEP', icon: '💤', name: 'Eight Sleep', desc: 'Sleep tracking, bed temp' },
+        { id: 'ULTRAHUMAN', icon: '🧬', name: 'Ultrahuman', desc: 'CGM, sleep, movement' },
+        { id: 'SUUNTO', icon: '🔵', name: 'Suunto', desc: 'Sports tracking, HR, GPS' },
+        { id: 'WAHOO', icon: '🚴', name: 'Wahoo', desc: 'Cycling, HR, power' },
       ].map(d => `
-        <div style="background:#0F172A;border:1px solid #334155;border-radius:8px;padding:10px;text-align:center;font-size:11px">
-          <div style="font-size:20px;margin-bottom:4px">${d.icon}</div>
-          <div style="color:#CBD5E1">${d.name}</div>
+        <div class="card" style="cursor:pointer;text-align:center;padding:16px" data-terra-provider="${d.id}" onclick="connectWearable(this)">
+          <div style="font-size:28px;margin-bottom:8px">${d.icon}</div>
+          <h3 style="font-size:13px;margin-bottom:4px">${d.name}</h3>
+          <p style="font-size:10px;color:#64748B;margin-bottom:8px">${d.desc}</p>
+          <span class="badge" style="font-size:9px">CONNECT</span>
         </div>
       `).join('')}
     </div>
-
-    <!-- Connected Devices -->
-    <div id="terra-connected" style="display:none;margin-top:16px">
-      <div class="section-title" style="font-size:14px;margin-bottom:8px;color:#22C55E">Connected Devices</div>
-      <div id="terra-connected-list"></div>
-    </div>
+    <p style="font-size:10px;color:#475569;margin-top:12px">Connected via Terra API — you log in with your device account. XSpan never stores your credentials.</p>
     </div>
     <div class="connect-sub" id="connect-labs" style="display:none">
     <div class="section-title">Connect Lab Providers</div>
@@ -1516,42 +1473,6 @@ async function startContribute() {
   );
 }
 
-// ── Terra: Open wearable connection widget ───────────────────
-
-async function openTerraWidget() {
-  try {
-    var res = await fetch('/api/terra/widget-session', { method: 'POST' });
-    var data = await res.json();
-    if (data.status === 'success' && data.url) {
-      // Open Terra widget in a popup window
-      var w = 500, h = 700;
-      var left = (screen.width - w) / 2;
-      var top = (screen.height - h) / 2;
-      var popup = window.open(data.url, 'terra-connect', 'width=' + w + ',height=' + h + ',left=' + left + ',top=' + top + ',toolbar=no,menubar=no');
-
-      // Poll for popup close
-      var check = setInterval(function() {
-        if (!popup || popup.closed) {
-          clearInterval(check);
-          showModal(
-            'Device Connection',
-            '<div style="text-align:center;padding:16px">' +
-            '<div style="font-size:48px;margin-bottom:12px">✅</div>' +
-            '<p style="color:#22C55E;font-size:16px;font-weight:700;margin-bottom:8px">Connection flow completed!</p>' +
-            '<p style="color:#94A3B8;font-size:13px">If you authorized the device, data will begin syncing shortly. It may take a few minutes for the first data to appear in your Insights.</p>' +
-            '</div>',
-            ''
-          );
-        }
-      }, 1000);
-    } else {
-      showModal('Error', '<p style="color:#EF4444">Could not initialize device connection. Please try again.</p>', '');
-    }
-  } catch (e) {
-    showModal('Error', '<p style="color:#EF4444">Could not connect to wearable service. Please try again.</p>', '');
-  }
-}
-
 // ── Premium: Open mailto to physician ─────────────────────────
 
 function sendPremiumEmail() {
@@ -1671,56 +1592,69 @@ function sendPremiumEmail() {
     .catch(function() {});
 })();
 
-// ── Fasten Connect: Initialize Stitch widget ─────────────────
+// ── Wearable: Connect individual device via Terra ────────────
 
-(function initFastenStitch() {
-  var container = document.getElementById('fasten-stitch-container');
-  if (!container) return;
+async function connectWearable(el) {
+  var provider = el.dataset.terraProvider;
+  var name = el.querySelector('h3').textContent;
+  el.querySelector('.badge').textContent = 'CONNECTING...';
+  el.querySelector('.badge').style.background = '#E8751A22';
+  el.querySelector('.badge').style.color = '#E8751A';
 
-  // Create and embed the Stitch web component
-  container.innerHTML = '<fasten-stitch-element public-id="public_test_04mzvfafxf4x7jiv5bzhk90zo2lp702k6b9t1s7mme791"></fasten-stitch-element>';
+  try {
+    var res = await fetch('/api/terra/widget-session', { method: 'POST' });
+    var data = await res.json();
+    if (data.status === 'success' && data.url) {
+      // Open Terra widget in popup — pre-filtered to this provider
+      var w = 500, h = 700;
+      var left = (screen.width - w) / 2;
+      var top = (screen.height - h) / 2;
+      window.open(data.url, 'terra-connect', 'width=' + w + ',height=' + h + ',left=' + left + ',top=' + top);
 
-  // Listen for events from Stitch
-  var el = container.querySelector('fasten-stitch-element');
-  if (el) {
-    el.addEventListener('eventBus', function(event) {
-      try {
-        var data = JSON.parse(event.detail.data);
-        console.log('[Fasten] Event:', data);
-
-        if (data.event_type === 'org_connection.created' || data.event_type === 'patient.ehi_export_success') {
-          showModal(
-            'Health Records Connected',
-            '<div style="text-align:center;padding:16px">' +
-            '<div style="font-size:48px;margin-bottom:12px">✅</div>' +
-            '<p style="color:#22C55E;font-size:16px;font-weight:700;margin-bottom:8px">Successfully connected!</p>' +
-            '<p style="color:#94A3B8;font-size:13px">Your health records are being imported. This may take a few minutes for the first sync.</p>' +
-            '</div>',
-            ''
-          );
-          // Mark EHR as connected
-          fetch('/api/connect', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ type: 'ehr', id: 'fasten-connect', name: 'Health System (via Fasten)', method: 'fasten_connect' }),
-          });
-        }
-      } catch (e) {
-        console.log('[Fasten] Event parse error:', e);
-      }
-    });
+      // Show status in modal
+      showModal(
+        'Connect ' + name,
+        '<div style="text-align:center;padding:16px">' +
+        '<div style="font-size:40px;margin-bottom:12px">' + el.querySelector('div').textContent.trim() + '</div>' +
+        '<p style="color:#CBD5E1;font-size:14px;margin-bottom:8px">A login window has opened for <strong>' + name + '</strong></p>' +
+        '<p style="color:#94A3B8;font-size:12px;line-height:1.6">1. Select <strong>' + name + '</strong> from the list<br>2. Log in with your ' + name + ' account credentials<br>3. Authorize XSpan to read your health data<br>4. Close the popup when done</p>' +
+        '</div>',
+        '<button class="btn btn-primary" style="width:100%" data-provider="' + provider + '" data-name="' + name + '" onclick="confirmWearableConnect(this)">I Have Connected — Done</button>'
+      );
+    } else {
+      el.querySelector('.badge').textContent = 'CONNECT';
+      showModal('Error', '<p style="color:#EF4444">Could not start connection. Please try again.</p>', '');
+    }
+  } catch (e) {
+    el.querySelector('.badge').textContent = 'CONNECT';
+    showModal('Error', '<p style="color:#EF4444">Connection service unavailable. Please try again.</p>', '');
   }
-})();
+}
+
+async function confirmWearableConnect(btn) {
+  var provider = btn.dataset.provider;
+  var name = btn.dataset.name;
+  btn.textContent = 'Connecting...';
+  btn.disabled = true;
+  await fetch('/api/connect', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ type: 'wearable', id: provider.toLowerCase(), name: name, method: 'terra' }),
+  });
+  showModal(name, '<div style="text-align:center;padding:16px"><div style="font-size:48px;margin-bottom:12px">✅</div><p style="color:#22C55E;font-size:16px;font-weight:700">Connected!</p><p style="color:#94A3B8;font-size:12px;margin-top:8px">Data sync will begin shortly.</p></div>', '');
+  setTimeout(function() { closeModal(); location.reload(); }, 2000);
+}
 
 // ── Navigate to Connect tab with specific sub-tab ────────────
 
 function goToConnect(subTab) {
   showPage('connect', document.querySelectorAll('.nav a')[1]);
   setTimeout(function() {
-    var subtabs = document.querySelectorAll('#connect-subtabs a');
-    var map = { ehr: 0, wearables: 1, labs: 2, genomics: 3, microbiome: 4 };
-    var idx = map[subTab] ?? 0;
-    if (subtabs[idx]) showConnectTab(subTab, subtabs[idx]);
+    var items = document.querySelectorAll('.connect-nav-item');
+    var map = { ehr: 0, 'health-systems': 0, wearables: 1, labs: 2, genomics: 3, microbiome: 4 };
+    var tabName = subTab === 'ehr' ? 'health-systems' : subTab;
+    var idx = map[tabName] ?? 0;
+    if (items[idx]) showConnectTab(tabName, items[idx]);
   }, 50);
 }
 
@@ -1782,7 +1716,7 @@ async function exitDemoMode(btn) {
         '<p style="color:#22C55E;font-size:16px;font-weight:700;margin-bottom:12px">Ready for your real data!</p>' +
         '<p style="color:#94A3B8;font-size:13px;line-height:1.7">Now connect your health sources to see your actual personalized health intelligence. Click <strong style="color:#E8751A">Connect</strong> in the nav bar to get started.</p>' +
         '</div>',
-        '<button class="btn btn-primary" onclick="closeModal();goToConnect(&quot;ehr&quot;)">Go to Connect</button>'
+        '<button class="btn btn-primary" onclick="closeModal();goToConnect(&quot;health-systems&quot;)">Go to Connect</button>'
       );
       setTimeout(function() { window.location.reload(); }, 3000);
     }
