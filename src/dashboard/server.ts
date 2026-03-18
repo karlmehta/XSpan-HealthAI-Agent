@@ -1915,20 +1915,31 @@ export function startDashboard(
         if (tokenUrl) {
           try {
             console.log(`[OAuth] Exchanging code at: ${tokenUrl}`);
+            console.log(`[OAuth] redirect_uri: ${redirectUri}`);
+            console.log(`[OAuth] client_id: ${clientId}`);
+            console.log(`[OAuth] code: ${code.substring(0, 20)}...`);
+            const tokenBody = new URLSearchParams({
+              grant_type: 'authorization_code',
+              code: code,
+              redirect_uri: redirectUri,
+              client_id: clientId,
+            }).toString();
             const tokenResp = await fetch(tokenUrl, {
               method: 'POST',
               headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-              body: new URLSearchParams({
-                grant_type: 'authorization_code',
-                code: code,
-                redirect_uri: redirectUri,
-                client_id: clientId,
-              }).toString(),
+              body: tokenBody,
             });
-            const tokenData = await tokenResp.json() as Record<string, string>;
+            const tokenText = await tokenResp.text();
+            console.log(`[OAuth] Token response status: ${tokenResp.status}`);
+            console.log(`[OAuth] Token response: ${tokenText.substring(0, 200)}`);
+            const tokenData = JSON.parse(tokenText) as Record<string, string>;
             accessToken = tokenData.access_token || '';
             patientId = tokenData.patient || '';
-            console.log(`[OAuth] Token received! Patient: ${patientId}`);
+            if (accessToken) {
+              console.log(`[OAuth] SUCCESS — Token received! Patient: ${patientId}`);
+            } else {
+              console.error(`[OAuth] FAILED — No access_token in response. Error: ${tokenData.error} ${tokenData.error_description || ''}`);
+            }
           } catch (tokenErr) {
             console.error(`[OAuth] Token exchange failed:`, tokenErr);
           }
@@ -1993,6 +2004,10 @@ export function startDashboard(
           } catch (fhirErr) {
             console.error(`[OAuth] FHIR data fetch failed:`, fhirErr);
           }
+        }
+
+        if (!accessToken) {
+          console.error(`[OAuth] No access token — cannot fetch FHIR data. Check token exchange logs above.`);
         }
 
         // Mark provider as connected
