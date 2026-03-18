@@ -1355,7 +1355,7 @@ async function pollForAuth(id) {
     'Once done, come back here and click "I Have Authorized — Connect Now".' +
     '</p>' +
     '</div>',
-    '<button class="btn btn-primary" style="width:100%" onclick="manualConnect(\'' + id + '\')">I Have Authorized — Connect Now</button>'
+    '<button class="btn btn-primary" style="width:100%" data-provider="' + id + '" onclick="manualConnect(this.dataset.provider)">I Have Authorized — Connect Now</button>'
   );
 }
 
