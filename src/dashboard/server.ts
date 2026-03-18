@@ -1462,22 +1462,22 @@ async function startContribute() {
 
     '<label id="chk-tos" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#0F172A;border:1px solid #334155;border-radius:8px;cursor:pointer;font-size:13px" onclick="event.stopPropagation()">' +
     '<input type="checkbox" id="cb-tos" onchange="checkEnrollReady()" style="accent-color:#E8751A;width:16px;height:16px;flex-shrink:0">' +
-    '<span style="flex:1">I have read and accept the <a href="#" onclick="event.preventDefault();event.stopPropagation();showLegalDoc(\\'tos\\')" style="color:#E8751A;text-decoration:underline">Terms of Service</a></span>' +
+    '<span style="flex:1">I have read and accept the <a href="#" onclick="event.preventDefault();event.stopPropagation();showLegalDoc(&quot;tos&quot;)" style="color:#E8751A;text-decoration:underline">Terms of Service</a></span>' +
     '</label>' +
 
     '<label id="chk-privacy" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#0F172A;border:1px solid #334155;border-radius:8px;cursor:pointer;font-size:13px" onclick="event.stopPropagation()">' +
     '<input type="checkbox" id="cb-privacy" onchange="checkEnrollReady()" style="accent-color:#E8751A;width:16px;height:16px;flex-shrink:0">' +
-    '<span style="flex:1">I have read and accept the <a href="#" onclick="event.preventDefault();event.stopPropagation();showLegalDoc(\\'privacy\\')" style="color:#E8751A;text-decoration:underline">Privacy Policy</a></span>' +
+    '<span style="flex:1">I have read and accept the <a href="#" onclick="event.preventDefault();event.stopPropagation();showLegalDoc(&quot;privacy&quot;)" style="color:#E8751A;text-decoration:underline">Privacy Policy</a></span>' +
     '</label>' +
 
     '<label id="chk-consent" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#0F172A;border:1px solid #334155;border-radius:8px;cursor:pointer;font-size:13px" onclick="event.stopPropagation()">' +
     '<input type="checkbox" id="cb-consent" onchange="checkEnrollReady()" style="accent-color:#E8751A;width:16px;height:16px;flex-shrink:0">' +
-    '<span style="flex:1">I have read and accept the <a href="#" onclick="event.preventDefault();event.stopPropagation();showLegalDoc(\\'consent\\')" style="color:#E8751A;text-decoration:underline">Data Contributor Consent</a></span>' +
+    '<span style="flex:1">I have read and accept the <a href="#" onclick="event.preventDefault();event.stopPropagation();showLegalDoc(&quot;consent&quot;)" style="color:#E8751A;text-decoration:underline">Data Contributor Consent</a></span>' +
     '</label>' +
 
     '<label id="chk-rewards" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#0F172A;border:1px solid #334155;border-radius:8px;cursor:pointer;font-size:13px" onclick="event.stopPropagation()">' +
     '<input type="checkbox" id="cb-rewards" onchange="checkEnrollReady()" style="accent-color:#E8751A;width:16px;height:16px;flex-shrink:0">' +
-    '<span style="flex:1">I understand the <a href="#" onclick="event.preventDefault();event.stopPropagation();showLegalDoc(\\'rewards\\')" style="color:#E8751A;text-decoration:underline">Contribution Rewards</a> (50% to me, rest supports health system &amp; community)</span>' +
+    '<span style="flex:1">I understand the <a href="#" onclick="event.preventDefault();event.stopPropagation();showLegalDoc(&quot;rewards&quot;)" style="color:#E8751A;text-decoration:underline">Contribution Rewards</a> (50% to me, rest supports health system &amp; community)</span>' +
     '</label>' +
 
     '</div>' +
@@ -1716,7 +1716,7 @@ async function exitDemoMode(btn) {
         '<p style="color:#22C55E;font-size:16px;font-weight:700;margin-bottom:12px">Ready for your real data!</p>' +
         '<p style="color:#94A3B8;font-size:13px;line-height:1.7">Now connect your health sources to see your actual personalized health intelligence. Click <strong style="color:#E8751A">Connect</strong> in the nav bar to get started.</p>' +
         '</div>',
-        '<button class="btn btn-primary" onclick="closeModal();goToConnect(\\'ehr\\')">Go to Connect</button>'
+        '<button class="btn btn-primary" onclick="closeModal();goToConnect(&quot;ehr&quot;)">Go to Connect</button>'
       );
       setTimeout(function() { window.location.reload(); }, 3000);
     }
@@ -1780,7 +1780,7 @@ function showLegalDoc(docType) {
         '<div style="background:#1E293B;border:1px solid #E8751A;border-radius:16px;padding:32px;max-width:640px;width:90%;max-height:80vh;overflow-y:auto">' +
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">' +
         '<h2 style="font-size:18px;color:#fff">' + title + '</h2>' +
-        '<button onclick="document.getElementById(\\'legal-doc-overlay\\').remove()" style="background:none;border:none;color:#64748B;font-size:24px;cursor:pointer">&times;</button>' +
+        '<button onclick="document.getElementById(&quot;legal-doc-overlay&quot;).remove()" style="background:none;border:none;color:#64748B;font-size:24px;cursor:pointer">&times;</button>' +
         '</div>' +
         '<div style="font-size:12px;color:#CBD5E1;line-height:1.8;white-space:pre-wrap">' + (data.content || 'Document not available.') + '</div>' +
         '</div>';
@@ -1808,8 +1808,8 @@ async function confirmContribute() {
         'Welcome to XSpan Contribute',
         '<div style="text-align:center;padding:16px">' +
         '<div style="font-size:56px;margin-bottom:16px">🎉</div>' +
-        '<p style="color:#22C55E;font-size:18px;font-weight:700;margin-bottom:12px">You\\'re enrolled!</p>' +
-        '<p style="color:#94A3B8;font-size:13px;line-height:1.7">Your first contribution will be posted automatically. You\\'ll see your rewards appear here as research organizations access your de-identified data.</p>' +
+        '<p style="color:#22C55E;font-size:18px;font-weight:700;margin-bottom:12px">You are enrolled!</p>' +
+        '<p style="color:#94A3B8;font-size:13px;line-height:1.7">Your first contribution will be posted automatically. You will see your rewards appear here as research organizations access your de-identified data.</p>' +
         '</div>',
         ''
       );
