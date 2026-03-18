@@ -17,7 +17,7 @@ interface HealthSystem {
 }
 const HEALTH_SYSTEMS: HealthSystem[] = [
   // Epic Sandbox (for testing — use fhirjason / epicepic1)
-  { name: 'Epic Sandbox (Test)', ehr: 'epic', region: 'Test Environment', fhirUrl: 'https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4', portalUrl: 'https://fhir.epic.com/', authUrl: 'https://fhir.epic.com/interconnect-fhir-oauth/oauth2/authorize', tokenUrl: 'https://fhir.epic.com/interconnect-fhir-oauth/oauth2/token', clientId: '8ce98706-fcb3-4cd9-a4ad-b793ed96e375' },
+  { name: 'Epic Sandbox (Test)', ehr: 'epic', region: 'Test Environment — limited to identity only', fhirUrl: 'https://fhir.epic.com/interconnect-fhir-oauth/api/FHIR/R4', portalUrl: 'https://fhir.epic.com/', authUrl: 'https://fhir.epic.com/interconnect-fhir-oauth/oauth2/authorize', tokenUrl: 'https://fhir.epic.com/interconnect-fhir-oauth/oauth2/token', clientId: '2a44a85d-ddf3-4b74-b17b-4c5844408f89' },
   // Featured — California (production client_id propagating — may take 1-2 weeks)
   { name: 'UCLA Health', ehr: 'epic', region: 'Los Angeles, CA', fhirUrl: 'https://arrprox.mednet.ucla.edu/FHIRPRD/api/FHIR/R4/', portalUrl: 'https://mychart.uclahealth.org/', authUrl: 'https://arrprox.mednet.ucla.edu/FHIRPRD/oauth2/authorize', tokenUrl: 'https://arrprox.mednet.ucla.edu/FHIRPRD/oauth2/token', clientId: '8ce98706-fcb3-4cd9-a4ad-b793ed96e375' },
   { name: 'Stanford Health Care', ehr: 'epic', region: 'Palo Alto, CA', fhirUrl: 'https://sfd.stanfordmed.org/FHIR/api/FHIR/R4/', portalUrl: 'https://mychart.stanfordhealth.org/', authUrl: 'https://sfd.stanfordmed.org/FHIR/oauth2/authorize', tokenUrl: 'https://sfd.stanfordmed.org/FHIR/oauth2/token', clientId: '8ce98706-fcb3-4cd9-a4ad-b793ed96e375' },
