@@ -284,6 +284,8 @@ function renderDashboard(config: AgentConfig, store: LocalStore): string {
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>XSpan HealthAI Agent</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
+<link href="https://cdn.fastenhealth.com/connect/v4/fasten-stitch-element.css" rel="stylesheet">
+<script src="https://cdn.fastenhealth.com/connect/v4/fasten-stitch-element.js" type="module"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: -apple-system, 'Inter', sans-serif; background: #0B0F1A; color: #E2E8F0; min-height: 100vh; }
@@ -667,9 +669,32 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0B0F1A; col
     <div style="flex:1;min-width:0;overflow:hidden">
     <div class="connect-sub active" id="connect-ehr">
     <div class="section-title">Connect Your Electronic Health Records</div>
-    <div class="hipaa-note" style="margin-bottom:20px">
-      🔐 <strong>How it works:</strong> Click "Open MyChart Login" — your health system's login page opens in this browser. Complete MFA/2FA there. Once logged in, XSpan reads your records via SMART on FHIR. No passwords are stored by XSpan.
+
+    <!-- Fasten Connect — Primary Method (50K+ institutions) -->
+    <div class="card" style="margin-bottom:20px;border-color:#E8751A44;background:linear-gradient(135deg,#1A1A2E,#1E293B);padding:24px">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+        <span style="font-size:28px">🏥</span>
+        <div>
+          <h3 style="font-size:16px;margin-bottom:2px">Connect Any Health System (Recommended)</h3>
+          <p style="font-size:11px;color:#94A3B8">50,000+ hospitals, clinics, and health systems — Epic, Cerner, Athena, and more</p>
+        </div>
+      </div>
+      <p style="font-size:12px;color:#CBD5E1;line-height:1.6;margin-bottom:16px">
+        Search for your health system, log in with your patient portal credentials, and authorize XSpan to read your records. Your credentials are never stored by XSpan — authentication is handled securely by Fasten Connect.
+      </p>
+      <div id="fasten-stitch-container" style="min-height:100px;background:#0F172A;border-radius:8px;padding:8px">
+        <p style="text-align:center;color:#64748B;font-size:12px;padding:20px">Loading health system connection widget...</p>
+      </div>
+      <p style="font-size:9px;color:#475569;margin-top:8px;text-align:center">Powered by Fasten Connect — patient-directed access under the 21st Century Cures Act</p>
     </div>
+
+    <!-- Direct SMART on FHIR — Alternative Method -->
+    <div style="margin-bottom:12px;display:flex;align-items:center;gap:8px">
+      <div style="flex:1;height:1px;background:#334155"></div>
+      <span style="font-size:11px;color:#64748B">or connect directly via SMART on FHIR</span>
+      <div style="flex:1;height:1px;background:#334155"></div>
+    </div>
+
     <input type="text" class="search" placeholder="Search health systems (e.g., Kaiser, UCLA, Stanford, Mayo)..." oninput="filterEHR(this.value)">
     <div class="card-grid" id="ehr-grid">
       ${HEALTH_SYSTEMS.map((hs, i) => `
@@ -1644,6 +1669,47 @@ function sendPremiumEmail() {
       }
     })
     .catch(function() {});
+})();
+
+// ── Fasten Connect: Initialize Stitch widget ─────────────────
+
+(function initFastenStitch() {
+  var container = document.getElementById('fasten-stitch-container');
+  if (!container) return;
+
+  // Create and embed the Stitch web component
+  container.innerHTML = '<fasten-stitch-element public-id="public_test_04mzvfafxf4x7jiv5bzhk90zo2lp702k6b9t1s7mme791"></fasten-stitch-element>';
+
+  // Listen for events from Stitch
+  var el = container.querySelector('fasten-stitch-element');
+  if (el) {
+    el.addEventListener('eventBus', function(event) {
+      try {
+        var data = JSON.parse(event.detail.data);
+        console.log('[Fasten] Event:', data);
+
+        if (data.event_type === 'org_connection.created' || data.event_type === 'patient.ehi_export_success') {
+          showModal(
+            'Health Records Connected',
+            '<div style="text-align:center;padding:16px">' +
+            '<div style="font-size:48px;margin-bottom:12px">✅</div>' +
+            '<p style="color:#22C55E;font-size:16px;font-weight:700;margin-bottom:8px">Successfully connected!</p>' +
+            '<p style="color:#94A3B8;font-size:13px">Your health records are being imported. This may take a few minutes for the first sync.</p>' +
+            '</div>',
+            ''
+          );
+          // Mark EHR as connected
+          fetch('/api/connect', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: 'ehr', id: 'fasten-connect', name: 'Health System (via Fasten)', method: 'fasten_connect' }),
+          });
+        }
+      } catch (e) {
+        console.log('[Fasten] Event parse error:', e);
+      }
+    });
+  }
 })();
 
 // ── Navigate to Connect tab with specific sub-tab ────────────
