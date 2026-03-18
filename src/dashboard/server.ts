@@ -603,6 +603,15 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0B0F1A; col
     </div>
     `}
 
+    <!-- Recent Health Records from EHR -->
+    <div class="card" style="margin-bottom:20px" id="ehr-records-section">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <h3 style="font-size:16px">Recent Health Records</h3>
+        <span style="font-size:10px;color:#64748B">From connected health systems</span>
+      </div>
+      <div id="ehr-records-content" style="font-size:13px;color:#94A3B8">Loading records...</div>
+    </div>
+
     <!-- Privacy & Security (collapsible) -->
     <div class="card" style="margin-bottom:20px;cursor:pointer" onclick="this.querySelector('.trust-detail').style.display=this.querySelector('.trust-detail').style.display==='none'?'block':'none'">
       <div style="display:flex;align-items:center;justify-content:space-between">
@@ -1645,6 +1654,69 @@ async function confirmWearableConnect(btn) {
   setTimeout(function() { closeModal(); location.reload(); }, 2000);
 }
 
+// ── EHR Records: Load on page load ───────────────────────────
+
+(function loadEhrRecords() {
+  var el = document.getElementById('ehr-records-content');
+  if (!el) return;
+
+  fetch('/api/ehr-records')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.total === 0) {
+        el.innerHTML = '<p style="color:#64748B;font-size:12px">No health records yet. Connect a health system from the <strong>Connect</strong> tab to see your labs, vitals, and conditions here.</p>';
+        return;
+      }
+
+      var html = '';
+
+      // Vitals
+      if (data.vitals.length > 0) {
+        html += '<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:600;color:#6EE7B7;margin-bottom:8px">Vitals</div>';
+        html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">';
+        data.vitals.forEach(function(r) {
+          html += '<div style="background:#0F172A;padding:10px;border-radius:8px">' +
+            '<div style="font-size:11px;color:#94A3B8">' + r.data_type + '</div>' +
+            '<div style="font-size:18px;font-weight:700;color:#E8751A">' + (typeof r.value === 'number' ? r.value.toFixed(1) : r.value) + ' <span style="font-size:11px;color:#64748B">' + (r.unit || '') + '</span></div>' +
+            '<div style="font-size:9px;color:#475569">' + (r.recorded_at ? r.recorded_at.split('T')[0] : '') + ' · EHR</div>' +
+            '</div>';
+        });
+        html += '</div></div>';
+      }
+
+      // Labs
+      if (data.labs.length > 0) {
+        html += '<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:600;color:#FBBF24;margin-bottom:8px">Lab Results</div>';
+        html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">';
+        data.labs.forEach(function(r) {
+          html += '<div style="background:#0F172A;padding:10px;border-radius:8px">' +
+            '<div style="font-size:11px;color:#94A3B8">' + r.data_type + '</div>' +
+            '<div style="font-size:18px;font-weight:700;color:#E8751A">' + (typeof r.value === 'number' ? r.value.toFixed(1) : r.value) + ' <span style="font-size:11px;color:#64748B">' + (r.unit || '') + '</span></div>' +
+            '<div style="font-size:9px;color:#475569">' + (r.recorded_at ? r.recorded_at.split('T')[0] : '') + ' · Lab</div>' +
+            '</div>';
+        });
+        html += '</div></div>';
+      }
+
+      // Other
+      if (data.other.length > 0) {
+        html += '<div><div style="font-size:12px;font-weight:600;color:#C4B5FD;margin-bottom:8px">Other Records</div>';
+        data.other.slice(0, 9).forEach(function(r) {
+          html += '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #1E293B;font-size:12px">' +
+            '<span style="color:#CBD5E1">' + r.data_type + '</span>' +
+            '<span style="color:#E8751A;font-weight:600">' + (typeof r.value === 'number' ? r.value.toFixed(1) : r.value) + ' ' + (r.unit || '') + '</span>' +
+            '</div>';
+        });
+        html += '</div>';
+      }
+
+      el.innerHTML = html;
+    })
+    .catch(function() {
+      el.innerHTML = '<p style="color:#64748B;font-size:12px">Could not load health records.</p>';
+    });
+})();
+
 // ── Navigate to Connect tab with specific sub-tab ────────────
 
 function goToConnect(subTab) {
@@ -2243,6 +2315,38 @@ export function startDashboard(
           res.end(JSON.stringify({ success: false, error: 'Invalid request' }));
         }
       });
+      return;
+    }
+
+    // API: EHR Records — recent health samples from connected health systems
+    if (url === '/api/ehr-records') {
+      try {
+        const rows = store.db.prepare(
+          'SELECT data_type, value, unit, recorded_at, source FROM health_samples ORDER BY recorded_at DESC LIMIT 50'
+        ).all() as { data_type: string; value: number; unit: string; recorded_at: string; source: string }[];
+
+        // Group by category
+        const vitals: typeof rows = [];
+        const labs: typeof rows = [];
+        const other: typeof rows = [];
+        const vitalTypes = new Set(['Heart rate', 'Blood Pressure', 'Body temperature', 'Respiratory rate', 'Oxygen saturation', 'Body weight', 'Body height', 'BMI']);
+
+        for (const r of rows) {
+          if (vitalTypes.has(r.data_type) || r.data_type.toLowerCase().includes('heart') || r.data_type.toLowerCase().includes('pressure') || r.data_type.toLowerCase().includes('weight')) {
+            vitals.push(r);
+          } else if (r.data_type.toLowerCase().includes('cholesterol') || r.data_type.toLowerCase().includes('glucose') || r.data_type.toLowerCase().includes('hemoglobin') || r.data_type.toLowerCase().includes('creatinine') || r.unit?.includes('/dL') || r.unit?.includes('/L')) {
+            labs.push(r);
+          } else {
+            other.push(r);
+          }
+        }
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ total: rows.length, vitals, labs, other }));
+      } catch {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ total: 0, vitals: [], labs: [], other: [] }));
+      }
       return;
     }
 
