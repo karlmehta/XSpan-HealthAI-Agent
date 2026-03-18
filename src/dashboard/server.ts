@@ -1250,10 +1250,10 @@ async function connectEHR(btn) {
     name + ' — Authorization Pending',
     '<div style="text-align:center;padding:16px">' +
     '<div style="font-size:48px;margin-bottom:12px">🏥</div>' +
-    '<p style="color:#FBBF24;font-size:16px;font-weight:700;margin-bottom:12px">Your health system hasn\'t enabled XSpan yet</p>' +
+    '<p style="color:#FBBF24;font-size:16px;font-weight:700;margin-bottom:12px">Your health system has not enabled XSpan yet</p>' +
     '<p style="color:#94A3B8;font-size:13px;line-height:1.7;margin-bottom:16px">' +
-    'XSpan is registered with Epic and your health system has received our app credentials, but they haven\'t approved patient data access yet. ' +
-    'This requires your health system\'s privacy and IT team to review and enable XSpan.</p>' +
+    'XSpan is registered with Epic and your health system has received our app credentials, but they have not approved patient data access yet. ' +
+    'This requires your health system privacy and IT team to review and enable XSpan.</p>' +
     '<div style="background:#0F172A;border:1px solid #334155;border-radius:8px;padding:16px;text-align:left;margin-bottom:16px">' +
     '<p style="color:#E8751A;font-weight:600;font-size:13px;margin-bottom:8px">What you can do:</p>' +
     '<p style="color:#CBD5E1;font-size:12px;line-height:1.8">' +
@@ -1262,7 +1262,7 @@ async function connectEHR(btn) {
     '3. In the meantime, use the <strong>Epic Sandbox</strong> (test data) to explore the full EHR flow</p>' +
     '</div>' +
     '<p style="color:#64748B;font-size:11px">Epic Error 15: Application not yet approved at this organization. ' +
-    'This is a health system decision, not a technical issue. XSpan\'s credentials are valid.</p>' +
+    'This is a health system decision, not a technical issue. XSpan credentials are valid.</p>' +
     '</div>',
     '<button class="btn btn-primary" onclick="closeModal();showPage(\'subscription\',document.querySelectorAll(\'.nav a\')[3])">Go to Premium — Ask Your Doctor</button>'
   );
