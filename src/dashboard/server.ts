@@ -2009,6 +2009,12 @@ export function startDashboard(
             patientId = tokenData.patient || '';
             if (accessToken) {
               console.log(`[OAuth] SUCCESS — Token received! Patient: ${patientId}`);
+              // Decode JWT to see granted scopes
+              try {
+                const payload = JSON.parse(Buffer.from(accessToken.split('.')[1], 'base64').toString());
+                console.log(`[OAuth] Token scopes: ${payload.scope || payload.scp || 'not in token'}`);
+                console.log(`[OAuth] Token aud: ${payload.aud || 'none'}`);
+              } catch {};
             } else {
               console.error(`[OAuth] FAILED — No access_token in response. Error: ${tokenData.error} ${tokenData.error_description || ''}`);
             }
@@ -2046,7 +2052,10 @@ export function startDashboard(
                 );
                 if (!fhirResp.ok) {
                   const errText = await fhirResp.text();
-                  console.warn(`[OAuth] ${resource.name}: HTTP ${fhirResp.status} — ${errText.substring(0, 200)}`);
+                  const errHeaders = Object.fromEntries(fhirResp.headers.entries());
+                  console.warn(`[OAuth] ${resource.name}: HTTP ${fhirResp.status}`);
+                  console.warn(`[OAuth] Response body: ${errText.substring(0, 500)}`);
+                  console.warn(`[OAuth] WWW-Authenticate: ${errHeaders['www-authenticate'] || 'none'}`);
                 } else {
                   const bundle = await fhirResp.json() as { total?: number; entry?: unknown[] };
                   const count = bundle.entry?.length || 0;
