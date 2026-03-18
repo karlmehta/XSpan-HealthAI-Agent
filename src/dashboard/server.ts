@@ -1175,7 +1175,7 @@ async function connectEHR(btn) {
   fetch('/api/start-oauth', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ type: 'ehr', provider: name, name: name, fhirUrl, authUrl }),
+    body: JSON.stringify({ type: 'ehr', provider: name, name: name, fhirUrl: fhirUrl, tokenUrl: (card.dataset.token || authUrl.replace('/authorize', '/token')), clientId: clientId, callbackUrl: callbackUrl }),
   });
 
   // Open Epic's auth page — user logs in with MyChart + MFA
@@ -1873,7 +1873,7 @@ export function startDashboard(
     sslCert = Buffer.alloc(0);
   }
 
-  const callbackServer = createHttpsServer({ key: sslKey, cert: sslCert }, (req, res) => {
+  const callbackServer = createHttpsServer({ key: sslKey, cert: sslCert }, async (req, res) => {
     const reqUrl = new URL(req.url ?? '/', `http://localhost:${OAUTH_CALLBACK_PORT}`);
 
     if (reqUrl.pathname === '/callback') {
@@ -1890,17 +1890,123 @@ export function startDashboard(
 
       if (code) {
         console.log(`[OAuth] Authorization code received — exchanging for token...`);
-        // Mark all pending providers as connected
+
+        // Find the pending provider with FHIR/token details
+        let pendingProvider = '';
+        let providerState: Record<string, unknown> = {};
         for (const [provider, s] of Object.entries(authState)) {
-          if (s.pending) {
-            s.connected = true;
-            s.pending = false;
-            console.log(`[OAuth] ${provider} connected successfully`);
+          const st = s as Record<string, unknown>;
+          if (st.pending) {
+            pendingProvider = provider;
+            providerState = st;
+            break;
+          }
+        }
+
+        // Exchange code for access token
+        const tokenUrl = (providerState.tokenUrl as string) || '';
+        const clientId = (providerState.clientId as string) || '8ce98706-fcb3-4cd9-a4ad-b793ed96e375';
+        const redirectUri = (providerState.callbackUrl as string) || `https://localhost:${OAUTH_CALLBACK_PORT}/callback`;
+        const fhirBaseUrl = (providerState.fhirUrl as string) || '';
+
+        let accessToken = '';
+        let patientId = '';
+
+        if (tokenUrl) {
+          try {
+            console.log(`[OAuth] Exchanging code at: ${tokenUrl}`);
+            const tokenResp = await fetch(tokenUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+              body: new URLSearchParams({
+                grant_type: 'authorization_code',
+                code: code,
+                redirect_uri: redirectUri,
+                client_id: clientId,
+              }).toString(),
+            });
+            const tokenData = await tokenResp.json() as Record<string, string>;
+            accessToken = tokenData.access_token || '';
+            patientId = tokenData.patient || '';
+            console.log(`[OAuth] Token received! Patient: ${patientId}`);
+          } catch (tokenErr) {
+            console.error(`[OAuth] Token exchange failed:`, tokenErr);
+          }
+        }
+
+        // Fetch FHIR data if we got a token
+        if (accessToken && fhirBaseUrl) {
+          try {
+            console.log(`[OAuth] Fetching FHIR data from: ${fhirBaseUrl}`);
+
+            // Fetch key resources
+            const resources = ['Observation', 'Condition', 'MedicationRequest', 'Procedure', 'DiagnosticReport'];
+            let totalRecords = 0;
+
+            for (const resource of resources) {
+              try {
+                const fhirResp = await fetch(
+                  `${fhirBaseUrl}/${resource}?patient=${patientId}&_count=100&_sort=-date`,
+                  { headers: { 'Authorization': `Bearer ${accessToken}`, 'Accept': 'application/fhir+json' } }
+                );
+                if (fhirResp.ok) {
+                  const bundle = await fhirResp.json() as { total?: number; entry?: unknown[] };
+                  const count = bundle.entry?.length || 0;
+                  totalRecords += count;
+                  console.log(`[OAuth] ${resource}: ${count} records`);
+
+                  // Store observations as health samples
+                  if (resource === 'Observation' && bundle.entry) {
+                    for (const entry of bundle.entry as { resource: Record<string, unknown> }[]) {
+                      const obs = entry.resource;
+                      try {
+                        const coding = ((obs.code as Record<string, unknown>)?.coding as { display?: string; code?: string }[])?.[0];
+                        const value = (obs.valueQuantity as Record<string, unknown>)?.value as number;
+                        const unit = (obs.valueQuantity as Record<string, unknown>)?.unit as string;
+                        if (coding && value !== undefined) {
+                          store.insertSample({
+                            id: obs.id as string || Math.random().toString(36).slice(2),
+                            source: 'ehr' as const,
+                            dataType: coding.display || coding.code || 'unknown',
+                            value: value,
+                            unit: unit || '',
+                            recordedAt: new Date((obs.effectiveDateTime as string) || Date.now()),
+                          });
+                        }
+                      } catch {}
+                    }
+                  }
+                }
+              } catch (resourceErr) {
+                console.warn(`[OAuth] Failed to fetch ${resource}:`, resourceErr);
+              }
+            }
+
+            console.log(`[OAuth] Total FHIR records fetched: ${totalRecords}`);
+
+            // Re-synthesize biomarkers with new data
+            if (totalRecords > 0) {
+              console.log(`[OAuth] Re-synthesizing biomarkers...`);
+              await pipeline.synthesizeBiomarkers(store);
+            }
+
+          } catch (fhirErr) {
+            console.error(`[OAuth] FHIR data fetch failed:`, fhirErr);
+          }
+        }
+
+        // Mark provider as connected
+        for (const [provider, s] of Object.entries(authState)) {
+          const st = s as Record<string, unknown>;
+          if (st.pending) {
+            st.connected = true;
+            st.pending = false;
+            console.log(`[OAuth] ${provider} connected successfully — ${accessToken ? 'data synced' : 'no token'}`);
           }
         }
 
         res.writeHead(200, { 'Content-Type': 'text/html' });
-        res.end('<html><body style="background:#0B0F1A;color:#22C55E;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;font-size:18px"><div style="text-align:center"><h2>Connected Successfully!</h2><p>You can close this tab and return to XSpan Dashboard.</p></div></body></html>');
+        res.end(`<html><body style="background:#0B0F1A;color:#22C55E;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;font-size:18px"><div style="text-align:center"><h2>Connected Successfully!</h2><p>${accessToken ? 'Your health records have been synced.' : 'Connection established.'} You can close this tab and return to XSpan Dashboard.</p></div></body></html>`);
         return;
       }
     }
@@ -2344,8 +2450,12 @@ export function startDashboard(
       req.on('data', chunk => body += chunk);
       req.on('end', () => {
         const data = JSON.parse(body);
-        authState[data.provider] = { connected: false, pending: true, startedAt: Date.now() };
+        authState[data.provider] = {
+          connected: false, pending: true, startedAt: Date.now(),
+          fhirUrl: data.fhirUrl, tokenUrl: data.tokenUrl, clientId: data.clientId, callbackUrl: data.callbackUrl,
+        } as Record<string, unknown>;
         console.log(`[OAuth] Waiting for ${data.name} authorization via browser...`);
+        console.log(`[OAuth] FHIR: ${data.fhirUrl} | Token: ${data.tokenUrl}`);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ status: 'waiting' }));
       });
