@@ -1606,38 +1606,40 @@ function sendPremiumEmail() {
 function connectWearable(el) {
   var provider = el.dataset.terraProvider;
   var name = el.querySelector('h3').textContent;
-  var icon = el.querySelector('div').textContent.trim();
   el.querySelector('.badge').textContent = 'CONNECTING...';
   el.querySelector('.badge').style.background = '#E8751A22';
   el.querySelector('.badge').style.color = '#E8751A';
 
-  // Show instructions first, then fetch the Terra URL
-  showModal(
-    'Connect ' + name,
-    '<div style="text-align:center;padding:16px">' +
-    '<div style="font-size:40px;margin-bottom:12px">' + icon + '</div>' +
-    '<p style="color:#CBD5E1;font-size:14px;margin-bottom:12px">Click the button below to open the <strong>' + name + '</strong> connection page.</p>' +
-    '<p style="color:#94A3B8;font-size:12px;line-height:1.6;margin-bottom:16px">1. Select <strong>' + name + '</strong> from the list<br>2. Log in with your ' + name + ' account<br>3. Authorize XSpan to read your health data<br>4. Come back here and click "Done"</p>' +
-    '<div id="terra-link-container" style="margin-bottom:12px"><p style="color:#64748B;font-size:11px">Loading connection link...</p></div>' +
-    '</div>',
-    '<button class="btn btn-primary" style="width:100%" data-provider="' + provider + '" data-name="' + name + '" onclick="confirmWearableConnect(this)">I Have Connected — Done</button>'
-  );
-
-  // Fetch Terra widget URL and show as a clickable link/button
-  fetch('/api/terra/widget-session', { method: 'POST' })
+  // Fetch direct auth URL for this specific provider, then open it
+  fetch('/api/terra/auth', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ provider: provider }),
+  })
     .then(function(r) { return r.json(); })
     .then(function(data) {
-      var container = document.getElementById('terra-link-container');
-      if (container && data.status === 'success' && data.url) {
-        container.innerHTML = '<a href="' + data.url + '" target="_blank" class="btn btn-primary" style="font-size:14px;padding:12px 24px;text-decoration:none;display:inline-block">Open ' + name + ' Login Page</a>';
+      if (data.status === 'success' && data.auth_url) {
+        // Open provider login directly in new tab — NO Terra widget
+        window.open(data.auth_url, '_blank');
+
+        // Show confirmation modal
+        showModal(
+          'Connect ' + name,
+          '<div style="text-align:center;padding:16px">' +
+          '<div style="font-size:40px;margin-bottom:12px">🔗</div>' +
+          '<p style="color:#22C55E;font-size:15px;font-weight:700;margin-bottom:8px">' + name + ' login page opened in a new tab</p>' +
+          '<p style="color:#94A3B8;font-size:12px;line-height:1.6;margin-bottom:16px">1. Log in with your <strong>' + name + '</strong> account<br>2. Authorize XSpan to read your health data<br>3. Come back to this tab and click "Done"</p>' +
+          '</div>',
+          '<button class="btn btn-primary" style="width:100%" data-provider="' + provider + '" data-name="' + name + '" onclick="confirmWearableConnect(this)">I Have Connected — Done</button>'
+        );
       } else {
-        if (container) container.innerHTML = '<p style="color:#EF4444;font-size:12px">Could not load connection. Please close and try again.</p>';
+        el.querySelector('.badge').textContent = 'CONNECT';
+        showModal('Error', '<p style="color:#EF4444">Could not connect to ' + name + '. This provider may not be available yet.</p>', '');
       }
     })
     .catch(function() {
-      var container = document.getElementById('terra-link-container');
-      if (container) container.innerHTML = '<p style="color:#EF4444;font-size:12px">Connection service unavailable. Please try again.</p>';
       el.querySelector('.badge').textContent = 'CONNECT';
+      showModal('Error', '<p style="color:#EF4444">Connection service unavailable. Please try again.</p>', '');
     });
 }
 
@@ -2276,35 +2278,41 @@ export function startDashboard(
       return;
     }
 
-    // API: Terra — Generate widget session for wearable connections
-    if (url === '/api/terra/widget-session' && req.method === 'POST') {
-      try {
-        const terraDevId = process.env.TERRA_DEV_ID || 'predixtions-testing-c1Ip106tRu';
-        const terraApiKey = process.env.TERRA_API_KEY || 'wLwQxQti90ZKyQui75IECWBEhZy6zI1a';
-        const userId = config.xspan?.userId || 'local-user';
+    // API: Terra — Get direct auth URL for a specific wearable provider
+    if (url === '/api/terra/auth' && req.method === 'POST') {
+      let body = '';
+      req.on('data', (chunk: Buffer) => body += chunk);
+      req.on('end', async () => {
+        try {
+          const data = JSON.parse(body);
+          const provider = data.provider || 'OURA';
+          const terraDevId = process.env.TERRA_DEV_ID || 'predixtions-testing-c1Ip106tRu';
+          const terraApiKey = process.env.TERRA_API_KEY || 'wLwQxQti90ZKyQui75IECWBEhZy6zI1a';
+          const userId = config.xspan?.userId || 'local-user';
 
-        const terraResp = await fetch('https://api.tryterra.co/v2/auth/generateWidgetSession', {
-          method: 'POST',
-          headers: {
-            'dev-id': terraDevId,
-            'x-api-key': terraApiKey,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            reference_id: userId,
-            providers: 'OURA,WHOOP,FITBIT,GARMIN,DEXCOM,GOOGLE,WITHINGS,OMRON,POLAR,STRAVA,PELOTON,EIGHTSLEEP,ULTRAHUMAN',
-            language: 'en',
-          }),
-        });
-        const terraData = await terraResp.json() as Record<string, unknown>;
-        console.log(`[Terra] Widget session: ${terraData['session_id']}`);
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(terraData));
-      } catch (err) {
-        console.error('[Terra] Widget session error:', err);
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ status: 'error', error: 'Could not connect to Terra' }));
-      }
+          console.log(`[Terra] Requesting direct auth URL for: ${provider}`);
+          const terraResp = await fetch('https://api.tryterra.co/v2/auth/authenticateUser', {
+            method: 'POST',
+            headers: {
+              'dev-id': terraDevId,
+              'x-api-key': terraApiKey,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              resource: provider,
+              reference_id: `${userId}-${Date.now()}`,
+            }),
+          });
+          const terraData = await terraResp.json() as Record<string, unknown>;
+          console.log(`[Terra] Auth URL for ${provider}: ${(terraData['auth_url'] as string || '').substring(0, 80)}...`);
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify(terraData));
+        } catch (err) {
+          console.error('[Terra] Auth error:', err);
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ status: 'error', error: 'Could not connect to Terra' }));
+        }
+      });
       return;
     }
 
