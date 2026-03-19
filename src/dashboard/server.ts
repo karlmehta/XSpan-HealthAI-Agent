@@ -1603,54 +1603,42 @@ function sendPremiumEmail() {
 
 // ── Wearable: Connect individual device via Terra ────────────
 
-async function connectWearable(el) {
+function connectWearable(el) {
   var provider = el.dataset.terraProvider;
   var name = el.querySelector('h3').textContent;
+  var icon = el.querySelector('div').textContent.trim();
   el.querySelector('.badge').textContent = 'CONNECTING...';
   el.querySelector('.badge').style.background = '#E8751A22';
   el.querySelector('.badge').style.color = '#E8751A';
 
-  // Open popup IMMEDIATELY on user click (before async fetch) to avoid popup blocker
-  var w = 500, h = 700;
-  var left = (screen.width - w) / 2;
-  var top = (screen.height - h) / 2;
-  var popup = window.open('about:blank', 'terra-connect', 'width=' + w + ',height=' + h + ',left=' + left + ',top=' + top);
-  if (popup) {
-    popup.document.write('<html><body style="background:#0B0F1A;color:#94A3B8;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh"><div style="text-align:center"><h2 style="color:#E8751A">Loading ' + name + '...</h2><p>Connecting to your device provider.</p></div></body></html>');
-  }
+  // Show instructions first, then fetch the Terra URL
+  showModal(
+    'Connect ' + name,
+    '<div style="text-align:center;padding:16px">' +
+    '<div style="font-size:40px;margin-bottom:12px">' + icon + '</div>' +
+    '<p style="color:#CBD5E1;font-size:14px;margin-bottom:12px">Click the button below to open the <strong>' + name + '</strong> connection page.</p>' +
+    '<p style="color:#94A3B8;font-size:12px;line-height:1.6;margin-bottom:16px">1. Select <strong>' + name + '</strong> from the list<br>2. Log in with your ' + name + ' account<br>3. Authorize XSpan to read your health data<br>4. Come back here and click "Done"</p>' +
+    '<div id="terra-link-container" style="margin-bottom:12px"><p style="color:#64748B;font-size:11px">Loading connection link...</p></div>' +
+    '</div>',
+    '<button class="btn btn-primary" style="width:100%" data-provider="' + provider + '" data-name="' + name + '" onclick="confirmWearableConnect(this)">I Have Connected — Done</button>'
+  );
 
-  try {
-    var res = await fetch('/api/terra/widget-session', { method: 'POST' });
-    var data = await res.json();
-    if (data.status === 'success' && data.url) {
-      // Redirect the already-open popup to Terra widget
-      if (popup && !popup.closed) {
-        popup.location.href = data.url;
+  // Fetch Terra widget URL and show as a clickable link/button
+  fetch('/api/terra/widget-session', { method: 'POST' })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var container = document.getElementById('terra-link-container');
+      if (container && data.status === 'success' && data.url) {
+        container.innerHTML = '<a href="' + data.url + '" target="_blank" class="btn btn-primary" style="font-size:14px;padding:12px 24px;text-decoration:none;display:inline-block">Open ' + name + ' Login Page</a>';
       } else {
-        // Popup was blocked or closed — open in new tab as fallback
-        window.open(data.url, '_blank');
+        if (container) container.innerHTML = '<p style="color:#EF4444;font-size:12px">Could not load connection. Please close and try again.</p>';
       }
-
-      // Show status in modal
-      showModal(
-        'Connect ' + name,
-        '<div style="text-align:center;padding:16px">' +
-        '<div style="font-size:40px;margin-bottom:12px">' + el.querySelector('div').textContent.trim() + '</div>' +
-        '<p style="color:#CBD5E1;font-size:14px;margin-bottom:8px">A login window has opened for <strong>' + name + '</strong></p>' +
-        '<p style="color:#94A3B8;font-size:12px;line-height:1.6">1. Select <strong>' + name + '</strong> from the list<br>2. Log in with your ' + name + ' account credentials<br>3. Authorize XSpan to read your health data<br>4. Close the popup when done</p>' +
-        '</div>',
-        '<button class="btn btn-primary" style="width:100%" data-provider="' + provider + '" data-name="' + name + '" onclick="confirmWearableConnect(this)">I Have Connected — Done</button>'
-      );
-    } else {
-      if (popup && !popup.closed) popup.close();
+    })
+    .catch(function() {
+      var container = document.getElementById('terra-link-container');
+      if (container) container.innerHTML = '<p style="color:#EF4444;font-size:12px">Connection service unavailable. Please try again.</p>';
       el.querySelector('.badge').textContent = 'CONNECT';
-      showModal('Error', '<p style="color:#EF4444">Could not start connection. Please try again.</p>', '');
-    }
-  } catch (e) {
-    if (popup && !popup.closed) popup.close();
-    el.querySelector('.badge').textContent = 'CONNECT';
-    showModal('Error', '<p style="color:#EF4444">Connection service unavailable. Please try again.</p>', '');
-  }
+    });
 }
 
 async function confirmWearableConnect(btn) {
