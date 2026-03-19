@@ -1610,15 +1610,26 @@ async function connectWearable(el) {
   el.querySelector('.badge').style.background = '#E8751A22';
   el.querySelector('.badge').style.color = '#E8751A';
 
+  // Open popup IMMEDIATELY on user click (before async fetch) to avoid popup blocker
+  var w = 500, h = 700;
+  var left = (screen.width - w) / 2;
+  var top = (screen.height - h) / 2;
+  var popup = window.open('about:blank', 'terra-connect', 'width=' + w + ',height=' + h + ',left=' + left + ',top=' + top);
+  if (popup) {
+    popup.document.write('<html><body style="background:#0B0F1A;color:#94A3B8;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh"><div style="text-align:center"><h2 style="color:#E8751A">Loading ' + name + '...</h2><p>Connecting to your device provider.</p></div></body></html>');
+  }
+
   try {
     var res = await fetch('/api/terra/widget-session', { method: 'POST' });
     var data = await res.json();
     if (data.status === 'success' && data.url) {
-      // Open Terra widget in popup — pre-filtered to this provider
-      var w = 500, h = 700;
-      var left = (screen.width - w) / 2;
-      var top = (screen.height - h) / 2;
-      window.open(data.url, 'terra-connect', 'width=' + w + ',height=' + h + ',left=' + left + ',top=' + top);
+      // Redirect the already-open popup to Terra widget
+      if (popup && !popup.closed) {
+        popup.location.href = data.url;
+      } else {
+        // Popup was blocked or closed — open in new tab as fallback
+        window.open(data.url, '_blank');
+      }
 
       // Show status in modal
       showModal(
@@ -1631,10 +1642,12 @@ async function connectWearable(el) {
         '<button class="btn btn-primary" style="width:100%" data-provider="' + provider + '" data-name="' + name + '" onclick="confirmWearableConnect(this)">I Have Connected — Done</button>'
       );
     } else {
+      if (popup && !popup.closed) popup.close();
       el.querySelector('.badge').textContent = 'CONNECT';
       showModal('Error', '<p style="color:#EF4444">Could not start connection. Please try again.</p>', '');
     }
   } catch (e) {
+    if (popup && !popup.closed) popup.close();
     el.querySelector('.badge').textContent = 'CONNECT';
     showModal('Error', '<p style="color:#EF4444">Connection service unavailable. Please try again.</p>', '');
   }
