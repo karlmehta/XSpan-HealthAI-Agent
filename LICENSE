@@ -1,36 +1,52 @@
-GNU AFFERO GENERAL PUBLIC LICENSE
-Version 3, 19 November 2007
+XSpan HealthAI Agent — Proprietary License
 
-Copyright (c) 2025 XSpan.ai
+Copyright (c) 2025-2026 XSpan, Inc. All rights reserved.
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+This software and associated documentation files (the "Software") are the
+proprietary and confidential property of XSpan, Inc.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU Affero General Public License for more details.
+PERMITTED USES:
+- You may download and use the Software for personal, non-commercial health
+  data aggregation and insights on your own devices.
+- You may connect the Software to your own health data sources (EHR, wearables,
+  labs, genomics) for personal use.
+- You may participate in XSpan Contribute to share de-identified health data
+  for medical research and earn contribution rewards.
 
-You should have received a copy of the GNU Affero General Public License
-along with this program. If not, see <https://www.gnu.org/licenses/agpl-3.0.html>.
+RESTRICTIONS:
+- You may NOT copy, modify, merge, publish, distribute, sublicense, or sell
+  copies of the Software or any derivative works.
+- You may NOT use the Software to build a competing product or service.
+- You may NOT reverse engineer, decompile, or disassemble the Software.
+- You may NOT remove or alter any proprietary notices, labels, or marks.
+- You may NOT use the Software for any commercial purpose without a separate
+  commercial license from XSpan, Inc.
 
----
+EXTENSIONS AND PLUGINS:
+- You may build plugins and extensions that interact with the Software through
+  the documented plugin API (src/plugins/) for personal use.
+- Commercial distribution of plugins requires a separate agreement with XSpan, Inc.
 
-ADDITIONAL TERMS (Section 7 of AGPL-3.0):
+DATA OWNERSHIP:
+- You retain full ownership of your personal health data.
+- XSpan does not claim ownership of any health data processed by the Software.
+- De-identified data contributed through XSpan Contribute is governed by the
+  Data Contributor Consent agreement.
 
-1. CONTRIBUTION REQUIREMENT: If you modify this software and make it
-   available to users over a network, you must make the complete source
-   code of your modifications available under this same license.
+DISCLAIMER:
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+XSPAN, INC. BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY ARISING
+FROM THE USE OF THE SOFTWARE.
 
-2. EXTENSIONS: Plugins and extensions that interact with this software
-   solely through the documented plugin API (src/plugins/) may be
-   distributed under different license terms, provided they do not
-   modify the core software.
+TERMINATION:
+This license is effective until terminated. XSpan, Inc. may terminate this
+license at any time if you fail to comply with any term of this agreement.
+Upon termination, you must destroy all copies of the Software.
 
-3. ATTRIBUTION: All copies and derivative works must retain the
-   "Built by XSpan.ai" attribution and link to https://xspan.ai.
+For commercial licensing, contact: licensing@xspan.ai
+For questions: legal@xspan.ai
 
-For the full AGPL-3.0 license text, see:
-https://www.gnu.org/licenses/agpl-3.0.html
+XSpan, Inc.
+https://xspan.ai

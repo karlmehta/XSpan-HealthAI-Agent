@@ -1,36 +1,22 @@
 # XSpan HealthAI Agent
 
-**Own Your Health Data. Get Synthesized Insights. Contribute & Earn.**
+**For Developers — Own Your Health Data. Get Synthesized Insights. Contribute & Earn.**
 
-Your health data is scattered across Oura, WHOOP, Dexcom, Apple Watch, MyChart, Quest Labs, 23andMe, and more. No single app gives you the full picture. XSpan brings it all together — synthesized, encrypted, and running 100% on your machine.
+A desktop health intelligence agent for developers and tech enthusiasts. Aggregates data from EHR, wearables, labs, genomics, and microbiome providers. Synthesizes 100+ biomarkers locally. All data AES-256 encrypted on your device. Zero cloud dependency.
 
 ```
 Install → Connect → Insights → Contribute & Earn
 ```
 
-**Zero cloud dependency. Zero cost. Your data never leaves your device.**
+Developer Portal: [xspan.ai/developer](https://xspan.ai/developer)
 
 ---
 
-## Why XSpan?
+## Why This Exists
 
-Your wearable shows you sleep. Your CGM shows glucose. Your lab portal shows HbA1c. But none of them show you **how they connect**.
+Your health data is scattered across Oura, WHOOP, Dexcom, Apple Watch, MyChart, Quest Labs, 23andMe, and more. No single app gives you the full picture. XSpan brings it all together — synthesized trends that no single app can show you.
 
-XSpan synthesizes data from **all** your health sources into unified trend charts that no single app can provide:
-
-### Synthesized Insights (Free)
-
-| Chart | What You See | Sources Combined |
-|-------|-------------|-----------------|
-| **Cardiovascular Synthesis** | Resting HR + HRV + Blood Pressure on one timeline | Apple Watch + Oura + Omron + EHR Labs |
-| **Sleep & Recovery** | Sleep duration + efficiency + overnight HRV recovery | Oura + WHOOP + Apple Watch |
-| **Metabolic Health** | Fasting glucose + weight + HbA1c trends | Dexcom CGM + Smart Scale + Quest Labs |
-| **Activity & Fitness** | Steps + active minutes + exercise sessions | WHOOP + Garmin + Fitbit + Apple Watch |
-| **Body Composition** | Weight (lbs) + BMI over time | Smart Scale + Apple Health |
-
-**Plus:** 7-day drift detection ("HRV down 14% from your 30-day average"), weekly health summaries, and 100+ biomarker synthesis.
-
-> You can't get these synthesized views from Oura, WHOOP, Apple Health, or MyChart alone. That's why XSpan exists.
+**Built for developers** who want to own their health data, see synthesized insights, and optionally contribute to medical research.
 
 ---
 
@@ -40,140 +26,102 @@ XSpan synthesizes data from **all** your health sources into unified trend chart
 git clone https://github.com/karlmehta/XSpan-HealthAI-Agent.git
 cd XSpan-HealthAI-Agent
 npm install
+cp .env.example .env
 npm run dev
 ```
 
-Open **http://localhost:3000** — click **"Preview with Demo Data"** to see synthesized charts with 30 days of sample data.
-
-No accounts needed. No API keys. No cloud services. Just clone and run.
+Open **http://localhost:3000** — click **"Preview with Demo Data"** to see 30 days of synthesized health insights.
 
 ---
 
-## What You Get (All Free)
+## What You Get (Free)
 
-### 1. Own Your Data
-- All health data AES-256 encrypted in a local SQLite database on your device
-- No data is ever sent to any server — not even XSpan
-- Connect once, own forever — export anytime
+### Synthesized Health Insights
 
-### 2. Synthesized Insights
-- Unified trend charts combining data from multiple devices, labs, and EHR
-- Personal baseline computation with drift detection
-- Weekly health summaries with top positives and concerns
-- 100+ biomarkers synthesized from all connected sources
+| Chart | Sources Combined |
+|-------|-----------------|
+| **Cardiovascular Synthesis** | Apple Watch (HR) + Oura (HRV) + Omron (BP) + EHR Labs |
+| **Sleep & Recovery** | Oura + WHOOP + Apple Watch |
+| **Metabolic Health** | Dexcom CGM + Smart Scale + Quest Labs (HbA1c) |
+| **Activity & Fitness** | WHOOP + Garmin + Fitbit + Apple Watch |
+| **Body Composition** | Smart Scale + Apple Health |
 
-### 3. Contribute & Earn
-- Opt-in to contribute de-identified health data to advance medical research
-- All 18 identifiers removed **on your device** before anything leaves
-- You earn 50% of every research contribution
-- Researchers get consented, de-identified data — patients get rewarded for the first time
+Plus: 7-day drift detection, weekly health summaries, 100+ biomarker synthesis.
 
-### 4. Connect to Premium (via your doctor)
-- Request XSpan Premium access through your physician or health system
-- Premium includes: mobile app, Digital Twin, AI nudges, meal tracking, Health Passport
-- Your doctor gets the request and can issue an invite code
-
----
-
-## Dashboard
-
-The agent runs a localhost dashboard (port 3000) with 4 tabs:
-
-| Tab | What It Does |
-|-----|-------------|
-| **Insights** ^FREE^ | Synthesized trend charts, drift detection, weekly summaries, data completeness |
-| **Connect** | Link EHR (MyChart), wearables, labs, genomics, microbiome — left sidebar navigation |
-| **Contribute & Earn** | Opt-in to research data contribution, see earnings, manage consent |
-| **Premium** | Request access via your doctor — value proposition + email form |
-
----
-
-## Supported Sources
+### Connect Everything
 
 | Category | Providers |
 |----------|----------|
-| **EHR** | Epic MyChart, Cerner, eClinicalWorks (SMART on FHIR R4) |
-| **Apple Health** | Steps, HR, HRV, sleep, SpO2, temperature, blood pressure |
-| **Google Health** | Activity, sleep, heart rate (OAuth2) |
-| **Wearables** | Oura, WHOOP, Dexcom CGM, Garmin, Fitbit |
+| **Health Systems** | Epic MyChart, Cerner (SMART on FHIR R4) |
+| **India (ABDM)** | 600M+ ABHA users via Ayushman Bharat consent framework |
+| **Wearables** | Oura, WHOOP, Dexcom CGM, Garmin, Fitbit (via Terra API, 150+ devices) |
 | **Labs** | Quest Diagnostics, LabCorp, Function Health |
-| **Genomics** | 23andMe, Illumina, Foundation Medicine, Tempus, Guardant Health |
-| **Microbiome** | Gut.id, Viome, Zoe, BIOHM, Tiny Health, Ombre |
+| **Genomics** | 23andMe, Illumina, Foundation Medicine |
+| **Microbiome** | Gut.id, Viome, Zoe, BIOHM |
+
+### Contribute & Earn
+
+Opt-in to contribute de-identified health data to advance medical research:
+- All 18 HIPAA identifiers removed **on your device**
+- You earn 50% of every research contribution
+- On-chain consent proof (Coinbase Base L2)
+- Withdraw to bank via Coinbase Wallet
+
+### Privacy & Security
+
+- **AES-256 encrypted** local SQLite database
+- **Zero cloud dependency** — nothing sent to any server
+- **No AI services** — no ChatGPT, Claude, Gemini access to your data
+- **100% local processing** — all synthesis runs on your machine
+- **You control everything** — delete, export, or revoke anytime
 
 ---
 
-## Platform Support
+## Supported Platforms
 
-| Platform | Health Data | Wearables | EHR / Labs / Genomics |
-|----------|-----------|-----------|----------------------|
-| **macOS** | Apple HealthKit (automatic) | Via Apple Health or direct OAuth | Full support |
-| **Windows** | Direct OAuth per device | Direct OAuth per device | Full support |
-| **Linux** | Direct OAuth per device | Direct OAuth per device | Full support |
+| Platform | Health Data | Wearables | EHR / Labs |
+|----------|-----------|-----------|------------|
+| **macOS** | Apple HealthKit (via companion app) | OAuth or Apple Health | Full support |
+| **Windows** | Direct OAuth per device | Direct OAuth | Full support |
+| **Linux** | Direct OAuth per device | Direct OAuth | Full support |
 
 ---
 
 ## Architecture
 
 ```
-+-----------------------------------------------------+
-|                    Your Desktop                      |
-|                                                      |
-|  +----------+ +----------+ +---------+ +---------+  |
-|  | Apple    | | EHR/FHIR | | Oura/   | | Quest/  |  |
-|  | Health   | | (Epic..) | | WHOOP.. | | LabCorp |  |
-|  +----+-----+ +----+-----+ +----+----+ +----+----+  |
-|       |             |            |           |       |
-|       +-------------+-----+-----+-----------+       |
-|                            |                         |
-|                    +-------v--------+                |
-|                    |  XSpan HealthAI |                |
-|                    |     Agent       |                |
-|                    +-------+--------+                |
-|                            |                         |
-|                  +---------v----------+              |
-|                  |  Local Data Store  |  AES-256     |
-|                  |  (~/.xspan/data)   |  ENCRYPTED   |
-|                  +---------+----------+              |
-|                            |                         |
-|              +-------------+-------------+           |
-|              |             |             |           |
-|     +--------v---+ +------v------+ +----v-------+   |
-|     | Synthesized| | Baseline &  | | Contribute |   |
-|     | Insights   | | Drift Engine| | & Earn     |   |
-|     +------------+ +-------------+ +------------+   |
-+-----------------------------------------------------+
-     100% local · Zero cloud dependency · Your device
+Your Desktop
+├── Health System (FHIR) ──┐
+├── Wearables (Terra) ─────┤→ XSpan Agent → SQLite (AES-256)
+├── Labs (Quest, LabCorp) ──┤                    ↓
+├── Genomics (23andMe) ────┤     Synthesized Insights Dashboard
+├── Microbiome (Gut.id) ───┤                    ↓
+├── India ABDM ────────────┘     Contribute & Earn (optional)
 ```
-
----
-
-## Privacy & Security
-
-- **AES-256 encrypted** local SQLite database
-- **Zero cloud dependency** — nothing is sent to any server
-- **No AI services** — no ChatGPT, Claude, Gemini, or any third-party AI
-- **100% local processing** — all synthesis and insights run on your machine
-- **Contribute is opt-in** — de-identification happens on-device before anything leaves
-- **You control everything** — delete, export, or revoke anytime
 
 ---
 
 ## Extending the Agent
 
-XSpan uses a plugin architecture. Build custom data sources and analyzers:
+Build plugins for custom data sources and health analyzers:
 
 ```typescript
-// Example: Custom analyzer plugin
-const myAnalyzer: Plugin = {
-  name: 'my-sleep-analyzer',
-  version: '1.0.0',
+const myPlugin: Plugin = {
+  name: 'my-analyzer',
   type: 'analyzer',
-  async init() { /* setup */ },
-  async execute(ctx) { /* analyze snapshots, return insights */ },
+  async execute(ctx) {
+    return { score: analyze(ctx.snapshots) };
+  }
 };
 ```
 
 See `src/plugins/examples/` for working examples.
+
+---
+
+## Premium (via your Health System)
+
+XSpan Premium features — Digital Twin, AI Nudges, Meal Tracking, Health Passport, Structured Care Programs — are available through participating health systems and physicians. Ask your doctor for an invite code.
 
 ---
 
@@ -187,22 +135,13 @@ See `src/plugins/examples/` for working examples.
 
 ---
 
-## Contributing
-
-We welcome contributions! This project uses **AGPL-3.0** — all modifications must be shared back.
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
----
-
 ## License
 
-**AGPL-3.0** — see [LICENSE](LICENSE)
+**Proprietary** — see [LICENSE](LICENSE)
 
-- You can use, modify, and distribute this software
-- Modifications must be shared under the same license
-- Extensions/plugins via the documented API can use different licenses
-- Network use (SaaS) triggers the share-alike requirement
+Free to use for personal health data aggregation and insights. Not open source. See LICENSE for full terms.
+
+For commercial licensing: licensing@xspan.ai
 
 ---
 

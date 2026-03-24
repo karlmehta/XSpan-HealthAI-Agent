@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Open-source health intelligence agent for developers. Runs locally on desktop (macOS/Windows/Linux). Aggregates health data from EHR, wearables, labs, genomics, microbiome. Synthesizes 100+ biomarkers. All data AES-256 encrypted locally. Zero cloud dependency.
+Proprietary health intelligence agent for developers (free to use, not open source). Runs locally on desktop (macOS/Windows/Linux). Aggregates health data from EHR, wearables, labs, genomics, microbiome. Synthesizes 100+ biomarkers. All data AES-256 encrypted locally. Zero cloud dependency. Positioned as "for developers" to preserve B2B channel with health systems.
 
 **Active repo:** `/Users/karlmehta/Desktop/XSpan-HealthAI-Agent/`
 **GitHub:** `karlmehta/XSpan-HealthAI-Agent` (public, AGPL-3.0)

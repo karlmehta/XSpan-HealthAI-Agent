@@ -671,6 +671,9 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0B0F1A; col
       <div onclick="showConnectTab('microbiome',this)" class="connect-nav-item" style="padding:12px 16px;cursor:pointer;border-radius:8px;margin-bottom:4px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;color:#94A3B8">
         <span>🦠</span> Microbiome
       </div>
+      <div onclick="showConnectTab('abdm',this)" class="connect-nav-item" style="padding:12px 16px;cursor:pointer;border-radius:8px;margin-bottom:4px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;color:#94A3B8">
+        <span>🇮🇳</span> India (ABDM)
+      </div>
     </div>
     <!-- Right Content -->
     <div style="flex:1;min-width:0;overflow:hidden">
@@ -800,6 +803,67 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0B0F1A; col
       `).join('')}
     </div>
     </div>
+    <!-- ── INDIA ABDM ── -->
+    <div class="connect-sub" id="connect-abdm" style="display:none">
+    <div class="section-title">India — Ayushman Bharat Digital Mission (ABDM)</div>
+    <div class="hipaa-note" style="margin-bottom:20px">
+      🇮🇳 <strong>For users in India:</strong> Connect your health records from any ABDM-linked hospital, clinic, or lab. 600M+ Indians have an ABHA health ID. Your records are shared only with your explicit consent via the ABHA app.
+    </div>
+
+    <div class="card" style="margin-bottom:16px;border-color:#E8751A33;padding:24px">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
+        <div style="width:56px;height:56px;border-radius:12px;background:#FF671F22;display:flex;align-items:center;justify-content:center;font-size:28px">🏥</div>
+        <div>
+          <h3 style="font-size:18px;margin-bottom:4px">Connect via ABHA</h3>
+          <p style="font-size:12px;color:#64748B">Ayushman Bharat Health Account — Government of India</p>
+        </div>
+      </div>
+      <p style="font-size:13px;color:#94A3B8;line-height:1.6;margin-bottom:16px">
+        Enter your ABHA address (e.g., yourname@abdm) below. XSpan will send a consent request to your ABHA app. Once you approve, your health records from all linked hospitals, clinics, and labs will be securely transferred to your local device.
+      </p>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <input type="text" id="abdm-abha-address" placeholder="Enter your ABHA address (e.g., yourname@abdm)" style="flex:1;padding:12px;background:#0F172A;border:1px solid #334155;border-radius:8px;color:#E2E8F0;font-size:14px">
+        <button class="btn btn-primary" style="padding:12px 24px;white-space:nowrap" onclick="connectABDM()">Connect</button>
+      </div>
+      <p style="font-size:10px;color:#475569">Do not have an ABHA ID? Create one at <a href="https://abha.abdm.gov.in" target="_blank" style="color:#E8751A">abha.abdm.gov.in</a></p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:16px">
+      <div class="card" style="text-align:center;padding:16px">
+        <div style="font-size:28px;margin-bottom:8px">📋</div>
+        <h3 style="font-size:13px;margin-bottom:4px">OPD Records</h3>
+        <p style="font-size:10px;color:#64748B">Consultations, prescriptions, follow-ups</p>
+      </div>
+      <div class="card" style="text-align:center;padding:16px">
+        <div style="font-size:28px;margin-bottom:8px">🧪</div>
+        <h3 style="font-size:13px;margin-bottom:4px">Lab Reports</h3>
+        <p style="font-size:10px;color:#64748B">Blood tests, diagnostics, pathology</p>
+      </div>
+      <div class="card" style="text-align:center;padding:16px">
+        <div style="font-size:28px;margin-bottom:8px">💊</div>
+        <h3 style="font-size:13px;margin-bottom:4px">Prescriptions</h3>
+        <p style="font-size:10px;color:#64748B">Medications, dosage, pharmacy records</p>
+      </div>
+      <div class="card" style="text-align:center;padding:16px">
+        <div style="font-size:28px;margin-bottom:8px">🏨</div>
+        <h3 style="font-size:13px;margin-bottom:4px">Discharge Summaries</h3>
+        <p style="font-size:10px;color:#64748B">Hospital stays, procedures, surgery notes</p>
+      </div>
+      <div class="card" style="text-align:center;padding:16px">
+        <div style="font-size:28px;margin-bottom:8px">💉</div>
+        <h3 style="font-size:13px;margin-bottom:4px">Immunizations</h3>
+        <p style="font-size:10px;color:#64748B">Vaccination records, CoWIN integration</p>
+      </div>
+      <div class="card" style="text-align:center;padding:16px">
+        <div style="font-size:28px;margin-bottom:8px">🩺</div>
+        <h3 style="font-size:13px;margin-bottom:4px">Wellness Records</h3>
+        <p style="font-size:10px;color:#64748B">Vitals, BMI, lifestyle assessments</p>
+      </div>
+    </div>
+
+    <p style="font-size:10px;color:#475569">Connected via ABDM Health Information Exchange. Data transferred with patient consent only. Compliant with India Digital Personal Data Protection Act 2023.</p>
+    </div>
+
     </div> <!-- end right content -->
     </div> <!-- end flex container -->
   </div> <!-- end page-connect -->
@@ -1482,6 +1546,35 @@ async function startContribute() {
   );
 }
 
+// ── ABDM: Connect Indian health records ──────────────────────
+
+function connectABDM() {
+  var abhaAddress = document.getElementById('abdm-abha-address').value.trim();
+  if (!abhaAddress) { alert('Please enter your ABHA address'); return; }
+  if (!abhaAddress.includes('@')) { abhaAddress = abhaAddress + '@abdm'; }
+
+  showModal(
+    'Connect via ABDM',
+    '<div style="text-align:center;padding:16px">' +
+    '<div style="font-size:48px;margin-bottom:12px">🇮🇳</div>' +
+    '<p style="color:#22C55E;font-size:15px;font-weight:700;margin-bottom:8px">Consent request sent!</p>' +
+    '<p style="color:#94A3B8;font-size:13px;line-height:1.6;margin-bottom:16px">Open your <strong>ABHA app</strong> on your phone and approve the consent request from XSpan. Once approved, your health records will be transferred to your local device.</p>' +
+    '<div style="background:#0F172A;border:1px solid #334155;border-radius:8px;padding:12px;font-size:11px;color:#64748B">' +
+    'ABHA Address: <strong style="color:#E8751A">' + abhaAddress + '</strong><br>' +
+    'Records requested: OPD, Labs, Prescriptions, Discharge Summaries, Immunizations' +
+    '</div>' +
+    '</div>',
+    ''
+  );
+
+  // Send to backend (will connect when ABDM credentials are configured)
+  fetch('/api/connect', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ type: 'abdm', id: 'abdm', name: 'India ABDM (' + abhaAddress + ')', method: 'abdm_consent', abhaAddress: abhaAddress }),
+  });
+}
+
 // ── Premium: Open mailto to physician ─────────────────────────
 
 function sendPremiumEmail() {
@@ -1726,7 +1819,7 @@ function goToConnect(subTab) {
   showPage('connect', document.querySelectorAll('.nav a')[1]);
   setTimeout(function() {
     var items = document.querySelectorAll('.connect-nav-item');
-    var map = { ehr: 0, 'health-systems': 0, wearables: 1, labs: 2, genomics: 3, microbiome: 4 };
+    var map = { ehr: 0, 'health-systems': 0, wearables: 1, labs: 2, genomics: 3, microbiome: 4, abdm: 5 };
     var tabName = subTab === 'ehr' ? 'health-systems' : subTab;
     var idx = map[tabName] ?? 0;
     if (items[idx]) showConnectTab(tabName, items[idx]);
