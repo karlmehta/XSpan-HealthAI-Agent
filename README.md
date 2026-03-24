@@ -1,8 +1,8 @@
-# XSpan HealthAI Agent
+# MyHealthSpan Agent
 
 **For Developers — Own Your Health Data. Get Synthesized Insights. Contribute & Earn.**
 
-A desktop health intelligence agent for developers and tech enthusiasts. Aggregates data from EHR, wearables, labs, genomics, and microbiome providers. Synthesizes 100+ biomarkers locally. All data AES-256 encrypted on your device. Zero cloud dependency.
+A desktop health intelligence agent for developers and tech enthusiasts. Aggregates data from EHR, wearables, labs, genomics, and microbiome providers across the US, India, and South Korea. Synthesizes 100+ biomarkers locally. All data AES-256 encrypted on your device. Zero cloud dependency.
 
 ```
 Install → Connect → Insights → Contribute & Earn

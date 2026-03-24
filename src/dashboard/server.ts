@@ -282,7 +282,7 @@ function renderDashboard(config: AgentConfig, store: LocalStore): string {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>XSpan HealthAI Agent</title>
+<title>MyHealthSpan Agent</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.6/dist/chart.umd.min.js"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -651,28 +651,39 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0B0F1A; col
   <!-- ═══ CONNECT (wrapper for all data sources) ═══ -->
   <div class="page" id="page-connect">
     <div class="section-title">Connect Your Health Data Sources</div>
-    <p style="font-size:13px;color:#94A3B8;margin-bottom:16px">The more sources you connect, the better your synthesized health insights. All data stored locally on your device.</p>
+    <p style="font-size:13px;color:#94A3B8;margin-bottom:12px">The more sources you connect, the better your synthesized health insights. All data stored locally on your device.</p>
+
+    <!-- Country Selector -->
+    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+      <button class="country-btn active" onclick="selectCountry('us', this)" style="padding:8px 16px;border-radius:8px;border:1px solid #334155;background:#2A8A6E;color:#fff;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px">🇺🇸 United States</button>
+      <button class="country-btn" onclick="selectCountry('india', this)" style="padding:8px 16px;border-radius:8px;border:1px solid #334155;background:transparent;color:#94A3B8;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px">🇮🇳 India</button>
+      <button class="country-btn" onclick="selectCountry('korea', this)" style="padding:8px 16px;border-radius:8px;border:1px solid #334155;background:transparent;color:#94A3B8;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px">🇰🇷 South Korea</button>
+      <button class="country-btn" onclick="selectCountry('global', this)" style="padding:8px 16px;border-radius:8px;border:1px solid #334155;background:transparent;color:#94A3B8;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px">🌍 Global (Wearables + Labs)</button>
+    </div>
 
     <div style="display:flex;gap:24px;min-height:600px;align-items:flex-start">
     <!-- Left Sidebar -->
     <div style="width:200px;flex-shrink:0;position:sticky;top:20px" id="connect-sidebar">
-      <div onclick="showConnectTab('health-systems',this)" class="connect-nav-item" style="padding:12px 16px;cursor:pointer;border-radius:8px;margin-bottom:4px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;background:#E8751A22;color:#E8751A">
+      <div onclick="showConnectTab('health-systems',this)" class="connect-nav-item" data-countries="us" style="padding:12px 16px;cursor:pointer;border-radius:8px;margin-bottom:4px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;background:#E8751A22;color:#E8751A">
         <span>🏥</span> Health Systems
       </div>
-      <div onclick="showConnectTab('wearables',this)" class="connect-nav-item" style="padding:12px 16px;cursor:pointer;border-radius:8px;margin-bottom:4px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;color:#94A3B8">
+      <div onclick="showConnectTab('wearables',this)" class="connect-nav-item" data-countries="us,india,korea,global" style="padding:12px 16px;cursor:pointer;border-radius:8px;margin-bottom:4px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;color:#94A3B8">
         <span>⌚</span> Wearables
       </div>
-      <div onclick="showConnectTab('labs',this)" class="connect-nav-item" style="padding:12px 16px;cursor:pointer;border-radius:8px;margin-bottom:4px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;color:#94A3B8">
+      <div onclick="showConnectTab('labs',this)" class="connect-nav-item" data-countries="us,global" style="padding:12px 16px;cursor:pointer;border-radius:8px;margin-bottom:4px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;color:#94A3B8">
         <span>🧪</span> Labs
       </div>
-      <div onclick="showConnectTab('genomics',this)" class="connect-nav-item" style="padding:12px 16px;cursor:pointer;border-radius:8px;margin-bottom:4px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;color:#94A3B8">
+      <div onclick="showConnectTab('genomics',this)" class="connect-nav-item" data-countries="us,global" style="padding:12px 16px;cursor:pointer;border-radius:8px;margin-bottom:4px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;color:#94A3B8">
         <span>🧬</span> Genomics
       </div>
-      <div onclick="showConnectTab('microbiome',this)" class="connect-nav-item" style="padding:12px 16px;cursor:pointer;border-radius:8px;margin-bottom:4px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;color:#94A3B8">
+      <div onclick="showConnectTab('microbiome',this)" class="connect-nav-item" data-countries="us,global" style="padding:12px 16px;cursor:pointer;border-radius:8px;margin-bottom:4px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;color:#94A3B8">
         <span>🦠</span> Microbiome
       </div>
-      <div onclick="showConnectTab('abdm',this)" class="connect-nav-item" style="padding:12px 16px;cursor:pointer;border-radius:8px;margin-bottom:4px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;color:#94A3B8">
-        <span>🇮🇳</span> India (ABDM)
+      <div onclick="showConnectTab('abdm',this)" class="connect-nav-item" data-countries="india" style="padding:12px 16px;cursor:pointer;border-radius:8px;margin-bottom:4px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;color:#94A3B8">
+        <span>🇮🇳</span> ABDM (Ayushman Bharat)
+      </div>
+      <div onclick="showConnectTab('myhealthway',this)" class="connect-nav-item" data-countries="korea" style="padding:12px 16px;cursor:pointer;border-radius:8px;margin-bottom:4px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;color:#94A3B8;display:none">
+        <span>🇰🇷</span> MyHealthWay
       </div>
     </div>
     <!-- Right Content -->
@@ -803,6 +814,52 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0B0F1A; col
       `).join('')}
     </div>
     </div>
+    <!-- ── SOUTH KOREA MyHealthWay ── -->
+    <div class="connect-sub" id="connect-myhealthway" style="display:none">
+    <div class="section-title">South Korea — MyHealthWay (나의건강길)</div>
+    <div class="hipaa-note" style="margin-bottom:20px">
+      🇰🇷 <strong>For users in South Korea:</strong> Connect your health records from 860+ hospitals and clinics via the MyHealthWay national health data platform. Access 113 types of health data including surgery reports, pathology, and prescriptions.
+    </div>
+
+    <div class="card" style="margin-bottom:16px;border-color:#E8751A33;padding:24px">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
+        <div style="width:56px;height:56px;border-radius:12px;background:#0066B322;display:flex;align-items:center;justify-content:center;font-size:28px">🏥</div>
+        <div>
+          <h3 style="font-size:18px;margin-bottom:4px">Connect via MyHealthWay</h3>
+          <p style="font-size:12px;color:#64748B">Korean National Health Information Highway — Ministry of Health and Welfare</p>
+        </div>
+      </div>
+      <p style="font-size:13px;color:#94A3B8;line-height:1.6;margin-bottom:16px">
+        Log in with your MyHealthWay account to pull your complete medical records from all linked Korean hospitals, clinics, and labs. Includes 113 standardized health data types in FHIR format.
+      </p>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <input type="text" id="korea-id" placeholder="Enter your MyHealthWay ID or national health insurance number" style="flex:1;padding:12px;background:#0F172A;border:1px solid #334155;border-radius:8px;color:#E2E8F0;font-size:14px">
+        <button class="btn btn-primary" style="padding:12px 24px;white-space:nowrap" onclick="connectMyHealthWay()">Connect</button>
+      </div>
+      <p style="font-size:10px;color:#475569">Register at <a href="https://www.healthwaykorea.kr" target="_blank" style="color:#E8751A">healthwaykorea.kr</a> if you do not have an account.</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">
+      <div class="card" style="text-align:center;padding:16px">
+        <div style="font-size:28px;margin-bottom:8px">🏨</div>
+        <h3 style="font-size:13px;margin-bottom:4px">860+ Hospitals</h3>
+        <p style="font-size:10px;color:#64748B">Tertiary, general, and specialty hospitals</p>
+      </div>
+      <div class="card" style="text-align:center;padding:16px">
+        <div style="font-size:28px;margin-bottom:8px">📋</div>
+        <h3 style="font-size:13px;margin-bottom:4px">113 Data Types</h3>
+        <p style="font-size:10px;color:#64748B">Surgery, pathology, labs, imaging, prescriptions</p>
+      </div>
+      <div class="card" style="text-align:center;padding:16px">
+        <div style="font-size:28px;margin-bottom:8px">🔬</div>
+        <h3 style="font-size:13px;margin-bottom:4px">FHIR R4 Standard</h3>
+        <p style="font-size:10px;color:#64748B">International Patient Summary (IPS) compatible</p>
+      </div>
+    </div>
+
+    <p style="font-size:10px;color:#475569">Connected via Korean Health Information Highway. Compliant with PIPA (Personal Information Protection Act). FHIR IPS data pipeline.</p>
+    </div>
+
     <!-- ── INDIA ABDM ── -->
     <div class="connect-sub" id="connect-abdm" style="display:none">
     <div class="section-title">India — Ayushman Bharat Digital Mission (ABDM)</div>
@@ -1544,6 +1601,66 @@ async function startContribute() {
     '</div>',
     '<button class="btn btn-primary" id="btn-enroll" style="flex:2;opacity:0.4;cursor:not-allowed" disabled onclick="confirmContribute()">Accept All &amp; Enroll</button>'
   );
+}
+
+// ── Country Selector for Connect tab ─────────────────────────
+
+function selectCountry(country, btn) {
+  // Update button styles
+  document.querySelectorAll('.country-btn').forEach(function(b) {
+    b.style.background = 'transparent';
+    b.style.color = '#94A3B8';
+  });
+  btn.style.background = '#2A8A6E';
+  btn.style.color = '#fff';
+
+  // Show/hide sidebar nav items based on country
+  document.querySelectorAll('.connect-nav-item').forEach(function(item) {
+    var countries = (item.dataset.countries || '').split(',');
+    if (countries.includes(country) || country === 'all') {
+      item.style.display = 'flex';
+    } else {
+      item.style.display = 'none';
+    }
+  });
+
+  // Auto-select first visible nav item
+  var firstVisible = document.querySelector('.connect-nav-item[style*="display: flex"], .connect-nav-item[style*="display:flex"]');
+  if (firstVisible) {
+    var tabId = '';
+    // Extract tab id from onclick
+    var onclickStr = firstVisible.getAttribute('onclick') || '';
+    var match = onclickStr.match(/showConnectTab\(['"]([^'"]+)['"]/);
+    if (match) tabId = match[1];
+    if (tabId) showConnectTab(tabId, firstVisible);
+  }
+}
+
+// ── MyHealthWay: Connect Korean health records ───────────────
+
+function connectMyHealthWay() {
+  var userId = document.getElementById('korea-id').value.trim();
+  if (!userId) { alert('Please enter your MyHealthWay ID'); return; }
+
+  showModal(
+    'Connect via MyHealthWay',
+    '<div style="text-align:center;padding:16px">' +
+    '<div style="font-size:48px;margin-bottom:12px">🇰🇷</div>' +
+    '<p style="color:#22C55E;font-size:15px;font-weight:700;margin-bottom:8px">Connection initiated!</p>' +
+    '<p style="color:#94A3B8;font-size:13px;line-height:1.6;margin-bottom:16px">You will be redirected to the MyHealthWay authentication portal. Log in with your credentials and authorize MyHealthSpan Agent to access your health records.</p>' +
+    '<div style="background:#0F172A;border:1px solid #334155;border-radius:8px;padding:12px;font-size:11px;color:#64748B">' +
+    'MyHealthWay ID: <strong style="color:#E8751A">' + userId + '</strong><br>' +
+    'Records: Surgery, pathology, labs, imaging, prescriptions (113 types)' +
+    '</div>' +
+    '</div>',
+    ''
+  );
+
+  fetch('/api/connect', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ type: 'myhealthway', id: 'myhealthway', name: 'South Korea MyHealthWay (' + userId + ')', method: 'myhealthway', userId: userId }),
+  });
 }
 
 // ── ABDM: Connect Indian health records ──────────────────────

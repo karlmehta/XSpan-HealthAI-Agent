@@ -1,7 +1,7 @@
 {
-  "name": "@xspan/agent",
+  "name": "@myhealthspan/agent",
   "version": "1.0.0",
-  "description": "XSpan AI Health Agent — Open Source autonomous health intelligence running on your laptop",
+  "description": "MyHealthSpan Agent — Open Source autonomous health intelligence running on your laptop",
   "main": "dist/agent/index.js",
   "bin": {
     "xspan-agent": "dist/cli.js"

@@ -1,4 +1,4 @@
-# CLAUDE.md — XSpan HealthAI Agent
+# CLAUDE.md — MyHealthSpan Agent (formerly XSpan HealthAI Agent)
 
 ## Project Overview
 

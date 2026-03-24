@@ -16,8 +16,8 @@ import { startDashboard } from '../dashboard/server.js';
 
 async function main() {
   console.log('╔═══════════════════════════════════════════╗');
-  console.log('║  XSpan HealthAI Agent v1.0.0              ║');
-  console.log('║  Local-only health intelligence           ║');
+  console.log('║  MyHealthSpan Agent v1.0.0                ║');
+  console.log('║  Own your health data. Get insights.      ║');
   console.log('╚═══════════════════════════════════════════╝');
 
   // Load configuration
