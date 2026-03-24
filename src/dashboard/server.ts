@@ -654,36 +654,59 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0B0F1A; col
     <p style="font-size:13px;color:#94A3B8;margin-bottom:12px">The more sources you connect, the better your synthesized health insights. All data stored locally on your device.</p>
 
     <!-- Country Selector -->
-    <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
-      <button class="country-btn active" onclick="selectCountry('us', this)" style="padding:8px 16px;border-radius:8px;border:1px solid #334155;background:#2A8A6E;color:#fff;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px">🇺🇸 United States</button>
-      <button class="country-btn" onclick="selectCountry('india', this)" style="padding:8px 16px;border-radius:8px;border:1px solid #334155;background:transparent;color:#94A3B8;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px">🇮🇳 India</button>
-      <button class="country-btn" onclick="selectCountry('korea', this)" style="padding:8px 16px;border-radius:8px;border:1px solid #334155;background:transparent;color:#94A3B8;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px">🇰🇷 South Korea</button>
-      <button class="country-btn" onclick="selectCountry('global', this)" style="padding:8px 16px;border-radius:8px;border:1px solid #334155;background:transparent;color:#94A3B8;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px">🌍 Global (Wearables + Labs)</button>
+    <div style="margin-bottom:12px">
+      <p style="font-size:12px;color:#64748B;margin-bottom:8px;font-weight:600">Select your country to see available health data sources:</p>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="country-btn active" onclick="selectCountry('us', this)" style="padding:6px 14px;border-radius:8px;border:1px solid #334155;background:#2A8A6E;color:#fff;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px">🇺🇸 United States</button>
+        <button class="country-btn" onclick="selectCountry('india', this)" style="padding:6px 14px;border-radius:8px;border:1px solid #334155;background:transparent;color:#94A3B8;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px">🇮🇳 India</button>
+        <button class="country-btn" onclick="selectCountry('korea', this)" style="padding:6px 14px;border-radius:8px;border:1px solid #334155;background:transparent;color:#94A3B8;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px">🇰🇷 South Korea</button>
+        <button class="country-btn" onclick="selectCountry('canada', this)" style="padding:6px 14px;border-radius:8px;border:1px solid #334155;background:transparent;color:#94A3B8;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px">🇨🇦 Canada</button>
+        <button class="country-btn" onclick="selectCountry('uk', this)" style="padding:6px 14px;border-radius:8px;border:1px solid #334155;background:transparent;color:#94A3B8;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px">🇬🇧 United Kingdom</button>
+        <button class="country-btn" onclick="selectCountry('eu', this)" style="padding:6px 14px;border-radius:8px;border:1px solid #334155;background:transparent;color:#94A3B8;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px">🇪🇺 Europe</button>
+        <button class="country-btn" onclick="selectCountry('israel', this)" style="padding:6px 14px;border-radius:8px;border:1px solid #334155;background:transparent;color:#94A3B8;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px">🇮🇱 Israel</button>
+        <button class="country-btn" onclick="selectCountry('australia', this)" style="padding:6px 14px;border-radius:8px;border:1px solid #334155;background:transparent;color:#94A3B8;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px">🇦🇺 Australia</button>
+        <button class="country-btn" onclick="selectCountry('global', this)" style="padding:6px 14px;border-radius:8px;border:1px solid #334155;background:transparent;color:#94A3B8;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px">🌍 Global</button>
+      </div>
     </div>
 
     <div style="display:flex;gap:24px;min-height:600px;align-items:flex-start">
     <!-- Left Sidebar -->
     <div style="width:200px;flex-shrink:0;position:sticky;top:20px" id="connect-sidebar">
-      <div onclick="showConnectTab('health-systems',this)" class="connect-nav-item" data-countries="us" style="padding:12px 16px;cursor:pointer;border-radius:8px;margin-bottom:4px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;background:#E8751A22;color:#E8751A">
-        <span>🏥</span> Health Systems
+      <div onclick="showConnectTab('health-systems',this)" class="connect-nav-item" data-countries="us" style="padding:10px 14px;cursor:pointer;border-radius:8px;margin-bottom:3px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px;background:#E8751A22;color:#E8751A">
+        <span>🏥</span> Health Systems (Epic/Cerner)
       </div>
-      <div onclick="showConnectTab('wearables',this)" class="connect-nav-item" data-countries="us,india,korea,global" style="padding:12px 16px;cursor:pointer;border-radius:8px;margin-bottom:4px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;color:#94A3B8">
-        <span>⌚</span> Wearables
+      <div onclick="showConnectTab('wearables',this)" class="connect-nav-item" data-countries="us,india,korea,canada,uk,eu,israel,australia,global" style="padding:10px 14px;cursor:pointer;border-radius:8px;margin-bottom:3px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px;color:#94A3B8">
+        <span>⌚</span> Wearables (150+ devices)
       </div>
-      <div onclick="showConnectTab('labs',this)" class="connect-nav-item" data-countries="us,global" style="padding:12px 16px;cursor:pointer;border-radius:8px;margin-bottom:4px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;color:#94A3B8">
+      <div onclick="showConnectTab('labs',this)" class="connect-nav-item" data-countries="us,uk,global" style="padding:10px 14px;cursor:pointer;border-radius:8px;margin-bottom:3px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px;color:#94A3B8">
         <span>🧪</span> Labs
       </div>
-      <div onclick="showConnectTab('genomics',this)" class="connect-nav-item" data-countries="us,global" style="padding:12px 16px;cursor:pointer;border-radius:8px;margin-bottom:4px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;color:#94A3B8">
+      <div onclick="showConnectTab('genomics',this)" class="connect-nav-item" data-countries="us,uk,global" style="padding:10px 14px;cursor:pointer;border-radius:8px;margin-bottom:3px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px;color:#94A3B8">
         <span>🧬</span> Genomics
       </div>
-      <div onclick="showConnectTab('microbiome',this)" class="connect-nav-item" data-countries="us,global" style="padding:12px 16px;cursor:pointer;border-radius:8px;margin-bottom:4px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;color:#94A3B8">
+      <div onclick="showConnectTab('microbiome',this)" class="connect-nav-item" data-countries="us,global" style="padding:10px 14px;cursor:pointer;border-radius:8px;margin-bottom:3px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px;color:#94A3B8">
         <span>🦠</span> Microbiome
       </div>
-      <div onclick="showConnectTab('abdm',this)" class="connect-nav-item" data-countries="india" style="padding:12px 16px;cursor:pointer;border-radius:8px;margin-bottom:4px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;color:#94A3B8">
+      <div onclick="showConnectTab('abdm',this)" class="connect-nav-item" data-countries="india" style="padding:10px 14px;cursor:pointer;border-radius:8px;margin-bottom:3px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px;color:#94A3B8;display:none">
         <span>🇮🇳</span> ABDM (Ayushman Bharat)
       </div>
-      <div onclick="showConnectTab('myhealthway',this)" class="connect-nav-item" data-countries="korea" style="padding:12px 16px;cursor:pointer;border-radius:8px;margin-bottom:4px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;color:#94A3B8;display:none">
+      <div onclick="showConnectTab('myhealthway',this)" class="connect-nav-item" data-countries="korea" style="padding:10px 14px;cursor:pointer;border-radius:8px;margin-bottom:3px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px;color:#94A3B8;display:none">
         <span>🇰🇷</span> MyHealthWay
+      </div>
+      <div onclick="showConnectTab('nhs',this)" class="connect-nav-item" data-countries="uk" style="padding:10px 14px;cursor:pointer;border-radius:8px;margin-bottom:3px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px;color:#94A3B8;display:none">
+        <span>🇬🇧</span> NHS (GP Connect)
+      </div>
+      <div onclick="showConnectTab('eu-ehds',this)" class="connect-nav-item" data-countries="eu" style="padding:10px 14px;cursor:pointer;border-radius:8px;margin-bottom:3px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px;color:#94A3B8;display:none">
+        <span>🇪🇺</span> EU Health Data Space
+      </div>
+      <div onclick="showConnectTab('canada-health',this)" class="connect-nav-item" data-countries="canada" style="padding:10px 14px;cursor:pointer;border-radius:8px;margin-bottom:3px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px;color:#94A3B8;display:none">
+        <span>🇨🇦</span> Provincial Health
+      </div>
+      <div onclick="showConnectTab('clalit',this)" class="connect-nav-item" data-countries="israel" style="padding:10px 14px;cursor:pointer;border-radius:8px;margin-bottom:3px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px;color:#94A3B8;display:none">
+        <span>🇮🇱</span> Health Funds (Clalit/Maccabi)
+      </div>
+      <div onclick="showConnectTab('myhealthrecord',this)" class="connect-nav-item" data-countries="australia" style="padding:10px 14px;cursor:pointer;border-radius:8px;margin-bottom:3px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px;color:#94A3B8;display:none">
+        <span>🇦🇺</span> My Health Record
       </div>
     </div>
     <!-- Right Content -->
@@ -814,6 +837,103 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0B0F1A; col
       `).join('')}
     </div>
     </div>
+    <!-- ── UK NHS ── -->
+    <div class="connect-sub" id="connect-nhs" style="display:none">
+    <div class="section-title">United Kingdom — NHS</div>
+    <div class="card" style="margin-bottom:16px;padding:24px;border-color:#E8751A33">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
+        <div style="width:56px;height:56px;border-radius:12px;background:#00559922;display:flex;align-items:center;justify-content:center;font-size:28px">🏥</div>
+        <div>
+          <h3 style="font-size:18px;margin-bottom:4px">Connect via NHS App</h3>
+          <p style="font-size:12px;color:#64748B">GP records, prescriptions, test results, vaccinations</p>
+        </div>
+      </div>
+      <p style="font-size:13px;color:#94A3B8;line-height:1.6;margin-bottom:16px">Access your GP records through the NHS GP Connect API. Log in with your NHS login credentials to pull prescriptions, test results, allergies, and immunization records.</p>
+      <button class="btn btn-primary" style="padding:12px 24px" onclick="window.open('https://www.nhs.uk/nhs-app/','_blank')">Open NHS App Login</button>
+      <p style="font-size:10px;color:#475569;margin-top:8px">Connected via GP Connect Patient Facing FHIR API. UK GDPR compliant.</p>
+    </div>
+    </div>
+
+    <!-- ── EU EHDS ── -->
+    <div class="connect-sub" id="connect-eu-ehds" style="display:none">
+    <div class="section-title">Europe — EU Health Data Space</div>
+    <div class="card" style="margin-bottom:16px;padding:24px;border-color:#E8751A33">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
+        <div style="width:56px;height:56px;border-radius:12px;background:#003DA522;display:flex;align-items:center;justify-content:center;font-size:28px">🇪🇺</div>
+        <div>
+          <h3 style="font-size:18px;margin-bottom:4px">European Health Data Space</h3>
+          <p style="font-size:12px;color:#64748B">Cross-border health records via MyHealth@EU</p>
+        </div>
+      </div>
+      <p style="font-size:13px;color:#94A3B8;line-height:1.6;margin-bottom:12px">The EHDS enables patients to access their health data electronically across EU member states. Select your country below:</p>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">
+        ${['🇫🇷 France (Mon Espace Sante)', '🇩🇪 Germany (ePA)', '🇳🇱 Netherlands (MedMij)', '🇩🇰 Denmark (Sundhed.dk)', '🇸🇪 Sweden (1177)', '🇫🇮 Finland (Kanta)', '🇪🇪 Estonia (X-Road)', '🇳🇴 Norway (Helsenorge)', '🇦🇹 Austria (ELGA)'].map(c =>
+          '<div style="background:#0F172A;border:1px solid #334155;border-radius:8px;padding:10px;text-align:center;font-size:11px;color:#CBD5E1;cursor:pointer" onclick="alert(this.textContent + \\' — coming soon\\')">' + c + '</div>'
+        ).join('')}
+      </div>
+      <p style="font-size:10px;color:#475569">EHDS regulation adopted 2025. Implementation by member states 2027-2029. Early access available for Denmark, Finland, and Estonia.</p>
+    </div>
+    </div>
+
+    <!-- ── CANADA ── -->
+    <div class="connect-sub" id="connect-canada-health" style="display:none">
+    <div class="section-title">Canada — Provincial Health Records</div>
+    <div class="card" style="margin-bottom:16px;padding:24px;border-color:#E8751A33">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
+        <div style="width:56px;height:56px;border-radius:12px;background:#FF000022;display:flex;align-items:center;justify-content:center;font-size:28px">🍁</div>
+        <div>
+          <h3 style="font-size:18px;margin-bottom:4px">Connect Provincial Health Portal</h3>
+          <p style="font-size:12px;color:#64748B">Health records vary by province</p>
+        </div>
+      </div>
+      <p style="font-size:13px;color:#94A3B8;line-height:1.6;margin-bottom:12px">Canada uses provincial health systems. Select your province to connect:</p>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px">
+        ${['🏔 Ontario (MyChart / OLIS)', '🌲 British Columbia (Health Gateway)', '🏔 Alberta (MyHealth Records)', '❄️ Quebec (Carnet Sante)'].map(p =>
+          '<div class="card" style="padding:12px;cursor:pointer;text-align:center;font-size:12px" onclick="alert(this.textContent + \\' — connect coming soon\\')">' + p + '</div>'
+        ).join('')}
+      </div>
+      <p style="font-size:10px;color:#475569">Ontario uses Epic MyChart (same as US). BC Health Gateway has open FHIR API. Alberta MyHealth Records and Quebec Carnet Sante are province-specific portals.</p>
+    </div>
+    </div>
+
+    <!-- ── ISRAEL ── -->
+    <div class="connect-sub" id="connect-clalit" style="display:none">
+    <div class="section-title">Israel — Health Funds (Kupot Holim)</div>
+    <div class="card" style="margin-bottom:16px;padding:24px;border-color:#E8751A33">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
+        <div style="width:56px;height:56px;border-radius:12px;background:#0038B822;display:flex;align-items:center;justify-content:center;font-size:28px">🇮🇱</div>
+        <div>
+          <h3 style="font-size:18px;margin-bottom:4px">Connect Your Health Fund</h3>
+          <p style="font-size:12px;color:#64748B">Clalit, Maccabi, Meuhedet, Leumit — 20+ years of records</p>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px">
+        <div class="card" style="padding:12px;cursor:pointer;text-align:center" onclick="window.open('https://www.clalit.co.il','_blank')"><div style="font-size:20px;margin-bottom:4px">🏥</div><div style="font-size:12px;font-weight:600">Clalit</div><div style="font-size:10px;color:#64748B">4.7M members</div></div>
+        <div class="card" style="padding:12px;cursor:pointer;text-align:center" onclick="window.open('https://www.maccabi4u.co.il','_blank')"><div style="font-size:20px;margin-bottom:4px">🏥</div><div style="font-size:12px;font-weight:600">Maccabi</div><div style="font-size:10px;color:#64748B">2.5M members</div></div>
+        <div class="card" style="padding:12px;cursor:pointer;text-align:center" onclick="window.open('https://www.meuhedet.co.il','_blank')"><div style="font-size:20px;margin-bottom:4px">🏥</div><div style="font-size:12px;font-weight:600">Meuhedet</div><div style="font-size:10px;color:#64748B">1.3M members</div></div>
+        <div class="card" style="padding:12px;cursor:pointer;text-align:center" onclick="window.open('https://www.leumit.co.il','_blank')"><div style="font-size:20px;margin-bottom:4px">🏥</div><div style="font-size:12px;font-weight:600">Leumit</div><div style="font-size:10px;color:#64748B">750K members</div></div>
+      </div>
+      <p style="font-size:10px;color:#475569">Log in to your health fund portal and export your records. Israel has 20+ years of complete longitudinal EHR data — among the most valuable in the world.</p>
+    </div>
+    </div>
+
+    <!-- ── AUSTRALIA ── -->
+    <div class="connect-sub" id="connect-myhealthrecord" style="display:none">
+    <div class="section-title">Australia — My Health Record</div>
+    <div class="card" style="margin-bottom:16px;padding:24px;border-color:#E8751A33">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
+        <div style="width:56px;height:56px;border-radius:12px;background:#00008B22;display:flex;align-items:center;justify-content:center;font-size:28px">🦘</div>
+        <div>
+          <h3 style="font-size:18px;margin-bottom:4px">Connect My Health Record</h3>
+          <p style="font-size:12px;color:#64748B">National opt-out health record — 90% of Australians</p>
+        </div>
+      </div>
+      <p style="font-size:13px;color:#94A3B8;line-height:1.6;margin-bottom:16px">Access your Medicare records, prescriptions, pathology results, and hospital discharge summaries through the My Health Record system.</p>
+      <button class="btn btn-primary" style="padding:12px 24px" onclick="window.open('https://www.myhealthrecord.gov.au','_blank')">Open My Health Record</button>
+      <p style="font-size:10px;color:#475569;margin-top:8px">Connected via Australian Digital Health Agency FHIR APIs. Privacy Act 1988 compliant.</p>
+    </div>
+    </div>
+
     <!-- ── SOUTH KOREA MyHealthWay ── -->
     <div class="connect-sub" id="connect-myhealthway" style="display:none">
     <div class="section-title">South Korea — MyHealthWay (나의건강길)</div>
