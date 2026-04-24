@@ -1,0 +1,117 @@
+{
+  "name": "myhealthspan",
+  "displayName": "MyHealthSpan Agent",
+  "description": "Personal health intelligence — connects wearables + medical records, synthesizes insights with clinical-grade AI analysis",
+  "version": "1.0.0",
+  "author": {
+    "name": "XSpan.ai",
+    "email": "engineering@xspan.ai",
+    "url": "https://xspan.ai"
+  },
+  "pricing": {
+    "model": "subscription",
+    "amount": 5.99,
+    "currency": "USD",
+    "trial_days": 3,
+    "annual": {
+      "amount": 59.99,
+      "currency": "USD"
+    }
+  },
+  "transport": "stdio",
+  "command": "npx @myhealthspan/agent mcp",
+  "tools": [
+    {
+      "name": "mhs_health_status",
+      "description": "Get a comprehensive health status summary including vitals, sleep, activity, and drift alerts"
+    },
+    {
+      "name": "mhs_ask",
+      "description": "Ask a natural language question about your health data and get an AI-synthesized answer"
+    },
+    {
+      "name": "mhs_get_labs",
+      "description": "Retrieve lab results and biomarker panels with reference ranges and trend analysis"
+    },
+    {
+      "name": "mhs_get_vitals",
+      "description": "Get current and historical vital signs — heart rate, HRV, blood pressure, SpO2, temperature"
+    },
+    {
+      "name": "mhs_get_sleep",
+      "description": "Retrieve sleep data including duration, stages, efficiency, and sleep score"
+    },
+    {
+      "name": "mhs_get_activity",
+      "description": "Get activity and exercise data — steps, calories, workouts, strain score"
+    },
+    {
+      "name": "mhs_get_conditions",
+      "description": "List medical conditions from connected EHR systems"
+    },
+    {
+      "name": "mhs_get_medications",
+      "description": "List current and past medications from connected health records"
+    },
+    {
+      "name": "mhs_get_allergies",
+      "description": "List known allergies and adverse reactions from health records"
+    },
+    {
+      "name": "mhs_detect_drift",
+      "description": "Detect baseline drift in health metrics — identifies when values deviate from your personal normal"
+    },
+    {
+      "name": "mhs_chart_data",
+      "description": "Get time-series data formatted for charting — supports vitals, sleep, activity, and lab trends"
+    },
+    {
+      "name": "mhs_connect_device",
+      "description": "Connect a wearable device (Oura, WHOOP, Dexcom, Garmin, Apple Watch, Fitbit)"
+    },
+    {
+      "name": "mhs_connect_ehr",
+      "description": "Connect to a hospital or health system via FHIR/SMART to pull medical records"
+    },
+    {
+      "name": "mhs_earnings",
+      "description": "View earnings from contributing anonymized health research data via XSpan Contribute"
+    }
+  ],
+  "categories": ["health", "wellness", "medical"],
+  "tags": [
+    "health",
+    "wearables",
+    "EHR",
+    "medical-records",
+    "biometrics",
+    "sleep",
+    "HRV",
+    "glucose",
+    "FHIR",
+    "privacy-first"
+  ],
+  "authentication": {
+    "type": "api_key",
+    "env_var": "XSPAN_API_KEY",
+    "signup_url": "https://xspan.ai/signup",
+    "docs_url": "https://xspan.ai/docs/agent/api-key"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/karlmehta/XSpan-HealthAI-Agent"
+  },
+  "homepage": "https://xspan.ai/agent",
+  "license": "MIT",
+  "runtime": {
+    "node": ">=18.0.0",
+    "platforms": ["darwin", "linux", "win32"]
+  },
+  "privacy": {
+    "data_storage": "local",
+    "encryption": "AES-256 at rest",
+    "cloud_required": false,
+    "hipaa_aligned": true,
+    "data_sharing": "opt-in only, anonymized and de-identified"
+  }
+}

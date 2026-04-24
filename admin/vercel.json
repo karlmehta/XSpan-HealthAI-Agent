@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "name": "mhs-admin",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "routes": [
+    { "src": "/assets/(.*)", "dest": "/assets/$1" },
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/(.*)", "dest": "/" }
+  ],
+  "env": {
+    "NODE_ENV": "production",
+    "ADMIN_PORT": "3001"
+  }
+}

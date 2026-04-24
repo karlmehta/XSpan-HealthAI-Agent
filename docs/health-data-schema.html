@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XSpan-EHR Data Schema</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, 'Inter', system-ui, sans-serif; background: #0B0F1A; color: #E2E8F0; min-height: 100vh; padding: 24px; }
+h1 { font-size: 28px; font-weight: 800; color: #fff; margin-bottom: 4px; }
+.subtitle { font-size: 13px; color: #64748B; margin-bottom: 24px; }
+.stats-bar { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+.stat { background: #1E293B; border: 1px solid #334155; border-radius: 8px; padding: 12px 16px; text-align: center; min-width: 100px; }
+.stat .num { font-size: 24px; font-weight: 800; color: #E8751A; }
+.stat .label { font-size: 10px; color: #64748B; margin-top: 2px; }
+.nav { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; position: sticky; top: 0; background: #0B0F1A; padding: 10px 0; z-index: 10; border-bottom: 1px solid #1E293B; }
+.nav a { padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; color: #94A3B8; background: #1E293B; border: 1px solid #334155; text-decoration: none; transition: all 0.15s; white-space: nowrap; }
+.nav a:hover { border-color: #E8751A; color: #E8751A; }
+.nav a.cat-core { border-color: #3B82F633; color: #60A5FA; }
+.nav a.cat-vitals { border-color: #EF444433; color: #F87171; }
+.nav a.cat-clinical { border-color: #8B5CF633; color: #A78BFA; }
+.nav a.cat-labs { border-color: #F59E0B33; color: #FBBF24; }
+.nav a.cat-omics { border-color: #10B98133; color: #34D399; }
+.nav a.cat-computed { border-color: #E8751A33; color: #E8751A; }
+
+.table-section { margin-bottom: 32px; scroll-margin-top: 60px; }
+.table-header { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+.table-header h2 { font-size: 18px; font-weight: 700; color: #fff; }
+.table-header .badge { padding: 2px 8px; border-radius: 4px; font-size: 9px; font-weight: 700; letter-spacing: 0.5px; }
+.badge-core { background: #3B82F622; color: #60A5FA; }
+.badge-vitals { background: #EF444422; color: #F87171; }
+.badge-clinical { background: #8B5CF622; color: #A78BFA; }
+.badge-labs { background: #F59E0B22; color: #FBBF24; }
+.badge-omics { background: #10B98122; color: #34D399; }
+.badge-computed { background: #E8751A22; color: #E8751A; }
+.table-meta { font-size: 11px; color: #64748B; margin-bottom: 10px; }
+.table-meta span { margin-right: 16px; }
+.table-meta .src { color: #6EE7B7; }
+.table-meta .freq { color: #FBBF24; }
+
+table { width: 100%; border-collapse: collapse; background: #0F172A; border: 1px solid #1E293B; border-radius: 8px; overflow: hidden; font-size: 12px; margin-bottom: 8px; }
+thead { background: #1E293B; }
+th { padding: 8px 10px; text-align: left; font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #334155; }
+td { padding: 6px 10px; border-bottom: 1px solid #1E293B; vertical-align: top; }
+tr:hover { background: #1E293B44; }
+.col-name { color: #fff; font-weight: 600; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 11px; }
+.col-type { color: #60A5FA; font-family: monospace; font-size: 11px; }
+.col-unit { color: #FBBF24; font-size: 11px; }
+.col-range { color: #6EE7B7; font-size: 11px; }
+.col-desc { color: #94A3B8; font-size: 11px; }
+.col-freq { color: #C084FC; font-size: 10px; }
+.pk { color: #E8751A; font-size: 9px; font-weight: 700; margin-left: 4px; }
+.fk { color: #60A5FA; font-size: 9px; font-weight: 700; margin-left: 4px; }
+.nullable { color: #475569; }
+.enum-vals { font-size: 9px; color: #64748B; display: block; margin-top: 2px; }
+
+.lab-ref-table { margin-top: 12px; }
+.lab-ref-table td { font-size: 11px; }
+.lab-cat { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 6px 10px; }
+.cat-metabolic { color: #F87171; background: #EF444411; }
+.cat-lipids { color: #FBBF24; background: #F59E0B11; }
+.cat-thyroid { color: #A78BFA; background: #8B5CF611; }
+.cat-inflammatory { color: #FB923C; background: #F9731611; }
+.cat-kidney { color: #60A5FA; background: #3B82F611; }
+.cat-liver { color: #34D399; background: #10B98111; }
+.cat-hematology { color: #F472B6; background: #EC489911; }
+.cat-vitamin { color: #FDE047; background: #FACC1511; }
+.cat-mineral { color: #FDE047; background: #FACC1511; }
+.cat-hormonal { color: #C084FC; background: #A855F711; }
+.cat-cardiac { color: #F87171; background: #EF444411; }
+.cat-tumor_marker { color: #FB7185; background: #F4366311; }
+
+.range-bar { display: inline-block; height: 6px; border-radius: 3px; background: #334155; width: 80px; position: relative; vertical-align: middle; margin-left: 4px; }
+.range-bar .ref { position: absolute; height: 100%; border-radius: 3px; background: #22C55E44; }
+.range-bar .opt { position: absolute; height: 100%; border-radius: 3px; background: #22C55E; }
+
+.footer { text-align: center; padding: 20px 0; font-size: 11px; color: #475569; border-top: 1px solid #1E293B; margin-top: 32px; }
+
+.relationships { background: #1E293B; border: 1px solid #334155; border-radius: 8px; padding: 16px; margin-bottom: 24px; }
+.relationships h3 { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+.rel-diagram { font-family: 'SF Mono', monospace; font-size: 11px; color: #94A3B8; line-height: 1.8; white-space: pre; overflow-x: auto; }
+.rel-diagram .tbl { color: #E8751A; font-weight: 700; }
+.rel-diagram .arrow { color: #60A5FA; }
+.rel-diagram .key { color: #6EE7B7; }
+</style>
+</head>
+<body>
+
+<h1>XSpan-EHR Data Schema</h1>
+<div class="subtitle">SQLite (local, AES-256 encrypted) &middot; FHIR R4 compatible &middot; 18 tables &middot; 200+ fields &middot; 60+ lab reference values</div>
+
+<div class="stats-bar">
+  <div class="stat"><div class="num">18</div><div class="label">Tables</div></div>
+  <div class="stat"><div class="num">200+</div><div class="label">Fields</div></div>
+  <div class="stat"><div class="num">60+</div><div class="label">Lab Tests</div></div>
+  <div class="stat"><div class="num">10</div><div class="label">Categories</div></div>
+  <div class="stat"><div class="num">7</div><div class="label">Source Types</div></div>
+  <div class="stat"><div class="num">9</div><div class="label">Countries</div></div>
+</div>
+
+<!-- Relationships -->
+<div class="relationships">
+  <h3>Table Relationships</h3>
+  <div class="rel-diagram"><span class="tbl">patient</span> <span class="arrow">&larr;</span> <span class="key">1:N</span> <span class="arrow">&rarr;</span> <span class="tbl">data_source</span> <span class="arrow">&larr;</span> <span class="key">1:N</span> <span class="arrow">&rarr;</span> [<span class="tbl">vital_signs</span>, <span class="tbl">body_measurements</span>, <span class="tbl">sleep</span>, <span class="tbl">activity</span>, <span class="tbl">lab_results</span>, <span class="tbl">conditions</span>, <span class="tbl">medications</span>, <span class="tbl">allergies</span>, <span class="tbl">immunizations</span>, <span class="tbl">encounters</span>, <span class="tbl">procedures</span>, <span class="tbl">care_plans</span>, <span class="tbl">genomic_variants</span>, <span class="tbl">microbiome</span>]
+
+<span class="tbl">lab_results</span>.<span class="key">loinc_code</span> <span class="arrow">&rarr;</span> <span class="tbl">lab_reference</span>.<span class="key">loinc_code</span> (lookup)
+
+<span class="tbl">daily_snapshot</span> <span class="arrow">&larr;</span> aggregated from <span class="tbl">vital_signs</span> + <span class="tbl">sleep</span> + <span class="tbl">activity</span> + <span class="tbl">body_measurements</span>
+<span class="tbl">baselines</span> <span class="arrow">&larr;</span> computed from <span class="tbl">daily_snapshot</span> (30-day rolling)
+<span class="tbl">drift_alerts</span> <span class="arrow">&larr;</span> when current value deviates from <span class="tbl">baselines</span>
+<span class="tbl">sync_log</span> <span class="arrow">&larr;</span> tracks every <span class="tbl">data_source</span> fetch operation</div>
+</div>
+
+<!-- Navigation -->
+<div class="nav">
+  <a href="#patient" class="cat-core">patient</a>
+  <a href="#data_source" class="cat-core">data_source</a>
+  <a href="#vital_signs" class="cat-vitals">vital_signs</a>
+  <a href="#body_measurements" class="cat-vitals">body_measurements</a>
+  <a href="#sleep" class="cat-vitals">sleep</a>
+  <a href="#activity" class="cat-vitals">activity</a>
+  <a href="#lab_results" class="cat-labs">lab_results</a>
+  <a href="#lab_reference" class="cat-labs">lab_reference (60+)</a>
+  <a href="#conditions" class="cat-clinical">conditions</a>
+  <a href="#medications" class="cat-clinical">medications</a>
+  <a href="#allergies" class="cat-clinical">allergies</a>
+  <a href="#immunizations" class="cat-clinical">immunizations</a>
+  <a href="#encounters" class="cat-clinical">encounters</a>
+  <a href="#procedures" class="cat-clinical">procedures</a>
+  <a href="#care_plans" class="cat-clinical">care_plans</a>
+  <a href="#genomic_variants" class="cat-omics">genomic_variants</a>
+  <a href="#microbiome" class="cat-omics">microbiome</a>
+  <a href="#daily_snapshot" class="cat-computed">daily_snapshot</a>
+  <a href="#baselines" class="cat-computed">baselines</a>
+  <a href="#drift_alerts" class="cat-computed">drift_alerts</a>
+  <a href="#sync_log" class="cat-core">sync_log</a>
+</div>
+
+<!-- ═══ PATIENT ═══ -->
+<div class="table-section" id="patient">
+  <div class="table-header"><h2>patient</h2><span class="badge badge-core">CORE</span></div>
+  <div class="table-meta"><span class="src">Sources: b.well, manual</span><span class="freq">Frequency: once (on setup)</span></div>
+  <table>
+    <thead><tr><th>Column</th><th>Type</th><th>Unit</th><th>Description</th><th>Values / Constraints</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">id<span class="pk">PK</span></td><td class="col-type">TEXT</td><td></td><td class="col-desc">UUID primary key</td><td></td></tr>
+      <tr><td class="col-name">source</td><td class="col-type">TEXT NOT NULL</td><td></td><td class="col-desc">Data origin</td><td class="col-desc"><span class="enum-vals">bwell, manual, ehr</span></td></tr>
+      <tr><td class="col-name">source_id</td><td class="col-type">TEXT</td><td></td><td class="col-desc">External patient ID</td><td></td></tr>
+      <tr><td class="col-name">first_name</td><td class="col-type">TEXT</td><td></td><td class="col-desc">Given name</td><td></td></tr>
+      <tr><td class="col-name">last_name</td><td class="col-type">TEXT</td><td></td><td class="col-desc">Family name</td><td></td></tr>
+      <tr><td class="col-name">date_of_birth</td><td class="col-type">TEXT</td><td></td><td class="col-desc">Birth date</td><td class="col-desc">YYYY-MM-DD</td></tr>
+      <tr><td class="col-name">gender</td><td class="col-type">TEXT</td><td></td><td class="col-desc">Administrative gender</td><td class="col-desc"><span class="enum-vals">male, female, other, unknown</span></td></tr>
+      <tr><td class="col-name">email</td><td class="col-type">TEXT</td><td></td><td class="col-desc">Email address</td><td></td></tr>
+      <tr><td class="col-name">phone</td><td class="col-type">TEXT</td><td></td><td class="col-desc">Phone number</td><td></td></tr>
+      <tr><td class="col-name">address_line</td><td class="col-type">TEXT</td><td></td><td class="col-desc">Street address</td><td></td></tr>
+      <tr><td class="col-name">address_city</td><td class="col-type">TEXT</td><td></td><td class="col-desc">City</td><td></td></tr>
+      <tr><td class="col-name">address_state</td><td class="col-type">TEXT</td><td></td><td class="col-desc">State / province</td><td></td></tr>
+      <tr><td class="col-name">address_zip</td><td class="col-type">TEXT</td><td></td><td class="col-desc">Postal code</td><td></td></tr>
+      <tr><td class="col-name">address_country</td><td class="col-type">TEXT</td><td></td><td class="col-desc">Country code</td><td class="col-desc">DEFAULT 'US'</td></tr>
+      <tr><td class="col-name">created_at</td><td class="col-type">TEXT</td><td></td><td class="col-desc">Record creation</td><td class="col-desc">ISO-8601 UTC</td></tr>
+      <tr><td class="col-name">updated_at</td><td class="col-type">TEXT</td><td></td><td class="col-desc">Last update</td><td class="col-desc">ISO-8601 UTC</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══ DATA SOURCE ═══ -->
+<div class="table-section" id="data_source">
+  <div class="table-header"><h2>data_source</h2><span class="badge badge-core">CORE</span></div>
+  <div class="table-meta"><span class="src">Sources: all connected providers</span><span class="freq">Frequency: per connection event</span></div>
+  <table>
+    <thead><tr><th>Column</th><th>Type</th><th>Description</th><th>Values / Constraints</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">id<span class="pk">PK</span></td><td class="col-type">TEXT</td><td class="col-desc">UUID</td><td></td></tr>
+      <tr><td class="col-name">source_type</td><td class="col-type">TEXT NOT NULL</td><td class="col-desc">Category of source</td><td class="col-desc"><span class="enum-vals">ehr, wearable, lab, genomics, microbiome, manual</span></td></tr>
+      <tr><td class="col-name">provider</td><td class="col-type">TEXT NOT NULL</td><td class="col-desc">Provider key</td><td class="col-desc"><span class="enum-vals">bwell, terra, apple_health, oura, whoop, dexcom, garmin, fitbit, quest, labcorp, 23andme, viome, gut_id</span></td></tr>
+      <tr><td class="col-name">provider_name</td><td class="col-type">TEXT</td><td class="col-desc">Display name</td><td class="col-desc">e.g., "UCLA Health", "Oura Ring"</td></tr>
+      <tr><td class="col-name">connection_status</td><td class="col-type">TEXT</td><td class="col-desc">Current state</td><td class="col-desc"><span class="enum-vals">connected, disconnected, pending, expired, error</span></td></tr>
+      <tr><td class="col-name">last_sync_at</td><td class="col-type">TEXT</td><td class="col-desc">Last successful sync</td><td class="col-desc">ISO-8601</td></tr>
+      <tr><td class="col-name">sync_frequency</td><td class="col-type">TEXT</td><td class="col-desc">How often to sync</td><td class="col-desc"><span class="enum-vals">realtime, hourly, daily, weekly, manual</span></td></tr>
+      <tr><td class="col-name">access_token</td><td class="col-type">TEXT</td><td class="col-desc">OAuth token (encrypted)</td><td></td></tr>
+      <tr><td class="col-name">refresh_token</td><td class="col-type">TEXT</td><td class="col-desc">Refresh token (encrypted)</td><td></td></tr>
+      <tr><td class="col-name">metadata</td><td class="col-type">TEXT</td><td class="col-desc">JSON config blob</td><td></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══ VITAL SIGNS ═══ -->
+<div class="table-section" id="vital_signs">
+  <div class="table-header"><h2>vital_signs</h2><span class="badge badge-vitals">VITALS</span></div>
+  <div class="table-meta"><span class="src">Sources: Wearables (Oura, WHOOP, Apple, Garmin, Dexcom), EHR (b.well), Manual</span><span class="freq">Frequency: every 1-5 min (wearable) to per visit (EHR)</span></div>
+  <table>
+    <thead><tr><th>Column</th><th>Type</th><th>Unit</th><th>Range</th><th>Description</th><th>Frequency</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">id<span class="pk">PK</span></td><td class="col-type">TEXT</td><td></td><td></td><td class="col-desc">UUID</td><td></td></tr>
+      <tr><td class="col-name">source_id<span class="fk">FK</span></td><td class="col-type">TEXT</td><td></td><td></td><td class="col-desc">References data_source</td><td></td></tr>
+      <tr><td class="col-name">fhir_id</td><td class="col-type">TEXT</td><td></td><td></td><td class="col-desc">Original FHIR resource ID</td><td></td></tr>
+      <tr><td class="col-name">recorded_at</td><td class="col-type">TEXT NOT NULL</td><td></td><td></td><td class="col-desc">Measurement timestamp</td><td></td></tr>
+      <tr style="background:#1E293B"><td colspan="6" style="color:#F87171;font-size:10px;font-weight:700;padding:6px 10px">HEART</td></tr>
+      <tr><td class="col-name">heart_rate</td><td class="col-type">REAL</td><td class="col-unit">bpm</td><td class="col-range">40 - 200</td><td class="col-desc">Instantaneous heart rate</td><td class="col-freq">1-5 min (wearable), per visit (EHR)</td></tr>
+      <tr><td class="col-name">heart_rate_resting</td><td class="col-type">REAL</td><td class="col-unit">bpm</td><td class="col-range">40 - 100</td><td class="col-desc">Resting heart rate (daily)</td><td class="col-freq">Daily</td></tr>
+      <tr><td class="col-name">hrv_sdnn</td><td class="col-type">REAL</td><td class="col-unit">ms</td><td class="col-range">10 - 200</td><td class="col-desc">HRV standard deviation (SDNN)</td><td class="col-freq">Daily</td></tr>
+      <tr><td class="col-name">hrv_rmssd</td><td class="col-type">REAL</td><td class="col-unit">ms</td><td class="col-range">10 - 200</td><td class="col-desc">HRV root mean square (RMSSD)</td><td class="col-freq">Per sleep session</td></tr>
+      <tr style="background:#1E293B"><td colspan="6" style="color:#60A5FA;font-size:10px;font-weight:700;padding:6px 10px">BLOOD PRESSURE</td></tr>
+      <tr><td class="col-name">bp_systolic</td><td class="col-type">REAL</td><td class="col-unit">mmHg</td><td class="col-range">70 - 250</td><td class="col-desc">Systolic blood pressure</td><td class="col-freq">Per visit / daily (home)</td></tr>
+      <tr><td class="col-name">bp_diastolic</td><td class="col-type">REAL</td><td class="col-unit">mmHg</td><td class="col-range">40 - 150</td><td class="col-desc">Diastolic blood pressure</td><td class="col-freq">Per visit / daily (home)</td></tr>
+      <tr><td class="col-name">bp_position</td><td class="col-type">TEXT</td><td></td><td></td><td class="col-desc">Position during measurement</td><td class="col-desc"><span class="enum-vals">sitting, standing, supine</span></td></tr>
+      <tr style="background:#1E293B"><td colspan="6" style="color:#6EE7B7;font-size:10px;font-weight:700;padding:6px 10px">RESPIRATORY</td></tr>
+      <tr><td class="col-name">respiratory_rate</td><td class="col-type">REAL</td><td class="col-unit">breaths/min</td><td class="col-range">8 - 30</td><td class="col-desc">Respiratory rate</td><td class="col-freq">Nightly (wearable), per visit (EHR)</td></tr>
+      <tr><td class="col-name">spo2</td><td class="col-type">REAL</td><td class="col-unit">%</td><td class="col-range">85 - 100</td><td class="col-desc">Blood oxygen saturation</td><td class="col-freq">Nightly / per visit</td></tr>
+      <tr><td class="col-name">spo2_min_overnight</td><td class="col-type">REAL</td><td class="col-unit">%</td><td class="col-range">85 - 100</td><td class="col-desc">Minimum overnight SpO2</td><td class="col-freq">Nightly</td></tr>
+      <tr style="background:#1E293B"><td colspan="6" style="color:#FBBF24;font-size:10px;font-weight:700;padding:6px 10px">TEMPERATURE</td></tr>
+      <tr><td class="col-name">body_temperature</td><td class="col-type">REAL</td><td class="col-unit">&deg;C</td><td class="col-range">35.0 - 42.0</td><td class="col-desc">Core body temperature</td><td class="col-freq">Nightly / per visit</td></tr>
+      <tr><td class="col-name">skin_temperature_dev</td><td class="col-type">REAL</td><td class="col-unit">&deg;C</td><td class="col-range">-2.0 - +2.0</td><td class="col-desc">Skin temp deviation from baseline (Oura)</td><td class="col-freq">Nightly</td></tr>
+      <tr style="background:#1E293B"><td colspan="6" style="color:#FB923C;font-size:10px;font-weight:700;padding:6px 10px">GLUCOSE</td></tr>
+      <tr><td class="col-name">blood_glucose</td><td class="col-type">REAL</td><td class="col-unit">mg/dL</td><td class="col-range">40 - 400</td><td class="col-desc">Blood glucose level</td><td class="col-freq">Every 5 min (CGM), per draw (lab)</td></tr>
+      <tr><td class="col-name">blood_glucose_type</td><td class="col-type">TEXT</td><td></td><td></td><td class="col-desc">Context of measurement</td><td class="col-desc"><span class="enum-vals">fasting, random, postprandial, cgm</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══ BODY MEASUREMENTS ═══ -->
+<div class="table-section" id="body_measurements">
+  <div class="table-header"><h2>body_measurements</h2><span class="badge badge-vitals">VITALS</span></div>
+  <div class="table-meta"><span class="src">Sources: Smart scale, Apple Health, EHR, Manual</span><span class="freq">Frequency: daily (scale) to per visit (EHR)</span></div>
+  <table>
+    <thead><tr><th>Column</th><th>Type</th><th>Unit</th><th>Range</th><th>Description</th><th>Frequency</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">id<span class="pk">PK</span></td><td class="col-type">TEXT</td><td></td><td></td><td class="col-desc">UUID</td><td></td></tr>
+      <tr><td class="col-name">source_id<span class="fk">FK</span></td><td class="col-type">TEXT</td><td></td><td></td><td class="col-desc">References data_source</td><td></td></tr>
+      <tr><td class="col-name">weight_kg</td><td class="col-type">REAL</td><td class="col-unit">kg</td><td class="col-range">20 - 300</td><td class="col-desc">Body weight</td><td class="col-freq">Daily</td></tr>
+      <tr><td class="col-name">weight_lbs</td><td class="col-type">REAL</td><td class="col-unit">lbs</td><td class="col-range">44 - 660</td><td class="col-desc">Derived: kg * 2.20462</td><td class="col-freq">Daily</td></tr>
+      <tr><td class="col-name">height_cm</td><td class="col-type">REAL</td><td class="col-unit">cm</td><td class="col-range">50 - 250</td><td class="col-desc">Height</td><td class="col-freq">Annually</td></tr>
+      <tr><td class="col-name">bmi</td><td class="col-type">REAL</td><td class="col-unit">kg/m&sup2;</td><td class="col-range">10 - 60</td><td class="col-desc">Derived: weight / height&sup2;</td><td class="col-freq">Daily</td></tr>
+      <tr><td class="col-name">body_fat_pct</td><td class="col-type">REAL</td><td class="col-unit">%</td><td class="col-range">3 - 60</td><td class="col-desc">Body fat percentage</td><td class="col-freq">Daily (smart scale)</td></tr>
+      <tr><td class="col-name">lean_mass_kg</td><td class="col-type">REAL</td><td class="col-unit">kg</td><td class="col-range">15 - 120</td><td class="col-desc">Lean body mass</td><td class="col-freq">Daily (smart scale)</td></tr>
+      <tr><td class="col-name">bone_mass_kg</td><td class="col-type">REAL</td><td class="col-unit">kg</td><td class="col-range">1 - 6</td><td class="col-desc">Estimated bone mass</td><td class="col-freq">Daily (smart scale)</td></tr>
+      <tr><td class="col-name">water_pct</td><td class="col-type">REAL</td><td class="col-unit">%</td><td class="col-range">35 - 75</td><td class="col-desc">Body water percentage</td><td class="col-freq">Daily (smart scale)</td></tr>
+      <tr><td class="col-name">waist_cm</td><td class="col-type">REAL</td><td class="col-unit">cm</td><td class="col-range">50 - 200</td><td class="col-desc">Waist circumference</td><td class="col-freq">Monthly (manual)</td></tr>
+      <tr><td class="col-name">hip_cm</td><td class="col-type">REAL</td><td class="col-unit">cm</td><td class="col-range">60 - 200</td><td class="col-desc">Hip circumference</td><td class="col-freq">Monthly (manual)</td></tr>
+      <tr><td class="col-name">waist_hip_ratio</td><td class="col-type">REAL</td><td class="col-unit">ratio</td><td class="col-range">0.6 - 1.2</td><td class="col-desc">Derived: waist / hip</td><td class="col-freq">Monthly</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══ SLEEP ═══ -->
+<div class="table-section" id="sleep">
+  <div class="table-header"><h2>sleep</h2><span class="badge badge-vitals">VITALS</span></div>
+  <div class="table-meta"><span class="src">Sources: Oura, WHOOP, Apple Watch, Garmin, Fitbit</span><span class="freq">Frequency: nightly</span></div>
+  <table>
+    <thead><tr><th>Column</th><th>Type</th><th>Unit</th><th>Range</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">id<span class="pk">PK</span></td><td class="col-type">TEXT</td><td></td><td></td><td class="col-desc">UUID</td></tr>
+      <tr><td class="col-name">source_id<span class="fk">FK</span></td><td class="col-type">TEXT</td><td></td><td></td><td class="col-desc">References data_source</td></tr>
+      <tr style="background:#1E293B"><td colspan="5" style="color:#A78BFA;font-size:10px;font-weight:700;padding:6px 10px">DURATION</td></tr>
+      <tr><td class="col-name">sleep_start</td><td class="col-type">TEXT</td><td></td><td></td><td class="col-desc">When fell asleep (ISO datetime)</td></tr>
+      <tr><td class="col-name">sleep_end</td><td class="col-type">TEXT</td><td></td><td></td><td class="col-desc">When woke up (ISO datetime)</td></tr>
+      <tr><td class="col-name">total_sleep_min</td><td class="col-type">INTEGER</td><td class="col-unit">minutes</td><td class="col-range">0 - 720</td><td class="col-desc">Total sleep time</td></tr>
+      <tr><td class="col-name">time_in_bed_min</td><td class="col-type">INTEGER</td><td class="col-unit">minutes</td><td class="col-range">0 - 900</td><td class="col-desc">Total time in bed</td></tr>
+      <tr><td class="col-name">sleep_latency_min</td><td class="col-type">INTEGER</td><td class="col-unit">minutes</td><td class="col-range">0 - 120</td><td class="col-desc">Time to fall asleep</td></tr>
+      <tr><td class="col-name">awake_min</td><td class="col-type">INTEGER</td><td class="col-unit">minutes</td><td class="col-range">0 - 180</td><td class="col-desc">Awake time during night</td></tr>
+      <tr style="background:#1E293B"><td colspan="5" style="color:#A78BFA;font-size:10px;font-weight:700;padding:6px 10px">STAGES</td></tr>
+      <tr><td class="col-name">rem_min</td><td class="col-type">INTEGER</td><td class="col-unit">minutes</td><td class="col-range">0 - 180</td><td class="col-desc">REM sleep duration</td></tr>
+      <tr><td class="col-name">deep_min</td><td class="col-type">INTEGER</td><td class="col-unit">minutes</td><td class="col-range">0 - 180</td><td class="col-desc">Deep / N3 sleep duration</td></tr>
+      <tr><td class="col-name">light_min</td><td class="col-type">INTEGER</td><td class="col-unit">minutes</td><td class="col-range">0 - 400</td><td class="col-desc">Light / N1+N2 sleep duration</td></tr>
+      <tr style="background:#1E293B"><td colspan="5" style="color:#A78BFA;font-size:10px;font-weight:700;padding:6px 10px">QUALITY</td></tr>
+      <tr><td class="col-name">sleep_efficiency</td><td class="col-type">REAL</td><td class="col-unit">%</td><td class="col-range">40 - 100</td><td class="col-desc">sleep / time_in_bed * 100</td></tr>
+      <tr><td class="col-name">sleep_score</td><td class="col-type">INTEGER</td><td class="col-unit">score</td><td class="col-range">0 - 100</td><td class="col-desc">Device composite score</td></tr>
+      <tr style="background:#1E293B"><td colspan="5" style="color:#A78BFA;font-size:10px;font-weight:700;padding:6px 10px">BIOMETRICS DURING SLEEP</td></tr>
+      <tr><td class="col-name">avg_hr_sleep</td><td class="col-type">REAL</td><td class="col-unit">bpm</td><td class="col-range">35 - 90</td><td class="col-desc">Average HR during sleep</td></tr>
+      <tr><td class="col-name">min_hr_sleep</td><td class="col-type">REAL</td><td class="col-unit">bpm</td><td class="col-range">30 - 80</td><td class="col-desc">Lowest HR during sleep</td></tr>
+      <tr><td class="col-name">avg_hrv_sleep</td><td class="col-type">REAL</td><td class="col-unit">ms</td><td class="col-range">10 - 200</td><td class="col-desc">Average HRV during sleep</td></tr>
+      <tr><td class="col-name">avg_spo2_sleep</td><td class="col-type">REAL</td><td class="col-unit">%</td><td class="col-range">85 - 100</td><td class="col-desc">Average SpO2 during sleep</td></tr>
+      <tr><td class="col-name">avg_resp_rate_sleep</td><td class="col-type">REAL</td><td class="col-unit">breaths/min</td><td class="col-range">8 - 25</td><td class="col-desc">Average respiratory rate</td></tr>
+      <tr><td class="col-name">avg_skin_temp_sleep</td><td class="col-type">REAL</td><td class="col-unit">&deg;C</td><td class="col-range">30 - 38</td><td class="col-desc">Average skin temperature</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══ ACTIVITY ═══ -->
+<div class="table-section" id="activity">
+  <div class="table-header"><h2>activity</h2><span class="badge badge-vitals">VITALS</span></div>
+  <div class="table-meta"><span class="src">Sources: All wearables, Apple Health, Google Fit</span><span class="freq">Frequency: daily summary</span></div>
+  <table>
+    <thead><tr><th>Column</th><th>Type</th><th>Unit</th><th>Range</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">id<span class="pk">PK</span></td><td class="col-type">TEXT</td><td></td><td></td><td class="col-desc">UUID</td></tr>
+      <tr style="background:#1E293B"><td colspan="5" style="color:#6EE7B7;font-size:10px;font-weight:700;padding:6px 10px">STEPS & DISTANCE</td></tr>
+      <tr><td class="col-name">steps</td><td class="col-type">INTEGER</td><td class="col-unit">count</td><td class="col-range">0 - 60,000</td><td class="col-desc">Daily step count</td></tr>
+      <tr><td class="col-name">distance_m</td><td class="col-type">REAL</td><td class="col-unit">meters</td><td class="col-range">0 - 50,000</td><td class="col-desc">Daily distance</td></tr>
+      <tr><td class="col-name">floors_climbed</td><td class="col-type">INTEGER</td><td class="col-unit">count</td><td class="col-range">0 - 200</td><td class="col-desc">Floors climbed</td></tr>
+      <tr style="background:#1E293B"><td colspan="5" style="color:#6EE7B7;font-size:10px;font-weight:700;padding:6px 10px">CALORIES</td></tr>
+      <tr><td class="col-name">calories_total</td><td class="col-type">INTEGER</td><td class="col-unit">kcal</td><td class="col-range">1000 - 6000</td><td class="col-desc">Total daily calories (BMR + active)</td></tr>
+      <tr><td class="col-name">calories_active</td><td class="col-type">INTEGER</td><td class="col-unit">kcal</td><td class="col-range">0 - 3000</td><td class="col-desc">Active calories only</td></tr>
+      <tr><td class="col-name">calories_bmr</td><td class="col-type">INTEGER</td><td class="col-unit">kcal</td><td class="col-range">1000 - 3000</td><td class="col-desc">Basal metabolic rate</td></tr>
+      <tr style="background:#1E293B"><td colspan="5" style="color:#6EE7B7;font-size:10px;font-weight:700;padding:6px 10px">ACTIVE TIME</td></tr>
+      <tr><td class="col-name">active_min</td><td class="col-type">INTEGER</td><td class="col-unit">minutes</td><td class="col-range">0 - 600</td><td class="col-desc">Moderate + vigorous minutes</td></tr>
+      <tr><td class="col-name">moderate_min</td><td class="col-type">INTEGER</td><td class="col-unit">minutes</td><td class="col-range">0 - 400</td><td class="col-desc">Moderate intensity</td></tr>
+      <tr><td class="col-name">vigorous_min</td><td class="col-type">INTEGER</td><td class="col-unit">minutes</td><td class="col-range">0 - 300</td><td class="col-desc">Vigorous intensity</td></tr>
+      <tr><td class="col-name">sedentary_min</td><td class="col-type">INTEGER</td><td class="col-unit">minutes</td><td class="col-range">0 - 1440</td><td class="col-desc">Sedentary time</td></tr>
+      <tr style="background:#1E293B"><td colspan="5" style="color:#6EE7B7;font-size:10px;font-weight:700;padding:6px 10px">DEVICE SCORES</td></tr>
+      <tr><td class="col-name">activity_score</td><td class="col-type">INTEGER</td><td class="col-unit">score</td><td class="col-range">0 - 100</td><td class="col-desc">Oura activity score</td></tr>
+      <tr><td class="col-name">strain_score</td><td class="col-type">REAL</td><td class="col-unit">score</td><td class="col-range">0 - 21</td><td class="col-desc">WHOOP day strain</td></tr>
+      <tr><td class="col-name">recovery_score</td><td class="col-type">INTEGER</td><td class="col-unit">score</td><td class="col-range">0 - 100</td><td class="col-desc">WHOOP recovery</td></tr>
+      <tr><td class="col-name">body_battery</td><td class="col-type">INTEGER</td><td class="col-unit">score</td><td class="col-range">0 - 100</td><td class="col-desc">Garmin Body Battery</td></tr>
+      <tr><td class="col-name">readiness_score</td><td class="col-type">INTEGER</td><td class="col-unit">score</td><td class="col-range">0 - 100</td><td class="col-desc">Oura readiness</td></tr>
+      <tr><td class="col-name">vo2_max</td><td class="col-type">REAL</td><td class="col-unit">mL/kg/min</td><td class="col-range">15 - 80</td><td class="col-desc">Estimated VO2 max</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══ LAB REFERENCE ═══ -->
+<div class="table-section" id="lab_reference">
+  <div class="table-header"><h2>lab_reference</h2><span class="badge badge-labs">LABS</span><span style="font-size:11px;color:#64748B;margin-left:8px">60+ pre-populated tests</span></div>
+  <div class="table-meta"><span class="src">Lookup table for lab_results — LOINC coded, with normal + optimal ranges</span></div>
+  <table class="lab-ref-table">
+    <thead><tr><th>LOINC</th><th>Test Name</th><th>Category</th><th>Unit</th><th>Type</th><th>Ref Low</th><th>Ref High</th><th>Optimal Low</th><th>Optimal High</th><th>Frequency</th></tr></thead>
+    <tbody>
+      <tr><td colspan="10" class="lab-cat cat-metabolic">METABOLIC</td></tr>
+      <tr><td class="col-name">2345-7</td><td>Glucose</td><td>metabolic</td><td class="col-unit">mg/dL</td><td class="col-type">numeric</td><td class="col-range">70</td><td class="col-range">100</td><td style="color:#22C55E">75</td><td style="color:#22C55E">90</td><td class="col-freq">quarterly</td></tr>
+      <tr><td class="col-name">1558-6</td><td>Fasting Glucose</td><td>metabolic</td><td class="col-unit">mg/dL</td><td class="col-type">numeric</td><td class="col-range">65</td><td class="col-range">99</td><td style="color:#22C55E">70</td><td style="color:#22C55E">90</td><td class="col-freq">quarterly</td></tr>
+      <tr><td class="col-name">4548-4</td><td>Hemoglobin A1c</td><td>metabolic</td><td class="col-unit">%</td><td class="col-type">numeric</td><td class="col-range">4.0</td><td class="col-range">5.6</td><td style="color:#22C55E">4.0</td><td style="color:#22C55E">5.3</td><td class="col-freq">quarterly</td></tr>
+      <tr><td class="col-name">14749-6</td><td>Fasting Insulin</td><td>metabolic</td><td class="col-unit">uIU/mL</td><td class="col-type">numeric</td><td class="col-range">2.6</td><td class="col-range">24.9</td><td style="color:#22C55E">2.6</td><td style="color:#22C55E">8.0</td><td class="col-freq">annually</td></tr>
+
+      <tr><td colspan="10" class="lab-cat cat-lipids">LIPIDS</td></tr>
+      <tr><td class="col-name">2093-3</td><td>Total Cholesterol</td><td>lipids</td><td class="col-unit">mg/dL</td><td class="col-type">numeric</td><td class="col-range nullable">-</td><td class="col-range">200</td><td style="color:#22C55E" class="nullable">-</td><td style="color:#22C55E">180</td><td class="col-freq">annually</td></tr>
+      <tr><td class="col-name">2085-9</td><td>HDL Cholesterol</td><td>lipids</td><td class="col-unit">mg/dL</td><td class="col-type">numeric</td><td class="col-range">40</td><td class="col-range nullable">-</td><td style="color:#22C55E">60</td><td style="color:#22C55E" class="nullable">-</td><td class="col-freq">annually</td></tr>
+      <tr><td class="col-name">2089-1</td><td>LDL Cholesterol</td><td>lipids</td><td class="col-unit">mg/dL</td><td class="col-type">numeric</td><td class="col-range nullable">-</td><td class="col-range">100</td><td style="color:#22C55E" class="nullable">-</td><td style="color:#22C55E">70</td><td class="col-freq">annually</td></tr>
+      <tr><td class="col-name">2571-8</td><td>Triglycerides</td><td>lipids</td><td class="col-unit">mg/dL</td><td class="col-type">numeric</td><td class="col-range nullable">-</td><td class="col-range">150</td><td style="color:#22C55E" class="nullable">-</td><td style="color:#22C55E">100</td><td class="col-freq">annually</td></tr>
+      <tr><td class="col-name">43396-1</td><td>ApoB</td><td>lipids</td><td class="col-unit">mg/dL</td><td class="col-type">numeric</td><td class="col-range nullable">-</td><td class="col-range">130</td><td style="color:#22C55E" class="nullable">-</td><td style="color:#22C55E">90</td><td class="col-freq">annually</td></tr>
+      <tr><td class="col-name">43245-0</td><td>Lp(a)</td><td>lipids</td><td class="col-unit">nmol/L</td><td class="col-type">numeric</td><td class="col-range nullable">-</td><td class="col-range">75</td><td style="color:#22C55E" class="nullable">-</td><td style="color:#22C55E">30</td><td class="col-freq">once</td></tr>
+
+      <tr><td colspan="10" class="lab-cat cat-thyroid">THYROID</td></tr>
+      <tr><td class="col-name">3016-3</td><td>TSH</td><td>thyroid</td><td class="col-unit">mIU/L</td><td class="col-type">numeric</td><td class="col-range">0.45</td><td class="col-range">4.5</td><td style="color:#22C55E">1.0</td><td style="color:#22C55E">2.5</td><td class="col-freq">annually</td></tr>
+      <tr><td class="col-name">3051-0</td><td>Free T3</td><td>thyroid</td><td class="col-unit">pg/mL</td><td class="col-type">numeric</td><td class="col-range">2.0</td><td class="col-range">4.4</td><td style="color:#22C55E">2.5</td><td style="color:#22C55E">4.0</td><td class="col-freq">annually</td></tr>
+      <tr><td class="col-name">3024-7</td><td>Free T4</td><td>thyroid</td><td class="col-unit">ng/dL</td><td class="col-type">numeric</td><td class="col-range">0.82</td><td class="col-range">1.77</td><td style="color:#22C55E">1.0</td><td style="color:#22C55E">1.5</td><td class="col-freq">annually</td></tr>
+
+      <tr><td colspan="10" class="lab-cat cat-inflammatory">INFLAMMATORY</td></tr>
+      <tr><td class="col-name">30522-7</td><td>hs-CRP</td><td>inflammatory</td><td class="col-unit">mg/L</td><td class="col-type">numeric</td><td class="col-range nullable">-</td><td class="col-range">3.0</td><td style="color:#22C55E" class="nullable">-</td><td style="color:#22C55E">1.0</td><td class="col-freq">annually</td></tr>
+      <tr><td class="col-name">2155-0</td><td>Homocysteine</td><td>inflammatory</td><td class="col-unit">umol/L</td><td class="col-type">numeric</td><td class="col-range nullable">-</td><td class="col-range">15</td><td style="color:#22C55E" class="nullable">-</td><td style="color:#22C55E">10</td><td class="col-freq">annually</td></tr>
+
+      <tr><td colspan="10" class="lab-cat cat-kidney">KIDNEY</td></tr>
+      <tr><td class="col-name">2160-0</td><td>Creatinine</td><td>kidney</td><td class="col-unit">mg/dL</td><td class="col-type">numeric</td><td class="col-range">0.7</td><td class="col-range">1.3</td><td style="color:#22C55E">0.7</td><td style="color:#22C55E">1.1</td><td class="col-freq">annually</td></tr>
+      <tr><td class="col-name">33914-3</td><td>eGFR</td><td>kidney</td><td class="col-unit">mL/min/1.73m&sup2;</td><td class="col-type">numeric</td><td class="col-range">60</td><td class="col-range nullable">-</td><td style="color:#22C55E">90</td><td style="color:#22C55E" class="nullable">-</td><td class="col-freq">annually</td></tr>
+
+      <tr><td colspan="10" class="lab-cat cat-liver">LIVER</td></tr>
+      <tr><td class="col-name">1742-6</td><td>ALT</td><td>liver</td><td class="col-unit">U/L</td><td class="col-type">numeric</td><td class="col-range">7</td><td class="col-range">56</td><td style="color:#22C55E">7</td><td style="color:#22C55E">35</td><td class="col-freq">annually</td></tr>
+      <tr><td class="col-name">1920-8</td><td>AST</td><td>liver</td><td class="col-unit">U/L</td><td class="col-type">numeric</td><td class="col-range">10</td><td class="col-range">40</td><td style="color:#22C55E">10</td><td style="color:#22C55E">30</td><td class="col-freq">annually</td></tr>
+      <tr><td class="col-name">1751-7</td><td>Albumin</td><td>liver</td><td class="col-unit">g/dL</td><td class="col-type">numeric</td><td class="col-range">3.4</td><td class="col-range">5.4</td><td style="color:#22C55E">4.0</td><td style="color:#22C55E">5.0</td><td class="col-freq">annually</td></tr>
+
+      <tr><td colspan="10" class="lab-cat cat-hematology">HEMATOLOGY (CBC)</td></tr>
+      <tr><td class="col-name">718-7</td><td>Hemoglobin</td><td>hematology</td><td class="col-unit">g/dL</td><td class="col-type">numeric</td><td class="col-range">12.0</td><td class="col-range">17.5</td><td style="color:#22C55E">13.5</td><td style="color:#22C55E">16.0</td><td class="col-freq">annually</td></tr>
+      <tr><td class="col-name">6690-2</td><td>WBC</td><td>hematology</td><td class="col-unit">10&sup3;/uL</td><td class="col-type">numeric</td><td class="col-range">3.4</td><td class="col-range">10.8</td><td style="color:#22C55E">4.0</td><td style="color:#22C55E">8.0</td><td class="col-freq">annually</td></tr>
+      <tr><td class="col-name">777-3</td><td>Platelets</td><td>hematology</td><td class="col-unit">10&sup3;/uL</td><td class="col-type">numeric</td><td class="col-range">150</td><td class="col-range">379</td><td style="color:#22C55E">175</td><td style="color:#22C55E">350</td><td class="col-freq">annually</td></tr>
+
+      <tr><td colspan="10" class="lab-cat cat-vitamin">VITAMINS & MINERALS</td></tr>
+      <tr><td class="col-name">1989-3</td><td>Vitamin D (25-OH)</td><td>vitamin</td><td class="col-unit">ng/mL</td><td class="col-type">numeric</td><td class="col-range">30</td><td class="col-range">100</td><td style="color:#22C55E">40</td><td style="color:#22C55E">70</td><td class="col-freq">semi-annually</td></tr>
+      <tr><td class="col-name">2132-9</td><td>Vitamin B12</td><td>vitamin</td><td class="col-unit">pg/mL</td><td class="col-type">numeric</td><td class="col-range">211</td><td class="col-range">946</td><td style="color:#22C55E">400</td><td style="color:#22C55E">800</td><td class="col-freq">annually</td></tr>
+      <tr><td class="col-name">2276-4</td><td>Ferritin</td><td>mineral</td><td class="col-unit">ng/mL</td><td class="col-type">numeric</td><td class="col-range">15</td><td class="col-range">150</td><td style="color:#22C55E">30</td><td style="color:#22C55E">100</td><td class="col-freq">annually</td></tr>
+
+      <tr><td colspan="10" class="lab-cat cat-hormonal">HORMONAL</td></tr>
+      <tr><td class="col-name">2986-8</td><td>Testosterone (Total)</td><td>hormonal</td><td class="col-unit">ng/dL</td><td class="col-type">numeric</td><td class="col-range">264</td><td class="col-range">916</td><td style="color:#22C55E">400</td><td style="color:#22C55E">800</td><td class="col-freq">annually</td></tr>
+      <tr><td class="col-name">2842-3</td><td>Cortisol (AM)</td><td>hormonal</td><td class="col-unit">ug/dL</td><td class="col-type">numeric</td><td class="col-range">6.2</td><td class="col-range">19.4</td><td style="color:#22C55E">10</td><td style="color:#22C55E">18</td><td class="col-freq">annually</td></tr>
+
+      <tr><td colspan="10" class="lab-cat cat-cardiac">CARDIAC</td></tr>
+      <tr><td class="col-name">42757-5</td><td>NT-proBNP</td><td>cardiac</td><td class="col-unit">pg/mL</td><td class="col-type">numeric</td><td class="col-range nullable">-</td><td class="col-range">125</td><td style="color:#22C55E" class="nullable">-</td><td style="color:#22C55E">100</td><td class="col-freq">as needed</td></tr>
+      <tr><td class="col-name">6598-7</td><td>Troponin T (hs)</td><td>cardiac</td><td class="col-unit">ng/L</td><td class="col-type">numeric</td><td class="col-range nullable">-</td><td class="col-range">14</td><td style="color:#22C55E" class="nullable">-</td><td style="color:#22C55E">10</td><td class="col-freq">as needed</td></tr>
+
+      <tr><td colspan="10" class="lab-cat cat-tumor_marker">TUMOR MARKERS</td></tr>
+      <tr><td class="col-name">2857-1</td><td>PSA</td><td>tumor_marker</td><td class="col-unit">ng/mL</td><td class="col-type">numeric</td><td class="col-range nullable">-</td><td class="col-range">4.0</td><td style="color:#22C55E" class="nullable">-</td><td style="color:#22C55E">2.0</td><td class="col-freq">annually</td></tr>
+    </tbody>
+  </table>
+  <div style="font-size:10px;color:#475569;margin-top:4px">Showing subset — full table has 60+ tests. See health-data-schema.sql for complete list.</div>
+</div>
+
+<!-- ═══ CLINICAL TABLES (compact) ═══ -->
+<div class="table-section" id="conditions">
+  <div class="table-header"><h2>conditions</h2><span class="badge badge-clinical">CLINICAL</span></div>
+  <div class="table-meta"><span class="src">Sources: b.well (EHR)</span><span class="freq">Frequency: per encounter</span></div>
+  <table>
+    <thead><tr><th>Column</th><th>Type</th><th>Description</th><th>Values</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">id<span class="pk">PK</span></td><td class="col-type">TEXT</td><td class="col-desc">UUID</td><td></td></tr>
+      <tr><td class="col-name">icd10_code</td><td class="col-type">TEXT</td><td class="col-desc">ICD-10 diagnosis code</td><td class="col-desc">e.g., E11.9, I10, J06.9</td></tr>
+      <tr><td class="col-name">snomed_code</td><td class="col-type">TEXT</td><td class="col-desc">SNOMED CT code</td><td></td></tr>
+      <tr><td class="col-name">display_name</td><td class="col-type">TEXT NOT NULL</td><td class="col-desc">Human-readable name</td><td class="col-desc">e.g., "Type 2 Diabetes"</td></tr>
+      <tr><td class="col-name">clinical_status</td><td class="col-type">TEXT</td><td class="col-desc">Current status</td><td class="col-desc"><span class="enum-vals">active, recurrence, relapse, inactive, remission, resolved</span></td></tr>
+      <tr><td class="col-name">severity</td><td class="col-type">TEXT</td><td class="col-desc">Severity level</td><td class="col-desc"><span class="enum-vals">mild, moderate, severe</span></td></tr>
+      <tr><td class="col-name">recorded_at</td><td class="col-type">TEXT NOT NULL</td><td class="col-desc">Onset date</td><td></td></tr>
+      <tr><td class="col-name">resolved_at</td><td class="col-type">TEXT</td><td class="col-desc">Resolved date (NULL if active)</td><td></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="table-section" id="medications">
+  <div class="table-header"><h2>medications</h2><span class="badge badge-clinical">CLINICAL</span></div>
+  <div class="table-meta"><span class="src">Sources: b.well (EHR), manual</span><span class="freq">Frequency: per prescription change</span></div>
+  <table>
+    <thead><tr><th>Column</th><th>Type</th><th>Unit</th><th>Description</th><th>Values</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">id<span class="pk">PK</span></td><td class="col-type">TEXT</td><td></td><td class="col-desc">UUID</td><td></td></tr>
+      <tr><td class="col-name">rxnorm_code</td><td class="col-type">TEXT</td><td></td><td class="col-desc">RxNorm drug code</td><td></td></tr>
+      <tr><td class="col-name">medication_name</td><td class="col-type">TEXT NOT NULL</td><td></td><td class="col-desc">Drug name</td><td class="col-desc">e.g., "Metformin 500mg"</td></tr>
+      <tr><td class="col-name">status</td><td class="col-type">TEXT</td><td></td><td class="col-desc">Prescription status</td><td class="col-desc"><span class="enum-vals">active, completed, stopped, on-hold, cancelled</span></td></tr>
+      <tr><td class="col-name">dose_value</td><td class="col-type">REAL</td><td class="col-unit">varies</td><td class="col-desc">Dose amount</td><td class="col-desc">e.g., 500</td></tr>
+      <tr><td class="col-name">dose_unit</td><td class="col-type">TEXT</td><td></td><td class="col-desc">Dose unit</td><td class="col-desc"><span class="enum-vals">mg, mL, mcg, units, puffs</span></td></tr>
+      <tr><td class="col-name">frequency</td><td class="col-type">TEXT</td><td></td><td class="col-desc">Dosing frequency</td><td class="col-desc"><span class="enum-vals">QD, BID, TID, QID, PRN, weekly</span></td></tr>
+      <tr><td class="col-name">route</td><td class="col-type">TEXT</td><td></td><td class="col-desc">Administration route</td><td class="col-desc"><span class="enum-vals">oral, topical, injection, inhalation, IV</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="table-section" id="allergies">
+  <div class="table-header"><h2>allergies</h2><span class="badge badge-clinical">CLINICAL</span></div>
+  <div class="table-meta"><span class="src">Sources: b.well (EHR)</span><span class="freq">Frequency: as discovered</span></div>
+  <table>
+    <thead><tr><th>Column</th><th>Type</th><th>Description</th><th>Values</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">allergen_name</td><td class="col-type">TEXT NOT NULL</td><td class="col-desc">Allergen</td><td class="col-desc">e.g., "Penicillin", "Peanuts"</td></tr>
+      <tr><td class="col-name">allergen_type</td><td class="col-type">TEXT</td><td class="col-desc">Category</td><td class="col-desc"><span class="enum-vals">food, medication, environment, biologic</span></td></tr>
+      <tr><td class="col-name">criticality</td><td class="col-type">TEXT</td><td class="col-desc">Risk level</td><td class="col-desc"><span class="enum-vals">low, high, unable-to-assess</span></td></tr>
+      <tr><td class="col-name">manifestation</td><td class="col-type">TEXT</td><td class="col-desc">Reaction type</td><td class="col-desc"><span class="enum-vals">rash, anaphylaxis, hives, nausea, swelling</span></td></tr>
+      <tr><td class="col-name">severity</td><td class="col-type">TEXT</td><td class="col-desc">Reaction severity</td><td class="col-desc"><span class="enum-vals">mild, moderate, severe</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="table-section" id="immunizations">
+  <div class="table-header"><h2>immunizations</h2><span class="badge badge-clinical">CLINICAL</span></div>
+  <div class="table-meta"><span class="src">Sources: b.well (EHR), state registries</span><span class="freq">Frequency: per vaccination</span></div>
+  <table>
+    <thead><tr><th>Column</th><th>Type</th><th>Description</th><th>Values</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">cvx_code</td><td class="col-type">TEXT</td><td class="col-desc">CVX vaccine code</td><td class="col-desc">e.g., 213 (COVID mRNA)</td></tr>
+      <tr><td class="col-name">vaccine_name</td><td class="col-type">TEXT NOT NULL</td><td class="col-desc">Vaccine name</td><td class="col-desc">e.g., "Pfizer COVID-19"</td></tr>
+      <tr><td class="col-name">dose_number</td><td class="col-type">INTEGER</td><td class="col-desc">Dose in series</td><td class="col-desc">1, 2, 3, ...</td></tr>
+      <tr><td class="col-name">status</td><td class="col-type">TEXT</td><td class="col-desc">Administration status</td><td class="col-desc"><span class="enum-vals">completed, not-done</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="table-section" id="encounters">
+  <div class="table-header"><h2>encounters</h2><span class="badge badge-clinical">CLINICAL</span></div>
+  <div class="table-meta"><span class="src">Sources: b.well (EHR)</span><span class="freq">Frequency: per visit</span></div>
+  <table>
+    <thead><tr><th>Column</th><th>Type</th><th>Description</th><th>Values</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">encounter_type</td><td class="col-type">TEXT</td><td class="col-desc">Visit type</td><td class="col-desc"><span class="enum-vals">office_visit, er, inpatient, telehealth, lab_visit</span></td></tr>
+      <tr><td class="col-name">class</td><td class="col-type">TEXT</td><td class="col-desc">Encounter class</td><td class="col-desc"><span class="enum-vals">ambulatory, emergency, inpatient, observation</span></td></tr>
+      <tr><td class="col-name">reason</td><td class="col-type">TEXT</td><td class="col-desc">Chief complaint</td><td></td></tr>
+      <tr><td class="col-name">provider_name</td><td class="col-type">TEXT</td><td class="col-desc">Treating provider</td><td></td></tr>
+      <tr><td class="col-name">facility_name</td><td class="col-type">TEXT</td><td class="col-desc">Where the visit occurred</td><td></td></tr>
+      <tr><td class="col-name">diagnoses</td><td class="col-type">TEXT</td><td class="col-desc">JSON array of ICD-10 codes</td><td></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="table-section" id="procedures">
+  <div class="table-header"><h2>procedures</h2><span class="badge badge-clinical">CLINICAL</span></div>
+  <div class="table-meta"><span class="src">Sources: b.well (EHR)</span><span class="freq">Frequency: per procedure</span></div>
+  <table>
+    <thead><tr><th>Column</th><th>Type</th><th>Description</th><th>Values</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">cpt_code</td><td class="col-type">TEXT</td><td class="col-desc">CPT procedure code</td><td></td></tr>
+      <tr><td class="col-name">procedure_name</td><td class="col-type">TEXT NOT NULL</td><td class="col-desc">Procedure name</td><td></td></tr>
+      <tr><td class="col-name">category</td><td class="col-type">TEXT</td><td class="col-desc">Type</td><td class="col-desc"><span class="enum-vals">surgical, diagnostic, therapeutic</span></td></tr>
+      <tr><td class="col-name">status</td><td class="col-type">TEXT</td><td class="col-desc">Status</td><td class="col-desc"><span class="enum-vals">completed, in-progress, not-done</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="table-section" id="care_plans">
+  <div class="table-header"><h2>care_plans</h2><span class="badge badge-clinical">CLINICAL</span></div>
+  <div class="table-meta"><span class="src">Sources: b.well (EHR)</span><span class="freq">Frequency: per plan</span></div>
+  <table>
+    <thead><tr><th>Column</th><th>Type</th><th>Description</th><th>Values</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">title</td><td class="col-type">TEXT NOT NULL</td><td class="col-desc">Plan title</td><td></td></tr>
+      <tr><td class="col-name">status</td><td class="col-type">TEXT</td><td class="col-desc">Plan status</td><td class="col-desc"><span class="enum-vals">active, completed, revoked, on-hold</span></td></tr>
+      <tr><td class="col-name">goals</td><td class="col-type">TEXT</td><td class="col-desc">JSON array of goals</td><td></td></tr>
+      <tr><td class="col-name">activities</td><td class="col-type">TEXT</td><td class="col-desc">JSON array of activities</td><td></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══ OMICS ═══ -->
+<div class="table-section" id="genomic_variants">
+  <div class="table-header"><h2>genomic_variants</h2><span class="badge badge-omics">OMICS</span></div>
+  <div class="table-meta"><span class="src">Sources: 23andMe, Illumina, Foundation Medicine</span><span class="freq">Frequency: once (WGS) or per panel</span></div>
+  <table>
+    <thead><tr><th>Column</th><th>Type</th><th>Description</th><th>Values / Example</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">gene</td><td class="col-type">TEXT NOT NULL</td><td class="col-desc">Gene symbol</td><td class="col-desc">BRCA1, APOE, MTHFR, CYP2D6</td></tr>
+      <tr><td class="col-name">rsid</td><td class="col-type">TEXT</td><td class="col-desc">dbSNP rs number</td><td class="col-desc">rs429358, rs7412</td></tr>
+      <tr><td class="col-name">chromosome</td><td class="col-type">TEXT</td><td class="col-desc">Chromosome</td><td class="col-desc">chr1 - chr22, chrX, chrY</td></tr>
+      <tr><td class="col-name">genotype</td><td class="col-type">TEXT</td><td class="col-desc">Allele pair</td><td class="col-desc">AG, CC, CT, TT</td></tr>
+      <tr><td class="col-name">zygosity</td><td class="col-type">TEXT</td><td class="col-desc">Zygosity</td><td class="col-desc"><span class="enum-vals">homozygous, heterozygous, hemizygous</span></td></tr>
+      <tr><td class="col-name">clinical_significance</td><td class="col-type">TEXT</td><td class="col-desc">ClinVar classification</td><td class="col-desc"><span class="enum-vals">pathogenic, likely_pathogenic, VUS, benign, likely_benign</span></td></tr>
+      <tr><td class="col-name">pharmacogenomic</td><td class="col-type">INTEGER</td><td class="col-desc">Affects drug metabolism?</td><td class="col-desc">0 = no, 1 = yes</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="table-section" id="microbiome">
+  <div class="table-header"><h2>microbiome</h2><span class="badge badge-omics">OMICS</span></div>
+  <div class="table-meta"><span class="src">Sources: Viome, Tiny Health, Gut.id, ZOE, BIOHM</span><span class="freq">Frequency: 1-4x per year</span></div>
+  <table>
+    <thead><tr><th>Column</th><th>Type</th><th>Unit</th><th>Range</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">sample_type</td><td class="col-type">TEXT</td><td></td><td></td><td class="col-desc"><span class="enum-vals">stool, oral, vaginal, skin</span></td></tr>
+      <tr><td class="col-name">test_type</td><td class="col-type">TEXT</td><td></td><td></td><td class="col-desc"><span class="enum-vals">16S, shotgun, metatranscriptomics</span></td></tr>
+      <tr><td class="col-name">shannon_diversity</td><td class="col-type">REAL</td><td class="col-unit">index</td><td class="col-range">0 - 6</td><td class="col-desc">Shannon diversity index</td></tr>
+      <tr><td class="col-name">firmicutes_pct</td><td class="col-type">REAL</td><td class="col-unit">%</td><td class="col-range">0 - 100</td><td class="col-desc">Firmicutes abundance</td></tr>
+      <tr><td class="col-name">bacteroidetes_pct</td><td class="col-type">REAL</td><td class="col-unit">%</td><td class="col-range">0 - 100</td><td class="col-desc">Bacteroidetes abundance</td></tr>
+      <tr><td class="col-name">fb_ratio</td><td class="col-type">REAL</td><td class="col-unit">ratio</td><td class="col-range">0.1 - 10</td><td class="col-desc">Firmicutes:Bacteroidetes</td></tr>
+      <tr><td class="col-name">gut_health_score</td><td class="col-type">INTEGER</td><td class="col-unit">score</td><td class="col-range">0 - 100</td><td class="col-desc">Provider composite score</td></tr>
+      <tr><td class="col-name">top_species</td><td class="col-type">TEXT</td><td></td><td></td><td class="col-desc">JSON: [{name, abundance_pct}]</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══ COMPUTED ═══ -->
+<div class="table-section" id="daily_snapshot">
+  <div class="table-header"><h2>daily_snapshot</h2><span class="badge badge-computed">COMPUTED</span></div>
+  <div class="table-meta"><span class="src">Aggregated from: vital_signs + sleep + activity + body_measurements</span><span class="freq">Frequency: daily (materialized view)</span></div>
+  <table>
+    <thead><tr><th>Column</th><th>Type</th><th>Unit</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">date</td><td class="col-type">TEXT UNIQUE</td><td></td><td class="col-desc">YYYY-MM-DD</td></tr>
+      <tr style="background:#1E293B"><td colspan="4" style="color:#F87171;font-size:10px;font-weight:700">VITALS</td></tr>
+      <tr><td class="col-name">resting_hr</td><td class="col-type">REAL</td><td class="col-unit">bpm</td><td class="col-desc">Daily resting HR</td></tr>
+      <tr><td class="col-name">hrv</td><td class="col-type">REAL</td><td class="col-unit">ms</td><td class="col-desc">Daily HRV</td></tr>
+      <tr><td class="col-name">bp_systolic / bp_diastolic</td><td class="col-type">REAL</td><td class="col-unit">mmHg</td><td class="col-desc">Blood pressure</td></tr>
+      <tr style="background:#1E293B"><td colspan="4" style="color:#A78BFA;font-size:10px;font-weight:700">SLEEP</td></tr>
+      <tr><td class="col-name">sleep_duration</td><td class="col-type">INTEGER</td><td class="col-unit">minutes</td><td class="col-desc">Total sleep</td></tr>
+      <tr><td class="col-name">sleep_score</td><td class="col-type">INTEGER</td><td class="col-unit">0-100</td><td class="col-desc">Device score</td></tr>
+      <tr style="background:#1E293B"><td colspan="4" style="color:#6EE7B7;font-size:10px;font-weight:700">ACTIVITY</td></tr>
+      <tr><td class="col-name">steps</td><td class="col-type">INTEGER</td><td class="col-unit">count</td><td class="col-desc">Daily steps</td></tr>
+      <tr><td class="col-name">strain / recovery / readiness</td><td class="col-type">REAL/INT</td><td class="col-unit">score</td><td class="col-desc">Device scores</td></tr>
+      <tr style="background:#1E293B"><td colspan="4" style="color:#FB923C;font-size:10px;font-weight:700">METABOLIC</td></tr>
+      <tr><td class="col-name">avg_glucose</td><td class="col-type">REAL</td><td class="col-unit">mg/dL</td><td class="col-desc">CGM daily average</td></tr>
+      <tr><td class="col-name">time_in_range_pct</td><td class="col-type">REAL</td><td class="col-unit">%</td><td class="col-desc">% time 70-180 mg/dL</td></tr>
+      <tr style="background:#1E293B"><td colspan="4" style="color:#E8751A;font-size:10px;font-weight:700">COMPOSITE SCORES (agent-computed)</td></tr>
+      <tr><td class="col-name">cardiovascular_score</td><td class="col-type">INTEGER</td><td class="col-unit">0-100</td><td class="col-desc">HR + HRV + BP synthesis</td></tr>
+      <tr><td class="col-name">metabolic_score</td><td class="col-type">INTEGER</td><td class="col-unit">0-100</td><td class="col-desc">Glucose + weight + labs</td></tr>
+      <tr><td class="col-name">overall_health_score</td><td class="col-type">INTEGER</td><td class="col-unit">0-100</td><td class="col-desc">Weighted composite</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="table-section" id="baselines">
+  <div class="table-header"><h2>baselines</h2><span class="badge badge-computed">COMPUTED</span></div>
+  <div class="table-meta"><span>Rolling 30-day averages per metric &mdash; used for drift detection</span></div>
+  <table>
+    <thead><tr><th>Column</th><th>Type</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">metric</td><td class="col-type">TEXT UNIQUE</td><td class="col-desc">e.g., "resting_hr", "hrv", "weight_kg", "sleep_duration"</td></tr>
+      <tr><td class="col-name">baseline_value</td><td class="col-type">REAL</td><td class="col-desc">30-day rolling average</td></tr>
+      <tr><td class="col-name">baseline_stddev</td><td class="col-type">REAL</td><td class="col-desc">Standard deviation</td></tr>
+      <tr><td class="col-name">window_days</td><td class="col-type">INTEGER</td><td class="col-desc">Window size (default 30)</td></tr>
+      <tr><td class="col-name">sample_count</td><td class="col-type">INTEGER</td><td class="col-desc">Number of data points in window</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="table-section" id="drift_alerts">
+  <div class="table-header"><h2>drift_alerts</h2><span class="badge badge-computed">COMPUTED</span></div>
+  <div class="table-meta"><span>Generated when current value deviates significantly from baseline</span></div>
+  <table>
+    <thead><tr><th>Column</th><th>Type</th><th>Description</th><th>Values</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">metric</td><td class="col-type">TEXT</td><td class="col-desc">Which metric drifted</td><td class="col-desc">e.g., "hrv", "resting_hr"</td></tr>
+      <tr><td class="col-name">baseline_value</td><td class="col-type">REAL</td><td class="col-desc">30-day average was</td><td></td></tr>
+      <tr><td class="col-name">current_value</td><td class="col-type">REAL</td><td class="col-desc">Current value is</td><td></td></tr>
+      <tr><td class="col-name">pct_change</td><td class="col-type">REAL</td><td class="col-desc">% change from baseline</td><td class="col-desc">e.g., -14.2</td></tr>
+      <tr><td class="col-name">severity</td><td class="col-type">TEXT</td><td class="col-desc">Alert level</td><td class="col-desc"><span class="enum-vals">info (&lt;10%), warning (10-20%), critical (&gt;20%)</span></td></tr>
+      <tr><td class="col-name">message</td><td class="col-type">TEXT</td><td class="col-desc">Human-readable alert</td><td class="col-desc">"HRV down 14% from 30-day average"</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="table-section" id="sync_log">
+  <div class="table-header"><h2>sync_log</h2><span class="badge badge-core">CORE</span></div>
+  <div class="table-meta"><span>Tracks every data fetch operation</span></div>
+  <table>
+    <thead><tr><th>Column</th><th>Type</th><th>Description</th><th>Values</th></tr></thead>
+    <tbody>
+      <tr><td class="col-name">source_id<span class="fk">FK</span></td><td class="col-type">TEXT</td><td class="col-desc">Which data_source</td><td></td></tr>
+      <tr><td class="col-name">status</td><td class="col-type">TEXT</td><td class="col-desc">Sync result</td><td class="col-desc"><span class="enum-vals">running, success, failed, partial</span></td></tr>
+      <tr><td class="col-name">records_fetched</td><td class="col-type">INTEGER</td><td class="col-desc">Records from source</td><td></td></tr>
+      <tr><td class="col-name">records_stored</td><td class="col-type">INTEGER</td><td class="col-desc">Records written to DB</td><td></td></tr>
+      <tr><td class="col-name">error_message</td><td class="col-type">TEXT</td><td class="col-desc">Error details if failed</td><td></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="footer">
+  XSpan-EHR Data Schema v1.0 &middot; Built by <a href="https://xspan.ai" style="color:#E8751A">XSpan.ai</a> &middot; SQLite + AES-256 &middot; FHIR R4 Compatible
+</div>
+
+</body>
+</html>

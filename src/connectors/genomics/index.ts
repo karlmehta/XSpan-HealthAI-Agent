@@ -119,23 +119,57 @@ export class TwentyThreeAndMeConnector implements GenomicsConnector {
    * The file format is tab-separated: rsid, chromosome, position, genotype
    * Lines starting with # are comments.
    */
+  /**
+   * Import variants from a 23andMe raw data file.
+   * Format: tab-separated — rsid, chromosome, position, genotype
+   * Lines starting with # are comments.
+   */
   async importRawDataFile(filePath: string): Promise<number> {
-    console.warn(`[23andMe] Raw data import from ${filePath} coming in v1.2`);
+    const { readFileSync } = await import('fs');
+    const content = readFileSync(filePath, 'utf-8');
+    return this.parseRawData(content);
+  }
 
-    // TODO v1.2: Parse raw data file
-    // const content = await fs.readFile(filePath, 'utf-8');
-    // const lines = content.split('\n').filter(l => !l.startsWith('#') && l.trim());
-    // for (const line of lines) {
-    //   const [rsid, , , genotype] = line.split('\t');
-    //   const known = KNOWN_VARIANTS.find(v => v.rsid === rsid);
-    //   if (known) {
-    //     const riskCount = countRiskAlleles(genotype, known.riskAllele);
-    //     this.variants.push({ rsid, gene: known.gene, genotype, riskAllele: known.riskAllele,
-    //       riskScore: riskCount / 2, category: known.category, description: known.description });
-    //   }
-    // }
+  /**
+   * Parse 23andMe raw data from a string (for upload handler).
+   */
+  parseRawData(content: string): number {
+    this.variants = [];
+    const lines = content.split('\n').filter(l => !l.startsWith('#') && l.trim().length > 0);
+    console.log(`[23andMe] Parsing ${lines.length} genotype lines...`);
 
-    return 0;
+    let matched = 0;
+    let total = 0;
+    const knownMap = new Map(KNOWN_VARIANTS.map(v => [v.rsid, v]));
+
+    for (const line of lines) {
+      const parts = line.split('\t');
+      if (parts.length < 4) continue;
+      total++;
+
+      const rsid = parts[0].trim();
+      const genotype = parts[3].trim();
+
+      if (genotype === '--' || genotype === 'DD' || genotype === 'II' || genotype === 'DI') continue;
+
+      const known = knownMap.get(rsid);
+      if (known) {
+        const riskCount = countRiskAlleles(genotype, known.riskAllele);
+        this.variants.push({
+          rsid,
+          gene: known.gene,
+          genotype,
+          riskAllele: known.riskAllele,
+          riskScore: riskCount / 2,
+          category: known.category,
+          description: known.description,
+        });
+        matched++;
+      }
+    }
+
+    console.log(`[23andMe] Parsed ${total} SNPs, matched ${matched} clinically relevant variants`);
+    return matched;
   }
 
   async disconnect(): Promise<void> {
@@ -197,6 +231,15 @@ export class GutIdConnector implements GenomicsConnector {
  * Keys are "{gene}_{category}" (e.g., "MTHFR_methylation"),
  * values are risk scores (0-1).
  */
+/** Count how many copies of the risk allele are present in the genotype */
+function countRiskAlleles(genotype: string, riskAllele: string): number {
+  let count = 0;
+  for (const ch of genotype) {
+    if (ch.toUpperCase() === riskAllele.toUpperCase()) count++;
+  }
+  return count;
+}
+
 function variantsToRiskMap(variants: GeneticVariant[]): Record<string, number> {
   const riskMap: Record<string, number> = {};
 

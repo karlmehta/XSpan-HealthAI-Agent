@@ -1,11 +1,14 @@
 {
   "name": "@myhealthspan/agent",
   "version": "1.0.0",
-  "description": "MyHealthSpan Agent — Open Source autonomous health intelligence running on your laptop",
-  "main": "dist/agent/index.js",
+  "description": "Personal health intelligence agent — wearables + medical records + labs, synthesized with clinical-grade AI insights. $5.99/mo",
+  "main": "dist/index.js",
   "bin": {
-    "xspan-agent": "dist/cli.js"
+    "mhs": "dist/index.js",
+    "myhealthspan": "dist/index.js",
+    "xspan-agent": "dist/index.js"
   },
+  "private": false,
   "type": "module",
   "engines": {
     "node": ">=18.0.0"
@@ -13,6 +16,9 @@
   "scripts": {
     "start": "node dist/agent/index.js",
     "dev": "tsx watch src/agent/index.ts",
+    "mhs": "tsx src/mhs.ts",
+    "mcp": "tsx src/mcp-server.ts",
+    "admin": "tsx src/dashboard/admin.ts",
     "build": "tsc",
     "build:swift": "swift build -C scripts/apple-health-bridge --configuration release",
     "setup": "node scripts/install.js",
@@ -24,9 +30,14 @@
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
     "format": "prettier --write src",
+    "build:bin": "npm run build && bash scripts/build-binaries.sh",
+    "build:mac": "bash scripts/package-mac.sh",
+    "build:all": "npm run build:bin && npm run build:mac",
     "prepublishOnly": "npm run build && npm test"
   },
   "dependencies": {
+    "@icanbwell/bwell-sdk-ts": "^1.77.0",
+    "@trustmodel/mcp-server": "github:pdxlab/trustmodel-mcp-server",
     "axios": "^1.6.7",
     "better-sqlite3": "^12.8.0",
     "chalk": "^5.3.0",
@@ -37,6 +48,8 @@
     "node-notifier": "^10.0.1",
     "open": "^10.1.0",
     "ora": "^8.0.1",
+    "pdf-parse": "^1.1.1",
+    "pdf2json": "^4.0.3",
     "pdfkit": "^0.15.0",
     "uuid": "^9.0.0",
     "zod": "^3.22.4"
@@ -63,10 +76,15 @@
     "scripts/install.js",
     "scripts/setup.sh",
     "scripts/apple-health-bridge/.build/release/AppleHealthBridge",
+    "mcp-config.json",
     ".env.example",
     "README.md",
     "LICENSE"
   ],
+  "funding": {
+    "type": "individual",
+    "url": "https://xspan.ai"
+  },
   "keywords": [
     "health",
     "ai-agent",

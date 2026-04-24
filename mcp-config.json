@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "myhealthspan": {
+      "command": "npx",
+      "args": ["@myhealthspan/agent", "mcp"],
+      "env": {
+        "XSPAN_API_KEY": "<your-api-key>"
+      }
+    }
+  }
+}

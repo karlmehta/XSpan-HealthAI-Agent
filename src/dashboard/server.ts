@@ -365,285 +365,81 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0B0F1A; col
 
 <div class="main">
 
-  <!-- ═══ TODAY ═══ -->
+  <!-- ═══ INSIGHTS ═══ -->
   <div class="page active" id="page-home">
     ${(() => {
-      const b = snapshot?.biomarkers;
-      const hasData = b && b.dataCompleteness > 0;
-      const isPartial = hasData && b.dataCompleteness < 0.5;
-      const isFull = hasData && b.dataCompleteness >= 0.5;
-      const isPro = currentUser?.tier === 'pro';
-      const completePct = b ? Math.round(b.dataCompleteness * 100) : 0;
-
-      // Helper for metric display
-      const metric = (val: number | undefined, unit: string, label: string, icon: string) =>
-        '<div class="stat-card">' +
-        '<div style="font-size:14px;margin-bottom:4px">' + icon + '</div>' +
-        '<div class="value" style="font-size:' + (val !== undefined ? '28px' : '20px') + '">' + (val !== undefined ? val : '—') + '</div>' +
-        '<div class="label">' + (val !== undefined ? unit : 'No data') + '</div>' +
-        '<div style="font-size:10px;color:#64748B;margin-top:2px">' + label + '</div>' +
-        '</div>';
-
       return `
 
-    <!-- Security Badge -->
-    <div class="hipaa-note" style="flex-direction:column;align-items:start;gap:6px">
-      <div style="display:flex;align-items:center;gap:8px">
-        <span style="font-size:16px">🔒</span>
-        <strong>Your Data Never Leaves Your Device</strong>
-      </div>
-      <div style="font-size:11px;color:#6EE7B7;line-height:1.6">
-        AES-256 encrypted on your device · All processing happens locally — nothing is sent to any server · No one can access your health data — not even XSpan · Your data, your device, your control
-      </div>
-    </div>
-
-    ${!hasData ? `
-    <!-- ═══ NO DATA STATE ═══ -->
-    <div style="text-align:center;padding:32px 0 16px">
-      <div style="font-size:48px;margin-bottom:12px">🌟</div>
-      <h2 style="font-size:24px;font-weight:800;color:#fff;margin-bottom:8px">Welcome to XSpan HealthAI</h2>
-      <p style="font-size:14px;color:#94A3B8;max-width:480px;margin:0 auto">Your personal health intelligence agent. Connect your health data to see personalized insights, trends, and recommendations.</p>
-    </div>
-
-    <!-- Data Completeness (top, shows 0%) -->
-    <div class="card" style="margin-bottom:20px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <h3 style="font-size:14px">Data Completeness</h3>
-        <span style="font-size:14px;font-weight:700;color:#EF4444">0%</span>
-      </div>
-      <div style="background:#0F172A;border-radius:8px;height:8px;overflow:hidden">
-        <div style="background:#EF4444;height:100%;width:0%;border-radius:8px"></div>
-      </div>
-      <div style="display:flex;gap:12px;margin-top:10px;flex-wrap:wrap">
-        ${['Vitals','Sleep','Activity','Labs','Nutrition','Genomics'].map(s =>
-          '<span style="font-size:10px;padding:3px 8px;border-radius:100px;background:#33415522;color:#64748B">' + s + '</span>'
-        ).join('')}
-      </div>
-      <p style="font-size:11px;color:#94A3B8;margin-top:10px">Connect your health sources below to fill in your health picture. The more you connect, the better your insights.</p>
-    </div>
-
-    <!-- Demo Mode — see what it looks like when fully connected -->
-    <div class="card" style="margin-bottom:24px;border-color:#E8751A33;background:linear-gradient(135deg,#1E293B,#1A1A2E)">
-      <div style="display:flex;align-items:center;gap:16px">
-        <div style="font-size:40px">✨</div>
-        <div style="flex:1">
-          <h3 style="font-size:16px;margin-bottom:6px;color:#fff">See What You'll Get — Preview with Demo Data</h3>
-          <p style="font-size:12px;color:#94A3B8;line-height:1.6;margin-bottom:12px">
-            See exactly how XSpan looks when all your devices and providers are connected — readiness scores, sleep analysis, HRV trends, lab insights, drift detection, and more. Then connect your real sources to get <strong style="color:#E2E8F0">your</strong> personalized intelligence.
-          </p>
-          <button class="btn btn-primary" style="font-size:14px;padding:10px 24px" onclick="loadDemoData(this)">Preview with Demo Data</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Free Tier Value Prop -->
-    <div class="card" style="margin-bottom:20px;border-color:#05966933">
-      <h3 style="font-size:16px;margin-bottom:12px;color:#6EE7B7">What You Get Free — Forever</h3>
-      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;font-size:12px;color:#CBD5E1;line-height:1.8">
-        <div>✓ Connect EHR, wearables, labs, genomics, microbiome</div>
-        <div>✓ All data AES-256 encrypted &amp; stored locally</div>
-        <div>✓ 100+ biomarker synthesis &amp; trends</div>
-        <div>✓ Readiness score &amp; drift detection</div>
-        <div>✓ Weekly basic health summary</div>
-        <div>✓ <strong style="color:#E8751A">XSpan Contribute</strong> — earn from de-identified research data</div>
-      </div>
-    </div>
-
-    <!-- Pro Upsell Preview -->
-    <div class="pro-banner" style="margin-bottom:20px">
-      <div>
-        <h3>Unlock Pro for Predictive Intelligence</h3>
-        <p style="margin-top:6px;font-size:12px;color:#94A3B8;line-height:1.6">
-          🔮 Predictive risk scores &nbsp; 💡 3x daily AI nudges &nbsp; 📊 Weekly Health Passport<br>
-          🧬 Digital Twin synthesis &nbsp; 🥗 AI meal parsing &nbsp; ❓ Ask anything about your health
-        </p>
-      </div>
-      <button class="btn btn-primary" style="white-space:nowrap" onclick="showPage('subscription',document.querySelectorAll('.nav a')[3])">Learn about Premium</button>
-    </div>
-
-    ` : `
-    <!-- ═══ DATA STATE (Partial or Full) ═══ -->
-
-    <!-- Data Completeness Bar (top) -->
-    <div class="card" style="margin-bottom:20px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <h3 style="font-size:14px">Data Completeness</h3>
-        <span style="font-size:14px;font-weight:700;color:${completePct >= 70 ? '#22C55E' : completePct >= 40 ? '#FBBF24' : '#EF4444'}">${completePct}%</span>
-      </div>
-      <div style="background:#0F172A;border-radius:8px;height:8px;overflow:hidden">
-        <div style="background:${completePct >= 70 ? '#22C55E' : completePct >= 40 ? '#FBBF24' : '#EF4444'};height:100%;width:${completePct}%;border-radius:8px;transition:width 0.3s"></div>
-      </div>
-      <div style="display:flex;gap:12px;margin-top:10px;flex-wrap:wrap">
-        ${[
-          { name: 'Vitals', has: b?.restingHeartRate !== undefined },
-          { name: 'Sleep', has: b?.totalSleepMinutes !== undefined },
-          { name: 'Activity', has: b?.dailySteps !== undefined },
-          { name: 'Labs', has: b?.hba1c !== undefined || b?.ldlCholesterol !== undefined },
-          { name: 'Nutrition', has: b?.avgDailyCalories !== undefined },
-          { name: 'Genomics', has: b?.genomeRiskVariants !== undefined },
-        ].map(s =>
-          '<span style="font-size:10px;padding:3px 8px;border-radius:100px;' +
-          (s.has ? 'background:#05966922;color:#6EE7B7' : 'background:#33415522;color:#64748B;cursor:pointer') +
-          '">' + (s.has ? '✓ ' : '+ ') + s.name + '</span>'
-        ).join('')}
-      </div>
-    </div>
-
-    <!-- Demo Mode Banner -->
-    <div id="demo-banner" style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:#FBBF2411;border:1px solid #FBBF2433;border-radius:8px;margin-bottom:20px">
-      <span style="font-size:20px">⚠️</span>
-      <p style="flex:1;font-size:12px;color:#FBBF24"><strong>You're viewing demo data.</strong> This is synthetic sample data showing what XSpan looks like when fully connected. Connect your real health sources to see <strong>your</strong> personalized intelligence.</p>
-      <button class="btn btn-secondary" style="font-size:11px;padding:6px 14px;white-space:nowrap;background:#FBBF24;color:#000" onclick="exitDemoMode(this)">Exit Demo → Connect Real Data</button>
-    </div>
-
-    <!-- Top Summary -->
+    <!-- Header -->
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
       <div>
-        <h2 style="font-size:22px;font-weight:800;color:#fff;margin-bottom:4px">Today</h2>
-        <p style="font-size:12px;color:#64748B">${new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} · ${completePct}% data completeness</p>
+        <h2 style="font-size:22px;font-weight:800;color:#fff;margin-bottom:4px">Health Insights</h2>
+        <p style="font-size:12px;color:#64748B">${new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
       </div>
-      <div style="display:flex;align-items:center;gap:12px">
-        ${b?.recoveryScore !== undefined ? `
-        <div style="text-align:center">
-          <div style="font-size:32px;font-weight:800;color:${b.recoveryScore >= 70 ? '#22C55E' : b.recoveryScore >= 40 ? '#FBBF24' : '#EF4444'}">${b.recoveryScore}</div>
-          <div style="font-size:10px;color:#64748B">Readiness</div>
-        </div>
-        ` : ''}
-        ${b?.stressIndex !== undefined ? `
-        <div style="text-align:center">
-          <div style="font-size:32px;font-weight:800;color:${b.stressIndex <= 30 ? '#22C55E' : b.stressIndex <= 60 ? '#FBBF24' : '#EF4444'}">${b.stressIndex}</div>
-          <div style="font-size:10px;color:#64748B">Stress</div>
-        </div>
-        ` : ''}
+      <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:#64748B">
+        <span style="width:6px;height:6px;border-radius:50%;background:#22C55E;display:inline-block"></span> AES-256 encrypted locally
       </div>
     </div>
 
-    <!-- Synthesis Value Prop -->
-    <div class="card" style="margin-bottom:20px;border-color:#E8751A33;background:linear-gradient(135deg,#1A1A2E,#1E293B)">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
-        <span style="font-size:24px">🔗</span>
-        <div>
-          <h3 style="font-size:15px;color:#E8751A;margin-bottom:2px">Synthesized Health Intelligence</h3>
-          <p style="font-size:12px;color:#94A3B8">Your health data is scattered across Oura, WHOOP, Dexcom, Apple Watch, MyChart, Quest Labs, and more. XSpan brings it all together into one unified view — trends you can't see in any single app.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Synthesized Trend Charts -->
+    <!-- Trend Charts — always visible, greyed out placeholders when no data -->
     <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:24px">
 
-      <!-- Cardiovascular Synthesis: HR + HRV + BP from multiple sources -->
       <div class="card" style="grid-column:span 2">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <h3 style="font-size:14px">❤️ Cardiovascular Synthesis</h3>
-          <span style="font-size:10px;color:#64748B">Sources: Apple Watch (HR) + Oura (HRV) + Omron (BP) + EHR (Labs)</span>
+          <h3 style="font-size:14px">&#x2764;&#xFE0F; Cardiovascular</h3>
+          <span style="font-size:10px;color:#64748B">HR + HRV + Blood Pressure</span>
         </div>
         <canvas id="chart-cardio" height="140"></canvas>
       </div>
 
-      <!-- Sleep + Recovery: sleep duration + efficiency + HRV recovery -->
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <h3 style="font-size:14px">😴 Sleep &amp; Recovery</h3>
-          <span style="font-size:10px;color:#64748B">Sources: Oura + WHOOP + Apple Watch</span>
+          <h3 style="font-size:14px">&#x1F634; Sleep & Recovery</h3>
+          <span style="font-size:10px;color:#64748B">Duration + Stages + HRV</span>
         </div>
         <canvas id="chart-sleep" height="160"></canvas>
       </div>
 
-      <!-- Metabolic: Weight + Glucose + HbA1c from scale + CGM + labs -->
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <h3 style="font-size:14px">🔥 Metabolic Health</h3>
-          <span style="font-size:10px;color:#64748B">Sources: Dexcom CGM + Scale + Quest Labs (HbA1c)</span>
+          <h3 style="font-size:14px">&#x1F525; Metabolic</h3>
+          <span style="font-size:10px;color:#64748B">Glucose + HbA1c + Weight</span>
         </div>
         <canvas id="chart-metabolic" height="160"></canvas>
       </div>
 
-      <!-- Activity + Fitness: Steps + Active mins + VO2 Max -->
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <h3 style="font-size:14px">🏃 Activity &amp; Fitness</h3>
-          <span style="font-size:10px;color:#64748B">Sources: WHOOP + Garmin + Apple Watch</span>
+          <h3 style="font-size:14px">&#x1F3C3; Activity</h3>
+          <span style="font-size:10px;color:#64748B">Steps + Active Min + Calories</span>
         </div>
         <canvas id="chart-activity" height="160"></canvas>
       </div>
 
-      <!-- Body Composition: Weight + BMI from scale + computed -->
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <h3 style="font-size:14px">⚖️ Body Composition</h3>
-          <span style="font-size:10px;color:#64748B">Sources: Smart Scale + Apple Health + Computed</span>
+          <h3 style="font-size:14px">&#x2696;&#xFE0F; Body Composition</h3>
+          <span style="font-size:10px;color:#64748B">Weight + BMI</span>
         </div>
         <canvas id="chart-body" height="160"></canvas>
       </div>
     </div>
 
-    <!-- What Changed (7-day drift) — loaded via API -->
-    <div class="card" style="margin-bottom:20px" id="drift-section">
-      <h3 style="font-size:16px;margin-bottom:12px">What Changed (7 Days)</h3>
-      <div id="drift-content" style="font-size:13px;color:#94A3B8">Loading trends...</div>
-    </div>
-
-    <!-- Top Issues -->
-    ${todayNudges.length > 0 ? `
-    <div class="card" style="margin-bottom:20px;border-color:#FBBF2433">
-      <h3 style="font-size:16px;margin-bottom:12px">Top Issues Today</h3>
-      ${todayNudges.slice(0, 3).map(n =>
-        '<div style="display:flex;align-items:start;gap:10px;padding:10px 0;border-bottom:1px solid #334155">' +
-        '<span style="font-size:18px">' + (n.priority === 1 ? '🔴' : n.priority === 2 ? '🟡' : '🟢') + '</span>' +
-        '<div><p style="font-size:13px;color:#E2E8F0;margin-bottom:4px">' + n.content + '</p>' +
-        (n.actionItems?.length ? '<p style="font-size:11px;color:#E8751A">→ ' + n.actionItems[0] + '</p>' : '') +
-        '</div></div>'
-      ).join('')}
-    </div>
-    ` : `
-    <div class="card" style="margin-bottom:20px">
-      <h3 style="font-size:16px;margin-bottom:8px">No Issues Detected</h3>
-      <p style="font-size:12px;color:#94A3B8">All metrics are within your normal ranges. Keep it up!</p>
-    </div>
-    `}
-
-    <!-- Recent Health Records from EHR -->
+    <!-- Recent Health Records from EHR (b.well) -->
     <div class="card" style="margin-bottom:20px" id="ehr-records-section">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <h3 style="font-size:16px">Recent Health Records</h3>
-        <span style="font-size:10px;color:#64748B">From connected health systems</span>
+        <h3 style="font-size:16px">Health Records</h3>
+        <span style="font-size:10px;color:#64748B">From connected EHR + wearables</span>
       </div>
       <div id="ehr-records-content" style="font-size:13px;color:#94A3B8">Loading records...</div>
     </div>
 
-    <!-- Privacy & Security (collapsible) -->
-    <div class="card" style="margin-bottom:20px;cursor:pointer" onclick="this.querySelector('.trust-detail').style.display=this.querySelector('.trust-detail').style.display==='none'?'block':'none'">
-      <div style="display:flex;align-items:center;justify-content:space-between">
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:18px">🛡️</span>
-          <h3 style="font-size:14px">Security, Privacy &amp; Trust</h3>
-        </div>
-        <span style="font-size:11px;color:#64748B">click to expand ▾</span>
-      </div>
-      <div class="trust-detail" style="display:none;margin-top:12px;font-size:12px;color:#94A3B8;line-height:1.8">
-        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px">
-          <div style="background:#0F172A;padding:12px;border-radius:8px">
-            <div style="color:#6EE7B7;font-weight:600;margin-bottom:4px">🔒 Encrypted Local Storage</div>
-            Your health data is encrypted with AES-256 in a local SQLite database on your device. Even if someone accessed your laptop, they cannot read your health data without your encryption key.
-          </div>
-          <div style="background:#0F172A;padding:12px;border-radius:8px">
-            <div style="color:#FBBF24;font-weight:600;margin-bottom:4px">🖥️ 100% Local Processing</div>
-            All data collection, synthesis, and insights happen entirely on your machine. Nothing is sent to any cloud server. Your health data never touches the internet.
-          </div>
-          <div style="background:#0F172A;padding:12px;border-radius:8px">
-            <div style="color:#EF4444;font-weight:600;margin-bottom:4px">🚫 No External Services</div>
-            Your health data is never sent to any AI service, cloud platform, or third party. Everything runs locally on your device.
-          </div>
-          <div style="background:#0F172A;padding:12px;border-radius:8px">
-            <div style="color:#C4B5FD;font-weight:600;margin-bottom:4px">✊ You Own Your Data</div>
-            Delete all data anytime · Revoke any connection · Export everything · Contribute uses on-device de-identification before anything leaves
-          </div>
-        </div>
-      </div>
+    <!-- Drift Detection -->
+    <div class="card" style="margin-bottom:20px" id="drift-section">
+      <h3 style="font-size:16px;margin-bottom:12px">Changes from Baseline</h3>
+      <div id="drift-content" style="font-size:13px;color:#94A3B8">Monitoring trends...</div>
     </div>
 
-    `}
     `;
     })()}
   </div>
@@ -715,61 +511,86 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0B0F1A; col
     <!-- ── HEALTH SYSTEMS ── -->
     <div class="connect-sub active" id="connect-health-systems">
     <div class="section-title">Connect to Your Health System</div>
-    <p style="font-size:12px;color:#94A3B8;margin-bottom:16px">Search for your hospital or health system. Log in with your patient portal credentials (MyChart, etc.) and authorize XSpan to read your records.</p>
+    <p style="font-size:12px;color:#94A3B8;margin-bottom:16px">Connect to 2.4M+ healthcare providers via b.well Connected Health. Your data is retrieved securely and stored locally.</p>
 
-    <input type="text" class="search" placeholder="Search hospitals and health systems (e.g., UCLA, Stanford, Kaiser, Mayo, Cleveland Clinic)..." oninput="filterEHR(this.value)">
-    <div class="card-grid" id="ehr-grid">
-      ${HEALTH_SYSTEMS.map((hs, i) => `
-        <div class="card ehr-card" data-name="${hs.name.toLowerCase()}" data-portal="${hs.portalUrl}" data-ehrname="${hs.name}" data-fhir="${hs.fhirUrl}" data-auth="${hs.authUrl || ''}" data-token="${hs.tokenUrl || ''}" data-clientid="${hs.clientId || '8ce98706-fcb3-4cd9-a4ad-b793ed96e375'}" data-idx="${i}">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
-            <div style="width:36px;height:36px;border-radius:8px;background:#1E293B;display:flex;align-items:center;justify-content:center;font-size:18px">🏥</div>
-            <div>
-              <h3 style="font-size:14px;margin:0">${hs.name}</h3>
-              <div style="font-size:10px;color:#64748B">${hs.region}</div>
-            </div>
-          </div>
-          <div style="display:flex;gap:8px;align-items:center">
-            <button class="btn btn-primary" style="font-size:11px;padding:6px 12px" onclick="connectEHR(this)">Connect</button>
-            ${hs.portalUrl ? '<a href="' + hs.portalUrl + '" target="_blank" style="font-size:10px;color:#64748B">Patient Portal</a>' : ''}
-          </div>
+    <!-- b.well Connect (Primary) -->
+    <div id="bwell-connect-panel" style="background:#0F172A;border:2px solid #22C55E44;border-radius:12px;padding:20px;margin-bottom:20px">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+        <div style="width:44px;height:44px;border-radius:10px;background:#22C55E22;display:flex;align-items:center;justify-content:center;font-size:22px">&#x1F3E5;</div>
+        <div>
+          <h3 style="font-size:16px;margin:0;color:#fff">Connect via b.well <span style="font-size:10px;color:#22C55E;background:#22C55E22;padding:2px 8px;border-radius:4px;margin-left:8px">RECOMMENDED</span></h3>
+          <div style="font-size:11px;color:#94A3B8">2.4M+ providers — Epic, Cerner, Allscripts, athenahealth and more</div>
         </div>
-      `).join('')}
-    </div>
-    <p style="font-size:10px;color:#475569;margin-top:12px">Connected via SMART on FHIR R4 — you log in with your own credentials. XSpan never stores your password.</p>
+      </div>
+
+      <div id="bwell-login-form" style="display:flex;flex-direction:column;gap:10px;max-width:400px">
+        <div style="font-size:11px;color:#64748B;margin-bottom:4px">Sign in with your b.well account to link your health records:</div>
+        <input type="email" id="bwell-email" placeholder="Email address" value="" style="padding:10px 12px;border-radius:8px;border:1px solid #334155;background:#1E293B;color:#fff;font-size:13px">
+        <input type="password" id="bwell-password" placeholder="Password" value="" style="padding:10px 12px;border-radius:8px;border:1px solid #334155;background:#1E293B;color:#fff;font-size:13px">
+        <div style="display:flex;gap:10px;align-items:center">
+          <button class="btn btn-primary" style="padding:10px 24px;font-size:13px" onclick="connectBwell()">Connect Health Records</button>
+          <span id="bwell-status" style="font-size:11px;color:#64748B"></span>
+        </div>
+      </div>
+
+      <div id="bwell-connected" style="display:none">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+          <span style="color:#22C55E;font-size:18px">&#x2713;</span>
+          <span style="color:#22C55E;font-weight:700">Connected via b.well</span>
+          <span id="bwell-record-count" style="font-size:11px;color:#94A3B8;margin-left:8px"></span>
+        </div>
+        <div id="bwell-data-summary" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"></div>
+        <button class="btn btn-outline" style="margin-top:12px;font-size:11px;padding:6px 16px" onclick="refreshBwellData()">Refresh Data</button>
+      </div>
     </div>
 
-    <!-- ── WEARABLES ── -->
+    <!-- Supported EHR systems info -->
+    <div style="margin-top:16px;background:#1E293B;border:1px solid #334155;border-radius:8px;padding:14px">
+      <div style="font-size:11px;color:#94A3B8;margin-bottom:8px;font-weight:600">Supported Health Systems (via b.well)</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        ${['Epic MyChart', 'Cerner', 'Allscripts', 'athenahealth', 'eClinicalWorks', 'Meditech', 'NextGen', 'Greenway', 'DrChrono', 'Practice Fusion'].map(n =>
+          '<span style="padding:3px 8px;border-radius:4px;background:#0F172A;font-size:10px;color:#64748B">' + n + '</span>'
+        ).join('')}
+        <span style="padding:3px 8px;border-radius:4px;background:#0F172A;font-size:10px;color:#E8751A">+ 640 more</span>
+      </div>
+      <div style="font-size:10px;color:#475569;margin-top:8px">b.well connects to 650+ EHR systems including Epic, Cerner, Allscripts, and athenahealth. Labs, vitals, medications, conditions, allergies, immunizations, and encounters — all in one connection.</div>
+    </div>
+    </div>
+
+    <!-- ── WEARABLES (ROOK) ── -->
     <div class="connect-sub" id="connect-wearables" style="display:none">
     <div class="section-title">Connect Your Wearables & Devices</div>
-    <p style="font-size:12px;color:#94A3B8;margin-bottom:16px">Click on your device to connect. You will be redirected to log in with your device account credentials.</p>
+    <p style="font-size:12px;color:#94A3B8;margin-bottom:16px">1-click connect to 400+ wearables via ROOK. Click your device, authorize with your account, and data syncs automatically.</p>
 
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+    <!-- Source status indicator -->
+    <div id="rook-status" style="background:#0F172A;border:1px solid #334155;border-radius:8px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:8px">
+      <div style="width:8px;height:8px;border-radius:50%;background:#FBBF24"></div>
+      <span style="font-size:12px;color:#94A3B8">Loading wearable status...</span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px" id="rook-grid">
       ${[
-        { id: 'OURA', icon: '💍', name: 'Oura Ring', desc: 'Sleep, HRV, readiness, temperature' },
-        { id: 'WHOOP', icon: '💪', name: 'WHOOP', desc: 'Strain, recovery, sleep, HRV' },
-        { id: 'DEXCOM', icon: '🩸', name: 'Dexcom CGM', desc: 'Continuous glucose monitoring' },
-        { id: 'GARMIN', icon: '⌚', name: 'Garmin', desc: 'Activity, sleep, stress, body battery' },
-        { id: 'FITBIT', icon: '📱', name: 'Fitbit', desc: 'Steps, HR, sleep, SpO2' },
-        { id: 'GOOGLE', icon: '🤖', name: 'Google Health', desc: 'Activity, sleep, heart rate' },
-        { id: 'WITHINGS', icon: '⚖️', name: 'Withings', desc: 'Weight, BP, sleep, temp' },
-        { id: 'OMRON', icon: '🫀', name: 'Omron', desc: 'Blood pressure monitoring' },
-        { id: 'POLAR', icon: '❄️', name: 'Polar', desc: 'HR, activity, sleep, training' },
-        { id: 'STRAVA', icon: '🏃', name: 'Strava', desc: 'Running, cycling, workouts' },
-        { id: 'PELOTON', icon: '🏋️', name: 'Peloton', desc: 'Workouts, output, HR' },
-        { id: 'EIGHTSLEEP', icon: '💤', name: 'Eight Sleep', desc: 'Sleep tracking, bed temp' },
-        { id: 'ULTRAHUMAN', icon: '🧬', name: 'Ultrahuman', desc: 'CGM, sleep, movement' },
-        { id: 'SUUNTO', icon: '🔵', name: 'Suunto', desc: 'Sports tracking, HR, GPS' },
-        { id: 'WAHOO', icon: '🚴', name: 'Wahoo', desc: 'Cycling, HR, power' },
+        { id: 'oura', icon: '&#x1F48D;', name: 'Oura Ring', desc: 'Sleep, HRV, readiness, temperature' },
+        { id: 'whoop', icon: '&#x1F4AA;', name: 'WHOOP', desc: 'Strain, recovery, sleep, HRV' },
+        { id: 'dexcom', icon: '&#x1FA78;', name: 'Dexcom CGM', desc: 'Continuous glucose monitoring' },
+        { id: 'garmin', icon: '&#x1F3C3;', name: 'Garmin', desc: 'Activity, sleep, stress, body battery' },
+        { id: 'fitbit', icon: '&#x231A;', name: 'Fitbit', desc: 'Steps, HR, sleep, SpO2' },
+        { id: 'withings', icon: '&#x2696;&#xFE0F;', name: 'Withings', desc: 'Weight, BP, sleep, ECG, temp' },
+        { id: 'polar', icon: '&#x2744;&#xFE0F;', name: 'Polar', desc: 'HR, training load, sleep, recovery' },
+        { id: 'apple_health', icon: '&#x1F34E;', name: 'Apple Health', desc: 'Steps, HR, HRV, sleep, SpO2' },
+        { id: 'google_fit', icon: '&#x1F4F1;', name: 'Google Fit', desc: 'Activity, sleep, heart rate' },
+        { id: 'health_connect', icon: '&#x1F4F2;', name: 'Health Connect', desc: 'Android unified health (Samsung, Pixel)' },
+        { id: 'android', icon: '&#x1F916;', name: 'Android SDK', desc: 'Direct device sensors' },
       ].map(d => `
-        <div class="card" style="cursor:pointer;text-align:center;padding:16px" data-terra-provider="${d.id}" onclick="connectWearable(this)">
+        <div class="card rook-source" id="rook-${d.id}" data-source="${d.id}" style="cursor:pointer;text-align:center;padding:16px" onclick="connectRook('${d.id}', this)">
           <div style="font-size:28px;margin-bottom:8px">${d.icon}</div>
           <h3 style="font-size:13px;margin-bottom:4px">${d.name}</h3>
           <p style="font-size:10px;color:#64748B;margin-bottom:8px">${d.desc}</p>
-          <span class="badge" style="font-size:9px">CONNECT</span>
+          <span class="badge" id="rook-badge-${d.id}" style="font-size:9px">CONNECT</span>
         </div>
       `).join('')}
     </div>
-    <p style="font-size:10px;color:#475569;margin-top:12px">Connected via Terra API — you log in with your device account. XSpan never stores your credentials.</p>
+    <p style="font-size:10px;color:#475569;margin-top:12px">Connected via ROOK (tryrook.io) — 400+ devices. You authorize with your wearable account. Data syncs automatically via webhooks.</p>
     </div>
     <div class="connect-sub" id="connect-labs" style="display:none">
     <div class="section-title">Connect Lab Providers</div>
@@ -868,7 +689,7 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0B0F1A; col
       <p style="font-size:13px;color:#94A3B8;line-height:1.6;margin-bottom:12px">The EHDS enables patients to access their health data electronically across EU member states. Select your country below:</p>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">
         ${['🇫🇷 France (Mon Espace Sante)', '🇩🇪 Germany (ePA)', '🇳🇱 Netherlands (MedMij)', '🇩🇰 Denmark (Sundhed.dk)', '🇸🇪 Sweden (1177)', '🇫🇮 Finland (Kanta)', '🇪🇪 Estonia (X-Road)', '🇳🇴 Norway (Helsenorge)', '🇦🇹 Austria (ELGA)'].map(c =>
-          '<div style="background:#0F172A;border:1px solid #334155;border-radius:8px;padding:10px;text-align:center;font-size:11px;color:#CBD5E1;cursor:pointer" onclick="alert(this.textContent + \\' — coming soon\\')">' + c + '</div>'
+          '<div style="background:#0F172A;border:1px solid #334155;border-radius:8px;padding:10px;text-align:center;font-size:11px;color:#CBD5E1;cursor:pointer" onclick="alert(this.textContent + \' coming soon\')">' + c + '</div>'
         ).join('')}
       </div>
       <p style="font-size:10px;color:#475569">EHDS regulation adopted 2025. Implementation by member states 2027-2029. Early access available for Denmark, Finland, and Estonia.</p>
@@ -889,7 +710,7 @@ body { font-family: -apple-system, 'Inter', sans-serif; background: #0B0F1A; col
       <p style="font-size:13px;color:#94A3B8;line-height:1.6;margin-bottom:12px">Canada uses provincial health systems. Select your province to connect:</p>
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px">
         ${['🏔 Ontario (MyChart / OLIS)', '🌲 British Columbia (Health Gateway)', '🏔 Alberta (MyHealth Records)', '❄️ Quebec (Carnet Sante)'].map(p =>
-          '<div class="card" style="padding:12px;cursor:pointer;text-align:center;font-size:12px" onclick="alert(this.textContent + \\' — connect coming soon\\')">' + p + '</div>'
+          '<div class="card" style="padding:12px;cursor:pointer;text-align:center;font-size:12px" onclick="alert(this.textContent + \' connect coming soon\')">' + p + '</div>'
         ).join('')}
       </div>
       <p style="font-size:10px;color:#475569">Ontario uses Epic MyChart (same as US). BC Health Gateway has open FHIR API. Alberta MyHealth Records and Quebec Carnet Sante are province-specific portals.</p>
@@ -1363,144 +1184,242 @@ function showPage(id, el) {
   if (el) el.classList.add('active');
 }
 
-function filterEHR(query) {
-  const q = query.toLowerCase();
-  document.querySelectorAll('.ehr-card').forEach(card => {
-    card.style.display = card.dataset.name.includes(q) ? '' : 'none';
-  });
-}
+// filterEHR removed — b.well handles all EHR connections now
 
-// ── EHR: SMART on FHIR Authorization ────────────────────────
-// Opens Epic's OAuth authorize page — user logs in with MyChart
-// credentials (incl. MFA) and grants XSpan read access.
-// Epic redirects back to localhost:9877/callback with auth code.
+// ── ROOK Wearable Connect ───────────────────────────────────
+// 1-click wearable connection via ROOK (tryrook.io)
 
-async function connectEHR(btn) {
-  const card = btn.closest('.ehr-card');
-  const name = card.dataset.ehrname;
-  const fhirUrl = card.dataset.fhir;
-  let authUrl = card.dataset.auth;
-  const clientId = card.dataset.clientid;
-  // Use Vercel-hosted callback for production health systems (they reject localhost)
-  // The Vercel page relays the auth code back to localhost:9877
-  const isSandbox = fhirUrl && fhirUrl.includes('fhir.epic.com');
-  const callbackUrl = isSandbox
-    ? 'https://localhost:9877/callback'
-    : 'https://xspan-research-portal.vercel.app/oauth/callback';
-
-  btn.textContent = 'Discovering endpoints...';
-  btn.disabled = true;
-
-  // If no auth URL stored, discover it from SMART configuration
-  if (!authUrl) {
-    try {
-      const res = await fetch('/api/discover-smart?fhir=' + encodeURIComponent(fhirUrl));
-      const data = await res.json();
-      authUrl = data.authorization_endpoint;
-    } catch (e) {
-      btn.textContent = 'Discovery failed — try again';
-      btn.disabled = false;
+async function connectRook(source, btn) {
+  btn.querySelector('.badge, [id^="rook-badge"]').textContent = 'Connecting...';
+  try {
+    var res = await fetch('/api/rook/authorize?source=' + source);
+    var data = await res.json();
+    if (data.authorized) {
+      btn.querySelector('.badge, [id^="rook-badge"]').textContent = 'CONNECTED';
+      btn.querySelector('.badge, [id^="rook-badge"]').style.background = '#05966922';
+      btn.querySelector('.badge, [id^="rook-badge"]').style.color = '#6EE7B7';
+      btn.style.borderColor = '#22C55E44';
       return;
     }
-  }
-
-  if (!authUrl) {
-    showModal(name, '<p style="color:#EF4444">Could not discover SMART authorization endpoint for ' + name + '.</p><p style="color:#94A3B8;margin-top:8px;font-size:12px">This health system may not have public FHIR endpoints enabled yet.</p>', '');
-    btn.textContent = 'Connect with MyChart';
-    btn.disabled = false;
-    return;
-  }
-
-  // Build SMART on FHIR authorization URL (standalone launch, PKCE)
-  const state = Math.random().toString(36).substring(2);
-  const smartUrl = authUrl +
-    '?response_type=code' +
-    '&client_id=' + clientId +
-    '&redirect_uri=' + encodeURIComponent(callbackUrl) +
-    '&scope=' + encodeURIComponent('openid fhirUser launch/patient patient/AllergyIntolerance.read patient/MedicationRequest.read patient/Observation.read patient/DiagnosticReport.read') +
-    '&state=' + state +
-    '&aud=' + encodeURIComponent(fhirUrl);
-
-  // Notify backend
-  fetch('/api/start-oauth', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ type: 'ehr', provider: name, name: name, fhirUrl: fhirUrl, tokenUrl: (card.dataset.token || authUrl.replace('/authorize', '/token')), clientId: clientId, callbackUrl: callbackUrl }),
-  });
-
-  // Open Epic's auth page — user logs in with MyChart + MFA
-  window.open(smartUrl, '_blank');
-
-  btn.textContent = 'Waiting for authorization...';
-
-  showModal(
-    'Authorize XSpan with ' + name,
-    '<div style="text-align:center;padding:16px">' +
-    '<div style="font-size:48px;margin-bottom:12px">🔐</div>' +
-    '<p style="color:#CBD5E1;font-size:14px;margin-bottom:16px"><strong>MyChart login page opened in a new tab.</strong></p>' +
-    '<div style="background:#0F172A;border:1px solid #334155;border-radius:8px;padding:16px;text-align:left;font-size:13px;color:#94A3B8;line-height:2">' +
-    '1. Log in with your <strong style="color:#A78BFA">MyChart</strong> username & password<br>' +
-    '2. Complete <strong style="color:#A78BFA">MFA / 2FA</strong> verification<br>' +
-    '3. Click <strong style="color:#22C55E">"Allow"</strong> to grant XSpan read access<br>' +
-    '4. You will be redirected back automatically' +
-    '</div>' +
-    '<div style="margin-top:16px;padding:10px;background:#0F172A;border-radius:8px;font-size:11px;color:#64748B;display:flex;align-items:center;gap:8px">' +
-    '<div style="width:8px;height:8px;border-radius:50%;background:#FBBF24;animation:pulse 1.5s infinite"></div>' +
-    'Waiting for OAuth callback on localhost:9877...' +
-    '</div>' +
-    '<style>@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}</style>' +
-    '</div>',
-    ''
-  );
-
-  // Poll for completion
-  for (let i = 0; i < 90; i++) {
-    await new Promise(r => setTimeout(r, 2000));
-    try {
-      const res = await fetch('/api/auth-status?provider=' + encodeURIComponent(name));
-      const data = await res.json();
-      if (data.connected) {
-        showModal(
-          'Connected to ' + name,
-          '<div style="text-align:center;padding:20px">' +
-          '<div style="font-size:48px;margin-bottom:12px">✅</div>' +
-          '<p style="color:#22C55E;font-size:18px;font-weight:700">Successfully connected!</p>' +
-          '<p style="color:#94A3B8;font-size:13px;margin-top:8px">Syncing your health records: labs, vitals, medications, conditions...</p>' +
-          '</div>',
-          ''
-        );
-        btn.textContent = 'Connected!';
-        btn.className = 'btn btn-success';
-        setTimeout(() => { closeModal(); location.reload(); }, 2500);
-        return;
+    if (data.authorization_url) {
+      window.open(data.authorization_url, '_blank');
+      btn.querySelector('.badge, [id^="rook-badge"]').textContent = 'Waiting...';
+      // Poll for connection
+      for (var i = 0; i < 60; i++) {
+        await new Promise(function(r) { setTimeout(r, 3000); });
+        var check = await fetch('/api/rook/status');
+        var status = await check.json();
+        if (status.sources && status.sources[source]) {
+          btn.querySelector('.badge, [id^="rook-badge"]').textContent = 'CONNECTED';
+          btn.querySelector('.badge, [id^="rook-badge"]').style.background = '#05966922';
+          btn.querySelector('.badge, [id^="rook-badge"]').style.color = '#6EE7B7';
+          btn.style.borderColor = '#22C55E44';
+          loadRookStatus();
+          return;
+        }
       }
-    } catch {}
+      btn.querySelector('.badge, [id^="rook-badge"]').textContent = 'CONNECT';
+    } else {
+      btn.querySelector('.badge, [id^="rook-badge"]').textContent = 'ERROR';
+    }
+  } catch (err) {
+    btn.querySelector('.badge, [id^="rook-badge"]').textContent = 'CONNECT';
+    console.error('ROOK connect error:', err);
   }
-
-  // Authorization timed out — likely Error 15 (health system hasn't enabled XSpan)
-  showModal(
-    name + ' — Authorization Pending',
-    '<div style="text-align:center;padding:16px">' +
-    '<div style="font-size:48px;margin-bottom:12px">🏥</div>' +
-    '<p style="color:#FBBF24;font-size:16px;font-weight:700;margin-bottom:12px">Your health system has not enabled XSpan yet</p>' +
-    '<p style="color:#94A3B8;font-size:13px;line-height:1.7;margin-bottom:16px">' +
-    'XSpan is registered with Epic and your health system has received our app credentials, but they have not approved patient data access yet. ' +
-    'This requires your health system privacy and IT team to review and enable XSpan.</p>' +
-    '<div style="background:#0F172A;border:1px solid #334155;border-radius:8px;padding:16px;text-align:left;margin-bottom:16px">' +
-    '<p style="color:#E8751A;font-weight:600;font-size:13px;margin-bottom:8px">What you can do:</p>' +
-    '<p style="color:#CBD5E1;font-size:12px;line-height:1.8">' +
-    '1. Go to the <strong>Premium</strong> tab and send a request to your doctor<br>' +
-    '2. Ask your health system to enable XSpan for patient access<br>' +
-    '3. In the meantime, use the <strong>Epic Sandbox</strong> (test data) to explore the full EHR flow</p>' +
-    '</div>' +
-    '<p style="color:#64748B;font-size:11px">Epic Error 15: Application not yet approved at this organization. ' +
-    'This is a health system decision, not a technical issue. XSpan credentials are valid.</p>' +
-    '</div>',
-    '<button class="btn btn-primary" onclick="closeModal();showPage(&quot;subscription&quot;,document.querySelectorAll(&quot;.nav a&quot;)[3])">Go to Premium — Ask Your Doctor</button>'
-  );
-  btn.textContent = 'Connect with MyChart';
-  btn.disabled = false;
 }
+
+async function loadRookStatus() {
+  try {
+    var res = await fetch('/api/rook/status');
+    var data = await res.json();
+    var sources = data.sources || {};
+    var connected = 0;
+    var total = 0;
+    for (var src in sources) {
+      total++;
+      var badge = document.getElementById('rook-badge-' + src);
+      var card = document.getElementById('rook-' + src);
+      if (sources[src]) {
+        connected++;
+        if (badge) { badge.textContent = 'CONNECTED'; badge.style.background = '#05966922'; badge.style.color = '#6EE7B7'; }
+        if (card) { card.style.borderColor = '#22C55E44'; }
+      }
+    }
+    var statusEl = document.getElementById('rook-status');
+    if (statusEl) {
+      if (connected > 0) {
+        statusEl.innerHTML = '<div style="width:8px;height:8px;border-radius:50%;background:#22C55E"></div><span style="font-size:12px;color:#22C55E;font-weight:600">' + connected + ' of ' + total + ' sources connected</span>';
+      } else {
+        statusEl.innerHTML = '<div style="width:8px;height:8px;border-radius:50%;background:#64748B"></div><span style="font-size:12px;color:#94A3B8">No wearables connected yet. Click a device to start.</span>';
+      }
+    }
+  } catch (err) { console.error('ROOK status error:', err); }
+}
+
+// Load ROOK status on page load and auto-sync wearable data
+setTimeout(loadRookStatus, 1000);
+setTimeout(syncRookData, 2000);
+
+// Poll Vercel webhook for ROOK wearable data every 5 minutes
+setInterval(syncRookData, 300000);
+
+async function syncRookData() {
+  try {
+    var res = await fetch('/api/rook/sync');
+    var data = await res.json();
+    if (data.stored > 0) {
+      console.log('ROOK: synced ' + data.stored + ' samples from ' + data.webhookEntries + ' webhook entries');
+      // Reload to show new data in charts
+      setTimeout(function() { location.reload(); }, 1500);
+    }
+  } catch(e) {}
+}
+
+// Auto-connect b.well on page load using stored credentials
+setTimeout(async function() {
+  // First check if already connected (session survived)
+  try {
+    var checkRes = await fetch('/api/bwell/records');
+    var checkData = await checkRes.json();
+    if (checkData.success && checkData.total > 0) {
+      showBwellConnected(checkData);
+      return;
+    }
+  } catch(e) {}
+
+  // Try auto-login with production credentials
+  try {
+    var loginRes = await fetch('/api/bwell/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'karlmehta@gmail.com', password: 'Krsna@108' })
+    });
+    var loginData = await loginRes.json();
+    if (loginData.success) {
+      var recRes = await fetch('/api/bwell/records');
+      var recData = await recRes.json();
+      if (recData.success && recData.total > 0) {
+        showBwellConnected(recData);
+      }
+    }
+  } catch(e) {}
+}, 500);
+
+function showBwellConnected(data) {
+  var loginForm = document.getElementById('bwell-login-form');
+  var connPanel = document.getElementById('bwell-connected');
+  var countEl = document.getElementById('bwell-record-count');
+  var summaryEl = document.getElementById('bwell-data-summary');
+  if (loginForm) loginForm.style.display = 'none';
+  if (connPanel) connPanel.style.display = 'block';
+  if (countEl) countEl.textContent = data.total + ' records synced';
+  if (summaryEl) {
+    var cats = data.categories || {};
+    var catLabels = { Observation: 'Labs & Vitals', Condition: 'Conditions', MedicationRequest: 'Medications', MedicationStatement: 'Medications', AllergyIntolerance: 'Allergies', Immunization: 'Immunizations', Encounter: 'Visits', Procedure: 'Procedures', DiagnosticReport: 'Lab Reports' };
+    var catIcons = { Observation: '&#x1F4CA;', Condition: '&#x1F3E5;', MedicationRequest: '&#x1F48A;', MedicationStatement: '&#x1F48A;', AllergyIntolerance: '&#x26A0;', Immunization: '&#x1F489;', Encounter: '&#x1F4C5;', Procedure: '&#x1FA7A;', DiagnosticReport: '&#x1F9EA;' };
+    var html = '';
+    for (var cat in cats) {
+      if (cats[cat] > 0 && catLabels[cat]) {
+        html += '<div style="background:#1E293B;border-radius:8px;padding:10px;text-align:center"><div style="font-size:18px;margin-bottom:4px">' + (catIcons[cat] || '&#x1F4CA;') + '</div><div style="font-size:18px;font-weight:800;color:#E8751A">' + cats[cat] + '</div><div style="font-size:10px;color:#94A3B8">' + (catLabels[cat] || cat) + '</div></div>';
+      }
+    }
+    summaryEl.innerHTML = html;
+  }
+}
+
+// ── b.well Connected Health ─────────────────────────────────
+// Primary EHR connection via b.well — 2.4M+ providers
+
+async function connectBwell() {
+  var email = document.getElementById('bwell-email').value.trim();
+  var password = document.getElementById('bwell-password').value;
+  var statusEl = document.getElementById('bwell-status');
+  if (!email || !password) { statusEl.textContent = 'Enter email and password'; statusEl.style.color = '#EF4444'; return; }
+
+  statusEl.textContent = 'Connecting...';
+  statusEl.style.color = '#FBBF24';
+
+  try {
+    var res = await fetch('/api/bwell/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email, password: password })
+    });
+    var data = await res.json();
+    if (!data.success) {
+      statusEl.textContent = data.error || 'Login failed';
+      statusEl.style.color = '#EF4444';
+      return;
+    }
+
+    statusEl.textContent = 'Authenticated. Fetching health records...';
+    statusEl.style.color = '#22C55E';
+
+    // Now fetch all health data
+    var recRes = await fetch('/api/bwell/records');
+    var recData = await recRes.json();
+
+    if (recData.success && recData.total > 0) {
+      // Show connected state
+      document.getElementById('bwell-login-form').style.display = 'none';
+      document.getElementById('bwell-connected').style.display = 'block';
+      document.getElementById('bwell-record-count').textContent = recData.total + ' records retrieved';
+
+      // Build summary cards
+      var summaryEl = document.getElementById('bwell-data-summary');
+      var cats = recData.categories || {};
+      var html = '';
+      var catIcons = {
+        Observation: '&#x1F4CA;', Condition: '&#x1F3E5;', MedicationRequest: '&#x1F48A;', MedicationStatement: '&#x1F48A;',
+        AllergyIntolerance: '&#x26A0;&#xFE0F;', Immunization: '&#x1F489;', Encounter: '&#x1F4C5;',
+        Procedure: '&#x1FA7A;', CarePlan: '&#x1F4CB;', DiagnosticReport: '&#x1F9EA;',
+        Composition: '&#x1F4C4;', DocumentReference: '&#x1F4C4;', Specimen: '&#x1F9EB;',
+        ServiceRequest: '&#x1F4DD;', Practitioner: '&#x1F468;&#x200D;&#x2695;&#xFE0F;',
+        Goal: '&#x1F3AF;', CareTeam: '&#x1F91D;', Location: '&#x1F4CD;'
+      };
+      var catLabels = {
+        Observation: 'Labs & Vitals', Condition: 'Conditions', MedicationRequest: 'Medications', MedicationStatement: 'Medications',
+        AllergyIntolerance: 'Allergies', Immunization: 'Immunizations', Encounter: 'Visits',
+        Procedure: 'Procedures', CarePlan: 'Care Plans', DiagnosticReport: 'Lab Reports'
+      };
+      for (var cat in cats) {
+        if (cats[cat] > 0 && catLabels[cat]) {
+          html += '<div style="background:#1E293B;border-radius:8px;padding:10px;text-align:center">' +
+            '<div style="font-size:18px;margin-bottom:4px">' + (catIcons[cat] || '&#x1F4CA;') + '</div>' +
+            '<div style="font-size:18px;font-weight:800;color:#E8751A">' + cats[cat] + '</div>' +
+            '<div style="font-size:10px;color:#94A3B8">' + (catLabels[cat] || cat) + '</div></div>';
+        }
+      }
+      summaryEl.innerHTML = html;
+
+      // Reload page after brief delay to refresh Insights with new data
+      setTimeout(function() { location.reload(); }, 3000);
+    } else {
+      statusEl.textContent = 'Connected but no health records found. Have you linked a provider in b.well?';
+      statusEl.style.color = '#FBBF24';
+    }
+  } catch (err) {
+    statusEl.textContent = 'Connection error: ' + (err.message || 'Network failure');
+    statusEl.style.color = '#EF4444';
+  }
+}
+
+async function refreshBwellData() {
+  var statusEl = document.getElementById('bwell-record-count');
+  statusEl.textContent = 'Refreshing...';
+  try {
+    var res = await fetch('/api/bwell/records');
+    var data = await res.json();
+    statusEl.textContent = data.total + ' records (refreshed)';
+    if (data.total > 0) { setTimeout(function() { location.reload(); }, 1500); }
+  } catch (err) {
+    statusEl.textContent = 'Refresh failed';
+  }
+}
+
+// ── EHR connection now handled entirely by b.well ───────────
+// Direct SMART on FHIR removed — b.well connects to 650+ EHR
+// systems (Epic, Cerner, Allscripts, athenahealth, etc.)
 
 // ── Wearables: Open OAuth login ─────────────────────────────
 
@@ -1750,8 +1669,8 @@ function selectCountry(country, btn) {
     var tabId = '';
     // Extract tab id from onclick
     var onclickStr = firstVisible.getAttribute('onclick') || '';
-    var match = onclickStr.match(/showConnectTab\(['"]([^'"]+)['"]/);
-    if (match) tabId = match[1];
+    var parts = onclickStr.split("showConnectTab(");
+    if (parts[1]) { tabId = parts[1].replace(/[^a-z0-9-]/g, '').split(',')[0]; }
     if (tabId) showConnectTab(tabId, firstVisible);
   }
 }
@@ -1826,166 +1745,108 @@ function sendPremiumEmail() {
 // ── Charts: Initialize on page load ──────────────────────────
 
 (function initCharts() {
+  var gc = '#1E293B';
+  var tc = '#475569';
+  var baseOpts = function(showLegend) {
+    return {
+      responsive: true,
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { display: showLegend, labels: { color: '#94A3B8', font: { size: 10 }, boxWidth: 12 } } },
+      scales: {
+        x: { ticks: { color: tc, font: { size: 9 }, maxTicksLimit: 8 }, grid: { color: gc } },
+        y: { ticks: { color: tc, font: { size: 10 } }, grid: { color: gc } }
+      }
+    };
+  };
+  function ds(label, data, color, dash) {
+    return { label: label, data: data, borderColor: color, borderWidth: 2, tension: 0.3, pointRadius: 1.5, fill: false, spanGaps: true, borderDash: dash || [] };
+  }
+
+  // Generate placeholder labels (last 30 days)
+  var placeholderLabels = [];
+  for (var i = 29; i >= 0; i--) {
+    var dt = new Date(); dt.setDate(dt.getDate() - i);
+    placeholderLabels.push((dt.getMonth()+1) + '/' + dt.getDate());
+  }
+  var emptyData = placeholderLabels.map(function() { return null; });
+
   fetch('/api/chart-data')
     .then(function(r) { return r.json(); })
     .then(function(d) {
-      if (!d.labels || d.labels.length < 2) return;
-      var gc = '#334155';
-      var tc = '#64748B';
-      var labels = d.labels.map(function(l) { return l.slice(5); });
-      var baseOpts = function(showLegend) {
-        return {
-          responsive: true,
-          interaction: { mode: 'index', intersect: false },
-          plugins: { legend: { display: showLegend, labels: { color: '#94A3B8', font: { size: 10 }, boxWidth: 12 } } },
-          scales: {
-            x: { ticks: { color: tc, font: { size: 9 }, maxTicksLimit: 8 }, grid: { color: gc } },
-            y: { ticks: { color: tc, font: { size: 10 } }, grid: { color: gc } }
-          }
-        };
-      };
-      function ds(label, data, color, dash) {
-        return { label: label, data: data, borderColor: color, borderWidth: 2, tension: 0.3, pointRadius: 1.5, fill: false, spanGaps: true, borderDash: dash || [] };
-      }
+      var hasData = d.labels && d.labels.length >= 2;
+      var labels = hasData ? d.labels.map(function(l) { return l.slice(5); }) : placeholderLabels;
+      var empty = !hasData;
 
-      // Cardiovascular Synthesis: RHR + HRV + BP (multi-axis)
+      // Helper: check if a data array has any non-null values
+      function hasValues(arr) { return arr && arr.some(function(v) { return v !== null && v !== undefined; }); }
+
+      // Cardiovascular: HR + BP from EHR
       var cardioCtx = document.getElementById('chart-cardio');
       if (cardioCtx) {
-        new Chart(cardioCtx, {
-          type: 'line',
-          data: {
-            labels: labels,
-            datasets: [
-              ds('Resting HR (bpm)', d.restingHr, '#EF4444'),
-              ds('HRV (ms)', d.hrv, '#22C55E'),
-              ds('BP Systolic', d.bpSystolic, '#A78BFA', [5,5])
-            ]
-          },
-          options: baseOpts(true)
-        });
+        var cardioSets = [];
+        if (hasValues(d.restingHr)) cardioSets.push(ds('Resting HR (bpm)', d.restingHr, '#EF4444'));
+        if (hasValues(d.hrv)) cardioSets.push(ds('HRV (ms)', d.hrv, '#22C55E'));
+        if (hasValues(d.bpSystolic)) cardioSets.push(ds('BP Systolic', d.bpSystolic, '#A78BFA', [5,5]));
+        if (hasValues(d.bpDiastolic)) cardioSets.push(ds('BP Diastolic', d.bpDiastolic, '#60A5FA', [5,5]));
+        if (cardioSets.length === 0) { cardioSets.push(ds('No data — connect wearable or EHR', emptyData, '#33415544', [6,4])); cardioCtx.parentElement.style.opacity = '0.5'; }
+        new Chart(cardioCtx, { type: 'line', data: { labels: labels, datasets: cardioSets }, options: baseOpts(true) });
       }
 
-      // Sleep & Recovery: hours + efficiency
+      // Sleep: from wearables (ROOK)
       var sleepCtx = document.getElementById('chart-sleep');
       if (sleepCtx) {
-        new Chart(sleepCtx, {
-          type: 'line',
-          data: {
-            labels: labels,
-            datasets: [
-              ds('Sleep (hrs)', d.sleep.map(function(v) { return v ? +(v/60).toFixed(1) : null; }), '#6EE7B7'),
-              ds('Efficiency (%)', d.sleepEfficiency, '#A78BFA', [4,4])
-            ]
-          },
-          options: baseOpts(true)
-        });
+        var sleepSets = [];
+        if (hasValues(d.sleep)) sleepSets.push(ds('Sleep (hrs)', d.sleep.map(function(v) { return v ? +(v/60).toFixed(1) : null; }), '#6EE7B7'));
+        if (hasValues(d.sleepEfficiency)) sleepSets.push(ds('Efficiency (%)', d.sleepEfficiency, '#A78BFA', [4,4]));
+        if (sleepSets.length === 0) { sleepSets.push(ds('Awaiting Oura/WHOOP data', emptyData, '#33415544', [6,4])); sleepCtx.parentElement.style.opacity = '0.5'; }
+        new Chart(sleepCtx, { type: 'line', data: { labels: labels, datasets: sleepSets }, options: baseOpts(true) });
       }
 
-      // Metabolic: Glucose + Weight (lbs)
+      // Metabolic: Glucose + HbA1c + Cholesterol from EHR labs
       var metaCtx = document.getElementById('chart-metabolic');
       if (metaCtx) {
-        new Chart(metaCtx, {
-          type: 'line',
-          data: {
-            labels: labels,
-            datasets: [
-              ds('Glucose (mg/dL)', d.glucose, '#EF4444'),
-              ds('Weight (lbs)', d.weight.map(function(v) { return v ? +(v * 2.205).toFixed(1) : null; }), '#E8751A', [4,4])
-            ]
-          },
-          options: baseOpts(true)
-        });
+        var metaSets = [];
+        if (hasValues(d.glucose)) metaSets.push(ds('Glucose (mg/dL)', d.glucose, '#EF4444'));
+        if (hasValues(d.hba1c)) metaSets.push(ds('HbA1c (%)', d.hba1c, '#FBBF24'));
+        if (hasValues(d.cholesterol)) metaSets.push(ds('Total Chol', d.cholesterol, '#A78BFA', [4,4]));
+        if (hasValues(d.triglycerides)) metaSets.push(ds('Triglycerides', d.triglycerides, '#FB923C', [4,4]));
+        if (metaSets.length === 0) { metaSets.push(ds('No metabolic data', emptyData, '#33415544', [6,4])); metaCtx.parentElement.style.opacity = '0.5'; }
+        new Chart(metaCtx, { type: 'line', data: { labels: labels, datasets: metaSets }, options: baseOpts(true) });
       }
 
-      // Activity: Steps + Active Minutes
+      // Activity: Steps from wearables
       var actCtx = document.getElementById('chart-activity');
       if (actCtx) {
-        new Chart(actCtx, {
-          type: 'line',
-          data: {
-            labels: labels,
-            datasets: [
-              ds('Steps', d.steps, '#FBBF24')
-            ]
-          },
-          options: baseOpts(false)
-        });
+        var actSets = [];
+        if (hasValues(d.steps)) actSets.push(ds('Steps', d.steps, '#FBBF24'));
+        if (actSets.length === 0) { actSets.push(ds('Awaiting wearable data', emptyData, '#33415544', [6,4])); actCtx.parentElement.style.opacity = '0.5'; }
+        new Chart(actCtx, { type: 'line', data: { labels: labels, datasets: actSets }, options: baseOpts(false) });
       }
 
-      // Body: Weight (lbs) + BMI
+      // Body / Lipids: LDL + HDL from EHR labs
       var bodyCtx = document.getElementById('chart-body');
       if (bodyCtx) {
-        new Chart(bodyCtx, {
-          type: 'line',
-          data: {
-            labels: labels,
-            datasets: [
-              ds('Weight (lbs)', d.weight.map(function(v) { return v ? +(v * 2.205).toFixed(1) : null; }), '#E8751A'),
-              ds('BMI', d.bmi, '#64748B', [4,4])
-            ]
-          },
-          options: baseOpts(true)
-        });
-      }
-    })
-    .catch(function() {});
-})();
-
-// ── Wearable: Connect individual device via Terra ────────────
-
-function connectWearable(el) {
-  var provider = el.dataset.terraProvider;
-  var name = el.querySelector('h3').textContent;
-  el.querySelector('.badge').textContent = 'CONNECTING...';
-  el.querySelector('.badge').style.background = '#E8751A22';
-  el.querySelector('.badge').style.color = '#E8751A';
-
-  // Fetch direct auth URL for this specific provider, then open it
-  fetch('/api/terra/auth', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ provider: provider }),
-  })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      if (data.status === 'success' && data.auth_url) {
-        // Open provider login directly in new tab — NO Terra widget
-        window.open(data.auth_url, '_blank');
-
-        // Show confirmation modal
-        showModal(
-          'Connect ' + name,
-          '<div style="text-align:center;padding:16px">' +
-          '<div style="font-size:40px;margin-bottom:12px">🔗</div>' +
-          '<p style="color:#22C55E;font-size:15px;font-weight:700;margin-bottom:8px">' + name + ' login page opened in a new tab</p>' +
-          '<p style="color:#94A3B8;font-size:12px;line-height:1.6;margin-bottom:16px">1. Log in with your <strong>' + name + '</strong> account<br>2. Authorize XSpan to read your health data<br>3. Come back to this tab and click "Done"</p>' +
-          '</div>',
-          '<button class="btn btn-primary" style="width:100%" data-provider="' + provider + '" data-name="' + name + '" onclick="confirmWearableConnect(this)">I Have Connected — Done</button>'
-        );
-      } else {
-        el.querySelector('.badge').textContent = 'CONNECT';
-        showModal('Error', '<p style="color:#EF4444">Could not connect to ' + name + '. This provider may not be available yet.</p>', '');
+        var bodySets = [];
+        if (hasValues(d.ldl)) bodySets.push(ds('LDL (mg/dL)', d.ldl, '#EF4444'));
+        if (hasValues(d.hdl)) bodySets.push(ds('HDL (mg/dL)', d.hdl, '#22C55E'));
+        if (hasValues(d.weight)) bodySets.push(ds('Weight', d.weight, '#E8751A', [4,4]));
+        if (bodySets.length === 0) { bodySets.push(ds('No data', emptyData, '#33415544', [6,4])); bodyCtx.parentElement.style.opacity = '0.5'; }
+        new Chart(bodyCtx, { type: 'line', data: { labels: labels, datasets: bodySets }, options: baseOpts(true) });
       }
     })
     .catch(function() {
-      el.querySelector('.badge').textContent = 'CONNECT';
-      showModal('Error', '<p style="color:#EF4444">Connection service unavailable. Please try again.</p>', '');
+      // Even on error, render empty greyed-out charts
+      ['chart-cardio','chart-sleep','chart-metabolic','chart-activity','chart-body'].forEach(function(id) {
+        var ctx = document.getElementById(id);
+        if (ctx) {
+          new Chart(ctx, { type: 'line', data: { labels: placeholderLabels, datasets: [ds('No data', emptyData, '#33415566', [6,4])] }, options: baseOpts(false) });
+          ctx.parentElement.style.opacity = '0.5';
+        }
+      });
     });
-}
+})();
 
-async function confirmWearableConnect(btn) {
-  var provider = btn.dataset.provider;
-  var name = btn.dataset.name;
-  btn.textContent = 'Connecting...';
-  btn.disabled = true;
-  await fetch('/api/connect', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ type: 'wearable', id: provider.toLowerCase(), name: name, method: 'terra' }),
-  });
-  showModal(name, '<div style="text-align:center;padding:16px"><div style="font-size:48px;margin-bottom:12px">✅</div><p style="color:#22C55E;font-size:16px;font-weight:700">Connected!</p><p style="color:#94A3B8;font-size:12px;margin-top:8px">Data sync will begin shortly.</p></div>', '');
-  setTimeout(function() { closeModal(); location.reload(); }, 2000);
-}
+// Terra removed — all wearables now via ROOK (tryrook.io)
 
 // ── EHR Records: Load on page load ───────────────────────────
 
@@ -2608,43 +2469,7 @@ export function startDashboard(
       return;
     }
 
-    // API: Terra — Get direct auth URL for a specific wearable provider
-    if (url === '/api/terra/auth' && req.method === 'POST') {
-      let body = '';
-      req.on('data', (chunk: Buffer) => body += chunk);
-      req.on('end', async () => {
-        try {
-          const data = JSON.parse(body);
-          const provider = data.provider || 'OURA';
-          const terraDevId = process.env.TERRA_DEV_ID || 'predixtions-testing-c1Ip106tRu';
-          const terraApiKey = process.env.TERRA_API_KEY || 'wLwQxQti90ZKyQui75IECWBEhZy6zI1a';
-          const userId = config.xspan?.userId || 'local-user';
-
-          console.log(`[Terra] Requesting direct auth URL for: ${provider}`);
-          const terraResp = await fetch('https://api.tryterra.co/v2/auth/authenticateUser', {
-            method: 'POST',
-            headers: {
-              'dev-id': terraDevId,
-              'x-api-key': terraApiKey,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              resource: provider,
-              reference_id: `${userId}-${Date.now()}`,
-            }),
-          });
-          const terraData = await terraResp.json() as Record<string, unknown>;
-          console.log(`[Terra] Auth URL for ${provider}: ${(terraData['auth_url'] as string || '').substring(0, 80)}...`);
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify(terraData));
-        } catch (err) {
-          console.error('[Terra] Auth error:', err);
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ status: 'error', error: 'Could not connect to Terra' }));
-        }
-      });
-      return;
-    }
+    // Terra removed — wearables handled by ROOK (/api/rook/*)
 
     // API: Premium — Send request to physician
     if (url === '/api/premium/request' && req.method === 'POST') {
@@ -2670,19 +2495,21 @@ export function startDashboard(
     if (url === '/api/ehr-records') {
       try {
         const rows = store.db.prepare(
-          'SELECT data_type, value, unit, recorded_at, source FROM health_samples ORDER BY recorded_at DESC LIMIT 50'
+          'SELECT data_type, value, unit, recorded_at, source FROM health_samples ORDER BY recorded_at DESC LIMIT 500'
         ).all() as { data_type: string; value: number; unit: string; recorded_at: string; source: string }[];
 
         // Group by category
         const vitals: typeof rows = [];
         const labs: typeof rows = [];
         const other: typeof rows = [];
-        const vitalTypes = new Set(['Heart rate', 'Blood Pressure', 'Body temperature', 'Respiratory rate', 'Oxygen saturation', 'Body weight', 'Body height', 'BMI']);
+        const vitalKeywords = ['heart rate', 'blood pressure', 'systolic', 'diastolic', 'body temperature', 'respiratory', 'oxygen saturation', 'spo2', 'body weight', 'body height', 'bmi', 'body mass', 'pulse'];
+        const labKeywords = ['cholesterol', 'glucose', 'hemoglobin', 'hba1c', 'creatinine', 'triglyceride', 'albumin', 'bilirubin', 'alkaline', 'ast', 'alt', 'tsh', 'thyroid', 'vitamin', 'iron', 'ferritin', 'calcium', 'sodium', 'potassium', 'chloride', 'co2', 'bun', 'urea', 'platelet', 'wbc', 'rbc', 'hematocrit', 'lymphocyte', 'neutrophil', 'egfr', 'glomerular', 'apolipoprotein', 'ldl', 'hdl', 'vldl', 'cortisol', 'testosterone', 'estradiol', 'insulin', 'psa', 'cea', 'magnesium', 'zinc', 'phosph', 'protein', 'globulin', 'lipase', 'amylase', 'uric', 'folate', 'b12', 'sed rate', 'esr', 'crp', 'homocysteine'];
 
         for (const r of rows) {
-          if (vitalTypes.has(r.data_type) || r.data_type.toLowerCase().includes('heart') || r.data_type.toLowerCase().includes('pressure') || r.data_type.toLowerCase().includes('weight')) {
+          const dt = r.data_type.toLowerCase();
+          if (vitalKeywords.some(k => dt.includes(k))) {
             vitals.push(r);
-          } else if (r.data_type.toLowerCase().includes('cholesterol') || r.data_type.toLowerCase().includes('glucose') || r.data_type.toLowerCase().includes('hemoglobin') || r.data_type.toLowerCase().includes('creatinine') || r.unit?.includes('/dL') || r.unit?.includes('/L')) {
+          } else if (labKeywords.some(k => dt.includes(k)) || r.unit?.includes('/dL') || r.unit?.includes('/L') || r.unit?.includes('U/L') || r.unit?.includes('mIU') || r.unit?.includes('ng/')) {
             labs.push(r);
           } else {
             other.push(r);
@@ -2698,29 +2525,88 @@ export function startDashboard(
       return;
     }
 
-    // API: Chart data — 30-day time series for Insights charts
+    // API: Chart data — built from health_samples directly (not snapshots)
     if (url === '/api/chart-data') {
       try {
+        // First try snapshots (if any exist from demo mode)
         const snapshots = store.getSnapshots(30);
-        const labels = snapshots.map(s => s.snapshotDate).reverse();
-        const extract = (key: string) => snapshots.map(s => (s.biomarkers as Record<string, unknown>)[key] ?? null).reverse();
+        if (snapshots.length >= 2) {
+          const labels = snapshots.map(s => s.snapshotDate).reverse();
+          const extract = (key: string) => snapshots.map(s => (s.biomarkers as Record<string, unknown>)[key] ?? null).reverse();
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({
+            labels,
+            weight: extract('bodyMassKg'), bmi: extract('bodyMassIndex'),
+            sleep: extract('totalSleepMinutes'), steps: extract('dailySteps'),
+            hrv: extract('heartRateVariability'), stress: extract('stressIndex'),
+            glucose: extract('bloodGlucoseFasting'),
+            bpSystolic: extract('bloodPressureSystolic'), bpDiastolic: extract('bloodPressureDiastolic'),
+            restingHr: extract('restingHeartRate'), sleepEfficiency: extract('sleepEfficiency'),
+          }));
+          return;
+        }
+
+        // No snapshots — build chart data from health_samples directly
+        const rows = store.db.prepare(
+          "SELECT data_type, value, unit, date(recorded_at) as day FROM health_samples WHERE recorded_at > datetime('now', '-90 days') ORDER BY recorded_at ASC"
+        ).all() as { data_type: string; value: number; unit: string; day: string }[];
+
+        // Group by date
+        const byDate: Record<string, Record<string, number[]>> = {};
+        for (const r of rows) {
+          if (!byDate[r.day]) byDate[r.day] = {};
+          const dt = r.data_type.toLowerCase();
+          // Map FHIR display names to chart keys
+          let key = '';
+          if (dt.includes('heart rate') || dt.includes('pulse')) key = 'restingHr';
+          else if (dt.includes('systolic') || (dt.includes('blood pressure') && r.value > 80)) key = 'bpSystolic';
+          else if (dt.includes('diastolic') || (dt.includes('blood pressure') && r.value <= 80)) key = 'bpDiastolic';
+          else if (dt.includes('glucose')) key = 'glucose';
+          else if (dt.includes('hemoglobin a1c') || dt.includes('hba1c')) key = 'hba1c';
+          else if (dt.includes('cholesterol') && !dt.includes('hdl') && !dt.includes('ldl') && !dt.includes('vldl')) key = 'cholesterol';
+          else if (dt.includes('ldl')) key = 'ldl';
+          else if (dt.includes('hdl')) key = 'hdl';
+          else if (dt.includes('triglyceride')) key = 'triglycerides';
+          else if (dt.includes('creatinine')) key = 'creatinine';
+          else if (dt.includes('tsh') || dt.includes('thyrotropin')) key = 'tsh';
+          else if (dt.includes('body weight') || dt.includes('body mass') || (dt.includes('weight') && r.unit?.includes('lb'))) key = 'weight';
+          else if (dt.includes('spo2') || dt.includes('oxygen saturation')) key = 'spo2';
+          if (key) {
+            if (!byDate[r.day][key]) byDate[r.day][key] = [];
+            byDate[r.day][key].push(r.value);
+          }
+        }
+
+        const dates = Object.keys(byDate).sort();
+        const labels = dates.map(d => d.slice(5)); // MM-DD
+        const avg = (key: string) => dates.map(d => {
+          const vals = byDate[d]?.[key];
+          return vals?.length ? Math.round((vals.reduce((a, b) => a + b, 0) / vals.length) * 10) / 10 : null;
+        });
 
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
           labels,
-          weight: extract('bodyMassKg'),
-          bmi: extract('bodyMassIndex'),
-          sleep: extract('totalSleepMinutes'),
-          steps: extract('dailySteps'),
-          hrv: extract('heartRateVariability'),
-          stress: extract('stressIndex'),
-          glucose: extract('bloodGlucoseFasting'),
-          bpSystolic: extract('bloodPressureSystolic'),
-          bpDiastolic: extract('bloodPressureDiastolic'),
-          restingHr: extract('restingHeartRate'),
-          sleepEfficiency: extract('sleepEfficiency'),
+          restingHr: avg('restingHr'),
+          hrv: avg('hrv'),
+          bpSystolic: avg('bpSystolic'),
+          bpDiastolic: avg('bpDiastolic'),
+          glucose: avg('glucose'),
+          weight: avg('weight'),
+          bmi: dates.map(() => null),
+          sleep: dates.map(() => null),
+          steps: dates.map(() => null),
+          stress: dates.map(() => null),
+          sleepEfficiency: dates.map(() => null),
+          // Extra lab series
+          cholesterol: avg('cholesterol'),
+          ldl: avg('ldl'),
+          hdl: avg('hdl'),
+          triglycerides: avg('triglycerides'),
+          hba1c: avg('hba1c'),
         }));
-      } catch {
+      } catch (err) {
+        console.error('[Chart] Error:', err);
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ labels: [] }));
       }
@@ -2908,6 +2794,391 @@ export function startDashboard(
       return;
     }
 
+    // ── ROOK Wearable API ─────────────────────────────────────────
+
+    const ROOK_UUID = process.env.ROOK_CLIENT_UUID || 'ee022812-e8d1-4493-867e-faebb98316e9';
+    const ROOK_SECRET = process.env.ROOK_SECRET_KEY || 'Hae7uoDZOAKTpyyAOWOKESVxPP6tyySukAxV';
+    const ROOK_BASE = process.env.ROOK_ENVIRONMENT === 'production' ? 'https://api.rook-connect.com/api/v1' : 'https://api.rook-connect.review/api/v1';
+    const ROOK_AUTH = 'Basic ' + Buffer.from(`${ROOK_UUID}:${ROOK_SECRET}`).toString('base64');
+    const ROOK_USER = process.env.ROOK_USER_ID || 'karl001';
+
+    // ROOK: Get auth URL for a wearable source
+    if (url === '/api/rook/authorize') {
+      const source = reqUrl.searchParams.get('source') || 'oura';
+      try {
+        const rookUrl = `${ROOK_BASE}/user_id/${ROOK_USER}/data_source/${source}/authorizer`;
+        console.log(`[ROOK] Fetching: ${rookUrl}`);
+        const resp = await fetch(rookUrl, {
+          headers: { 'Authorization': ROOK_AUTH },
+        });
+        const respText = await resp.text();
+        let data: Record<string, unknown>;
+        try { data = JSON.parse(respText); } catch { data = { error: 'Invalid response', raw: respText.slice(0, 100) }; }
+        console.log(`[ROOK] Authorize ${source}: authorized=${(data as Record<string, unknown>).authorized}`);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(data));
+      } catch (err) {
+        console.error(`[ROOK] Authorize error:`, err);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Failed to get auth URL' }));
+      }
+      return;
+    }
+
+    // ROOK: Get all source connection status
+    if (url === '/api/rook/status') {
+      try {
+        const resp = await fetch(`${ROOK_BASE}/user_id/${ROOK_USER}/data_sources/authorized`, {
+          headers: { 'Authorization': ROOK_AUTH },
+        });
+        const data = await resp.json();
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(data));
+      } catch (err) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ sources: {} }));
+      }
+      return;
+    }
+
+    // ROOK: Webhook receiver (ROOK pushes health data here)
+    if (url === '/api/rook/webhook' && req.method === 'POST') {
+      let body = '';
+      req.on('data', (chunk: Buffer) => body += chunk);
+      req.on('end', () => {
+        try {
+          const payload = JSON.parse(body);
+          console.log(`[ROOK] Webhook received:`, JSON.stringify(payload).slice(0, 200));
+
+          // Process and store the health data
+          const userId = payload.user_id || '';
+          const dataType = payload.data_type || payload.type || 'unknown';
+          const source = payload.data_source || 'rook';
+
+          // Store samples in local database
+          let stored = 0;
+          const data = payload.data || payload;
+          if (data && typeof data === 'object') {
+            const fields: Record<string, { type: string; unit: string }> = {
+              steps: { type: 'steps', unit: 'count' },
+              calories: { type: 'caloriesActive', unit: 'kcal' },
+              hr_average: { type: 'heartRateResting', unit: 'bpm' },
+              hrv_average: { type: 'hrvSdnn', unit: 'ms' },
+              sleep_duration_seconds: { type: 'totalSleepMin', unit: 'min' },
+              deep_sleep_seconds: { type: 'deepSleepMin', unit: 'min' },
+              rem_sleep_seconds: { type: 'remSleepMin', unit: 'min' },
+              spo2_average: { type: 'spo2', unit: '%' },
+              temperature_delta: { type: 'skinTempDev', unit: 'C' },
+              weight_kg: { type: 'weightKg', unit: 'kg' },
+              blood_glucose_mg_dl: { type: 'bloodGlucose', unit: 'mg/dL' },
+              blood_pressure_systolic: { type: 'bpSystolic', unit: 'mmHg' },
+              blood_pressure_diastolic: { type: 'bpDiastolic', unit: 'mmHg' },
+              vo2_max: { type: 'vo2Max', unit: 'mL/kg/min' },
+            };
+
+            for (const [key, meta] of Object.entries(fields)) {
+              let val = (data as Record<string, unknown>)[key];
+              if (val !== undefined && val !== null) {
+                let numVal = Number(val);
+                if (key.includes('seconds')) numVal = numVal / 60; // convert to minutes
+                try {
+                  store.insertSample({
+                    id: Math.random().toString(36).slice(2),
+                    source: 'wearable',
+                    dataType: meta.type,
+                    value: numVal,
+                    unit: meta.unit,
+                    metadata: { provider: source, via: 'rook' },
+                    recordedAt: new Date((data as Record<string, string>).datetime || Date.now()),
+                    syncedAt: new Date(),
+                  });
+                  stored++;
+                } catch {}
+              }
+            }
+          }
+
+          if (stored > 0) {
+            console.log(`[ROOK] Stored ${stored} samples from ${source} webhook`);
+            try { pipeline.synthesizeBiomarkers(store); } catch {}
+          }
+
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: true, stored }));
+        } catch (err) {
+          console.error('[ROOK] Webhook error:', err);
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false }));
+        }
+      });
+      return;
+    }
+
+    // ROOK: Poll Vercel webhook for new data and store locally
+    if (url === '/api/rook/sync') {
+      try {
+        const since = (authState as Record<string, Record<string, unknown>>)['rook_last_sync']?.timestamp as string || '2020-01-01T00:00:00Z';
+        console.log(`[ROOK] Polling Vercel webhook for data since ${since}...`);
+        const resp = await fetch(`https://research.xspan.ai/api/rook/webhook?user_id=${ROOK_USER}&since=${encodeURIComponent(since)}&limit=200`);
+        const webhookData = await resp.json() as { data?: Array<{ payload: Record<string, unknown>; receivedAt: string; dataType: string; source: string }> };
+        const entries = webhookData.data || [];
+
+        let stored = 0;
+        for (const entry of entries) {
+          const p = entry.payload;
+          const data = (p.data || p) as Record<string, unknown>;
+          const fields: Record<string, { type: string; unit: string }> = {
+            steps: { type: 'steps', unit: 'count' },
+            calories: { type: 'caloriesActive', unit: 'kcal' },
+            hr_average: { type: 'heartRateResting', unit: 'bpm' },
+            hr_min: { type: 'heartRateMin', unit: 'bpm' },
+            hr_max: { type: 'heartRateMax', unit: 'bpm' },
+            hrv_average: { type: 'hrvSdnn', unit: 'ms' },
+            sleep_duration_seconds: { type: 'totalSleepMin', unit: 'min' },
+            deep_sleep_seconds: { type: 'deepSleepMin', unit: 'min' },
+            rem_sleep_seconds: { type: 'remSleepMin', unit: 'min' },
+            light_sleep_seconds: { type: 'lightSleepMin', unit: 'min' },
+            sleep_score: { type: 'sleepScore', unit: 'score' },
+            recovery_score: { type: 'recoveryScore', unit: 'score' },
+            strain_score: { type: 'strainScore', unit: 'score' },
+            spo2_average: { type: 'spo2', unit: '%' },
+            respiratory_rate_average: { type: 'respiratoryRate', unit: 'breaths/min' },
+            temperature_delta: { type: 'skinTempDev', unit: 'C' },
+            weight_kg: { type: 'weightKg', unit: 'kg' },
+            blood_glucose_mg_dl: { type: 'bloodGlucose', unit: 'mg/dL' },
+            blood_pressure_systolic: { type: 'bpSystolic', unit: 'mmHg' },
+            blood_pressure_diastolic: { type: 'bpDiastolic', unit: 'mmHg' },
+            vo2_max: { type: 'vo2Max', unit: 'mL/kg/min' },
+          };
+
+          for (const [key, meta] of Object.entries(fields)) {
+            const val = data[key];
+            if (val !== undefined && val !== null) {
+              let numVal = Number(val);
+              if (key.includes('seconds')) numVal = numVal / 60;
+              try {
+                store.insertSample({
+                  id: Math.random().toString(36).slice(2),
+                  source: 'wearable',
+                  dataType: meta.type,
+                  value: numVal,
+                  unit: meta.unit,
+                  metadata: { provider: entry.source, via: 'rook' },
+                  recordedAt: new Date((data.datetime as string) || entry.receivedAt),
+                  syncedAt: new Date(),
+                });
+                stored++;
+              } catch {}
+            }
+          }
+        }
+
+        (authState as Record<string, Record<string, unknown>>)['rook_last_sync'] = { timestamp: new Date().toISOString() };
+        if (stored > 0) {
+          console.log(`[ROOK] Synced ${stored} samples from ${entries.length} webhook entries`);
+          try { pipeline.synthesizeBiomarkers(store); } catch {}
+        }
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, webhookEntries: entries.length, stored }));
+      } catch (err) {
+        console.error('[ROOK] Sync error:', err);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: 'Sync failed' }));
+      }
+      return;
+    }
+
+    // ROOK: OAuth callback (user returns here after connecting wearable)
+    if (url === '/rook/callback') {
+      res.writeHead(200, { 'Content-Type': 'text/html' });
+      res.end('<html><body style="background:#0B0F1A;color:#22C55E;font-family:system-ui;display:flex;align-items:center;justify-content:center;height:100vh;margin:0"><div style="text-align:center"><h1 style="font-size:48px;margin-bottom:12px">&#x2713;</h1><h2>Wearable Connected!</h2><p style="color:#94A3B8;margin-top:8px">You can close this tab and return to the dashboard.</p><script>setTimeout(function(){window.close()},3000)</script></div></body></html>');
+      return;
+    }
+
+    // ── b.well Connected Health API ──────────────────────────────
+
+    // b.well: Login
+    if (url === '/api/bwell/login' && req.method === 'POST') {
+      let body = '';
+      req.on('data', (chunk: Buffer) => body += chunk);
+      req.on('end', async () => {
+        try {
+          const { email, password } = JSON.parse(body);
+          const BWELL_CLIENT_KEY = process.env.BWELL_CLIENT_KEY || 'eyJyIjoiaWhhcDI1NWltc25ncm9xY2xuIiwiZW52IjoiY2xpZW50LXNhbmRib3giLCJraWQiOiJid2VsbF90cmlhbC1jbGllbnQtc2FuZGJveCJ9';
+          const BWELL_GATEWAY = process.env.BWELL_ENVIRONMENT === 'production'
+            ? 'https://api-gateway.prod.icanbwell.com'
+            : 'https://api-gateway.client-sandbox.icanbwell.com';
+          const BWELL_API = process.env.BWELL_ENVIRONMENT === 'production'
+            ? 'https://api.prod.icanbwell.com'
+            : 'https://api.client-sandbox.icanbwell.com';
+
+          console.log(`[b.well] Login attempt: ${email}`);
+          const loginResp = await fetch(`${BWELL_GATEWAY}/identity/account/login`, {
+            method: 'POST',
+            headers: { 'clientkey': BWELL_CLIENT_KEY, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password }),
+          });
+
+          if (!loginResp.ok) {
+            const errText = await loginResp.text();
+            console.error(`[b.well] Login failed: ${loginResp.status} ${errText}`);
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: false, error: `Login failed (${loginResp.status})` }));
+            return;
+          }
+
+          const loginData = await loginResp.json() as {
+            accessToken?: { jwtToken?: string; payload?: { bwellFhirPersonId?: string; clientFhirPersonId?: string } };
+          };
+          const accessToken = loginData.accessToken?.jwtToken;
+          const personId = loginData.accessToken?.payload?.bwellFhirPersonId || '';
+
+          if (!accessToken) {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: false, error: 'No access token returned' }));
+            return;
+          }
+
+          // Store session for subsequent requests
+          (authState as Record<string, unknown>)['bwell'] = {
+            connected: true, pending: false, startedAt: Date.now(),
+            accessToken, personId, apiUrl: BWELL_API, email,
+          };
+          console.log(`[b.well] Logged in — personId: ${personId}`);
+
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: true, personId }));
+        } catch (err) {
+          console.error('[b.well] Login error:', err);
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: 'Login failed' }));
+        }
+      });
+      return;
+    }
+
+    // b.well: Fetch health records
+    if (url === '/api/bwell/records') {
+      const bwellState = (authState as Record<string, Record<string, unknown>>)['bwell'];
+      if (!bwellState?.accessToken || !bwellState?.personId) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: 'Not logged in to b.well', total: 0 }));
+        return;
+      }
+
+      try {
+        const apiUrl = bwellState.apiUrl as string;
+        const personId = bwellState.personId as string;
+        const token = bwellState.accessToken as string;
+
+        console.log(`[b.well] Fetching $everything for person.${personId}...`);
+        const fhirResp = await fetch(`${apiUrl}/v1/Patient/person.${personId}/$everything`, {
+          headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/fhir+json' },
+        });
+
+        if (!fhirResp.ok) {
+          console.error(`[b.well] $everything failed: ${fhirResp.status}`);
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: false, error: `FHIR fetch failed (${fhirResp.status})`, total: 0 }));
+          return;
+        }
+
+        const bundle = await fhirResp.json() as {
+          total?: number;
+          entry?: Array<{ resource: { resourceType: string; [key: string]: unknown } }>;
+        };
+
+        // Group by resource type
+        const categories: Record<string, number> = {};
+        const entries = bundle.entry || [];
+        for (const e of entries) {
+          const rt = e.resource?.resourceType || 'Unknown';
+          categories[rt] = (categories[rt] || 0) + 1;
+        }
+
+        const total = entries.length;
+        console.log(`[b.well] Retrieved ${total} resources:`);
+        for (const [rt, count] of Object.entries(categories).sort((a, b) => b[1] - a[1])) {
+          console.log(`  ${rt}: ${count}`);
+        }
+
+        // Extract key health data and store as samples for the Insights dashboard
+        const samples: Array<{ dataType: string; value: number; unit: string; recordedAt: string; source: string }> = [];
+        const conditions: Array<{ name: string; status: string }> = [];
+        const medications: Array<{ name: string; status: string }> = [];
+        const allergies: Array<{ name: string; criticality: string }> = [];
+
+        for (const e of entries) {
+          const r = e.resource;
+          if (r.resourceType === 'Observation') {
+            const coding = (r.code as { coding?: Array<{ code?: string; display?: string }> })?.coding?.[0];
+            const vq = r.valueQuantity as { value?: number; unit?: string } | undefined;
+            if (coding && vq?.value !== undefined) {
+              samples.push({
+                dataType: coding.display as string || coding.code as string || 'unknown',
+                value: vq.value as number,
+                unit: vq.unit as string || '',
+                recordedAt: (r.effectiveDateTime as string) || (r.issued as string) || new Date().toISOString(),
+                source: 'bwell',
+              });
+            }
+          } else if (r.resourceType === 'Condition') {
+            const code = r.code as { text?: string; coding?: Array<{ display?: string }> };
+            const status = (r.clinicalStatus as { coding?: Array<{ code?: string }> })?.coding?.[0]?.code || '';
+            conditions.push({ name: code?.text || code?.coding?.[0]?.display || 'Unknown', status });
+          } else if (r.resourceType === 'MedicationRequest' || r.resourceType === 'MedicationStatement') {
+            const med = (r.medicationCodeableConcept as { text?: string; coding?: Array<{ display?: string }> }) || {};
+            medications.push({ name: med.text || med.coding?.[0]?.display || 'Unknown', status: r.status as string || '' });
+          } else if (r.resourceType === 'AllergyIntolerance') {
+            const code = r.code as { text?: string; coding?: Array<{ display?: string }> };
+            allergies.push({ name: code?.text || code?.coding?.[0]?.display || 'Unknown', criticality: r.criticality as string || '' });
+          }
+        }
+
+        // Store observations as health samples in local store (for Insights charts)
+        let stored = 0;
+        for (const s of samples) {
+          try {
+            store.insertSample({
+              id: Math.random().toString(36).slice(2),
+              source: 'ehr',
+              dataType: s.dataType,
+              value: s.value,
+              unit: s.unit,
+              metadata: { provider: 'bwell', source: 'bwell' },
+              recordedAt: new Date(s.recordedAt),
+              syncedAt: new Date(),
+            });
+            stored++;
+          } catch {}
+        }
+
+        if (stored > 0) {
+          console.log(`[b.well] Stored ${stored} observations in local database`);
+          // Re-synthesize biomarkers with new data
+          try { pipeline.synthesizeBiomarkers(store); } catch {}
+        }
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          success: true,
+          total,
+          stored,
+          categories,
+          patient: entries.find(e => e.resource.resourceType === 'Patient')?.resource || null,
+          conditions: conditions.slice(0, 30),
+          medications: medications.slice(0, 20),
+          allergies: allergies.slice(0, 15),
+        }));
+      } catch (err) {
+        console.error('[b.well] Records fetch error:', err);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: false, error: 'Failed to fetch records', total: 0 }));
+      }
+      return;
+    }
+
     // API: Discover SMART on FHIR configuration from any FHIR base URL
     if (url === '/api/discover-smart') {
       const fhirBase = reqUrl.searchParams.get('fhir') ?? '';
@@ -3016,14 +3287,13 @@ export function startDashboard(
       return;
     }
 
-    // Route: / — login page (or redirect to dashboard if already signed in)
+    // Route: / — dashboard directly (auth optional for local agent)
     if (!currentUser) {
-      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-      res.end(renderAuthPage(config.xspan.apiUrl));
-    } else {
-      res.writeHead(302, { 'Location': '/dashboard' });
-      res.end();
+      // Auto-login as local user when no cloud API is available
+      currentUser = { email: 'karlmehta@gmail.com', name: 'Karl Mehta', apiKey: '', token: 'local', tier: 'free' };
     }
+    res.writeHead(302, { 'Location': '/dashboard' });
+    res.end();
   });
 
   server.on('error', (err: Error) => {

@@ -1,0 +1,96 @@
+# ============================================================
+# GitHub Marketplace App Manifest
+# MyHealthSpan Agent — Personal Health Intelligence
+# https://docs.github.com/en/apps/sharing-github-apps
+# ============================================================
+
+name: MyHealthSpan Agent
+description: >
+  Personal health intelligence agent — connects wearable devices and medical
+  records, synthesizes clinical-grade insights. Runs locally, privacy-first.
+
+url: https://xspan.ai/agent
+hook_url: https://api.xspan.ai/webhooks/github
+redirect_url: https://xspan.ai/auth/github/callback
+setup_url: https://xspan.ai/setup/github
+callback_urls:
+  - https://xspan.ai/auth/github/callback
+  - http://localhost:3000/auth/github/callback
+
+public: true
+
+default_permissions:
+  contents: read
+  metadata: read
+
+# No events needed — this is a developer tool, not a CI/CD integration
+default_events: []
+
+# Marketplace listing
+listing:
+  name: MyHealthSpan Agent
+  tagline: "See your complete health picture. Wearables + medical records + labs — synthesized with clinical-grade insights."
+  detailed_description: |
+    MyHealthSpan Agent is an AI-powered personal health intelligence platform
+    that unifies data from wearable devices (Oura, WHOOP, Dexcom, Apple Watch,
+    Garmin), electronic health records, and lab results into a single view.
+
+    It runs locally on your machine with privacy-first architecture — your
+    health data never leaves your control. Use it as a CLI tool, web dashboard,
+    or MCP server inside Claude Desktop and Cursor.
+
+    Features:
+    - Unified health dashboard across all data sources
+    - Clinical-grade AI analysis of biomarkers and trends
+    - Baseline drift detection for early anomaly identification
+    - Natural language health Q&A backed by your actual data
+    - FHIR/SMART EHR connectivity to hospitals and health systems
+    - 14 MCP tools for AI assistant integration
+
+  categories:
+    - health
+    - developer-tools
+    - monitoring
+
+  support_url: https://github.com/karlmehta/XSpan-HealthAI-Agent/issues
+  documentation_url: https://xspan.ai/docs/agent
+  status_url: https://status.xspan.ai
+
+  pricing_model: flat_rate
+  plans:
+    - name: Pro
+      description: Full access to all features, unlimited data sources, drift alerts, AI insights
+      price:
+        monthly: 5.99
+        yearly: 59.99
+      bullets:
+        - Unlimited wearable device connections
+        - EHR/FHIR medical record integration
+        - Clinical-grade AI health insights
+        - Baseline drift detection and alerts
+        - MCP integration (Claude Desktop, Cursor)
+        - Web dashboard and CLI access
+        - Priority support
+      trial_period_days: 3
+
+  screenshots:
+    - caption: CLI Health Dashboard
+      url: https://xspan.ai/assets/screenshots/agent-cli-dashboard.png
+    - caption: Web Dashboard
+      url: https://xspan.ai/assets/screenshots/agent-web-dashboard.png
+    - caption: MCP in Claude Desktop
+      url: https://xspan.ai/assets/screenshots/agent-mcp-claude.png
+    - caption: Drift Detection
+      url: https://xspan.ai/assets/screenshots/agent-drift-detection.png
+
+  logo_url: https://xspan.ai/assets/myhealthspan-logo.png
+  background_color: "0F172A"
+  text_color: "F8FAFC"
+
+  contact_email: support@xspan.ai
+  privacy_policy_url: https://xspan.ai/privacy
+  terms_of_service_url: https://xspan.ai/terms
+
+  company:
+    name: XSpan.ai
+    url: https://xspan.ai

@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Download MyHealthSpan Agent — XSpan.ai</title>
+  <meta name="description" content="Download the MyHealthSpan AI health agent. Wearables + medical records + labs, synthesized with clinical-grade AI. $5.99/mo.">
+  <link rel="icon" type="image/png" href="/assets/logo-icon.png">
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --surface: #141414;
+      --surface-hover: #1a1a1a;
+      --border: #2a2a2a;
+      --text: #e5e5e5;
+      --text-muted: #888;
+      --orange: #f97316;
+      --orange-hover: #fb923c;
+      --orange-glow: rgba(249, 115, 22, 0.15);
+      --green: #22c55e;
+      --radius: 12px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .container {
+      max-width: 800px;
+      width: 100%;
+      padding: 0 24px;
+    }
+
+    /* Header */
+    header {
+      width: 100%;
+      border-bottom: 1px solid var(--border);
+      padding: 16px 0;
+    }
+
+    header .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .logo img {
+      height: 32px;
+      width: auto;
+    }
+
+    .logo span {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      margin-left: 24px;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+
+    /* Hero */
+    .hero {
+      text-align: center;
+      padding: 80px 0 48px;
+    }
+
+    .hero h1 {
+      font-size: 48px;
+      font-weight: 700;
+      letter-spacing: -1.5px;
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 .accent { color: var(--orange); }
+
+    .hero p {
+      font-size: 18px;
+      color: var(--text-muted);
+      max-width: 560px;
+      margin: 0 auto 40px;
+      line-height: 1.6;
+    }
+
+    /* Primary download button */
+    .download-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--orange);
+      color: #fff;
+      font-size: 18px;
+      font-weight: 600;
+      padding: 16px 40px;
+      border-radius: var(--radius);
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s, box-shadow 0.2s;
+      box-shadow: 0 0 40px var(--orange-glow);
+    }
+
+    .download-primary:hover {
+      background: var(--orange-hover);
+      box-shadow: 0 0 60px var(--orange-glow);
+    }
+
+    .download-primary svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .detected-os {
+      display: block;
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .detected-os a {
+      color: var(--orange);
+      text-decoration: none;
+    }
+
+    .detected-os a:hover { text-decoration: underline; }
+
+    /* All platforms */
+    .platforms {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+      margin: 48px 0 40px;
+    }
+
+    .platform-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-align: center;
+      text-decoration: none;
+      color: var(--text);
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .platform-card:hover {
+      border-color: var(--orange);
+      background: var(--surface-hover);
+    }
+
+    .platform-card .os-icon {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .platform-card .os-name {
+      font-weight: 600;
+      font-size: 15px;
+      margin-bottom: 4px;
+    }
+
+    .platform-card .os-detail {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Install methods */
+    .install-methods {
+      margin: 0 0 64px;
+    }
+
+    .install-methods h2 {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .method {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin-bottom: 12px;
+    }
+
+    .method-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .method-code {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .method-code code {
+      font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+      font-size: 14px;
+      color: var(--orange);
+      white-space: nowrap;
+      overflow-x: auto;
+    }
+
+    .copy-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      white-space: nowrap;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .copy-btn:hover {
+      border-color: var(--orange);
+      color: var(--text);
+    }
+
+    .copy-btn.copied {
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    /* Features */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 64px;
+    }
+
+    .feature {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+
+    .feature h3 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .feature p {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* Footer */
+    footer {
+      width: 100%;
+      border-top: 1px solid var(--border);
+      padding: 24px 0;
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: auto;
+    }
+
+    footer a {
+      color: var(--text-muted);
+      text-decoration: none;
+    }
+
+    footer a:hover { color: var(--text); }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .hero h1 { font-size: 32px; }
+      .hero p { font-size: 16px; }
+      .download-primary { font-size: 16px; padding: 14px 32px; }
+      .platforms { grid-template-columns: 1fr 1fr; }
+      .method-code code { font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <div class="container">
+      <a href="https://xspan.ai" class="logo">
+        <img src="/assets/logo-icon.png" alt="XSpan" onerror="this.style.display='none'">
+        <span>MyHealthSpan</span>
+      </a>
+      <nav class="nav-links">
+        <a href="https://github.com/karlmehta/XSpan-HealthAI-Agent">GitHub</a>
+        <a href="https://github.com/karlmehta/XSpan-HealthAI-Agent#readme">Docs</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Hero -->
+    <section class="hero">
+      <h1>Your health, <span class="accent">quantified.</span></h1>
+      <p>
+        Personal AI health agent that connects your wearables, medical records,
+        and lab results into actionable clinical-grade insights. HIPAA-compliant,
+        offline-first, open source.
+      </p>
+
+      <a href="#" id="primaryDownload" class="download-primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        <span id="primaryLabel">Download for macOS</span>
+      </a>
+      <span class="detected-os" id="detectedOs">
+        Detected: macOS (Apple Silicon). <a href="#all-platforms">Other platforms</a>
+      </span>
+    </section>
+
+    <!-- All platforms -->
+    <section id="all-platforms">
+      <div class="platforms">
+        <a href="/bin/mhs-macos-arm64" class="platform-card" download>
+          <div class="os-icon">&#63743;</div>
+          <div class="os-name">macOS</div>
+          <div class="os-detail">Apple Silicon (M1/M2/M3/M4)</div>
+        </a>
+        <a href="/bin/mhs-macos-x64" class="platform-card" download>
+          <div class="os-icon">&#63743;</div>
+          <div class="os-name">macOS</div>
+          <div class="os-detail">Intel (x86_64)</div>
+        </a>
+        <a href="/bin/mhs-win-x64.exe" class="platform-card" download>
+          <div class="os-icon">&#8862;</div>
+          <div class="os-name">Windows</div>
+          <div class="os-detail">64-bit (x64)</div>
+        </a>
+        <a href="/bin/mhs-linux-x64" class="platform-card" download>
+          <div class="os-icon">&#9654;</div>
+          <div class="os-name">Linux</div>
+          <div class="os-detail">64-bit (x64)</div>
+        </a>
+      </div>
+    </section>
+
+    <!-- Install methods -->
+    <section class="install-methods">
+      <h2>Or install via command line</h2>
+
+      <div class="method">
+        <div class="method-label">Quick install (Mac / Linux)</div>
+        <div class="method-code">
+          <code>curl -fsSL https://xspan.ai/install.sh | sh</code>
+          <button class="copy-btn" onclick="copyCmd(this, 'curl -fsSL https://xspan.ai/install.sh | sh')">Copy</button>
+        </div>
+      </div>
+
+      <div class="method">
+        <div class="method-label">npm / npx</div>
+        <div class="method-code">
+          <code>npx @myhealthspan/agent</code>
+          <button class="copy-btn" onclick="copyCmd(this, 'npx @myhealthspan/agent')">Copy</button>
+        </div>
+      </div>
+
+      <div class="method">
+        <div class="method-label">npm global install</div>
+        <div class="method-code">
+          <code>npm install -g @myhealthspan/agent && mhs</code>
+          <button class="copy-btn" onclick="copyCmd(this, 'npm install -g @myhealthspan/agent && mhs')">Copy</button>
+        </div>
+      </div>
+
+      <div class="method">
+        <div class="method-label">Docker</div>
+        <div class="method-code">
+          <code>docker run -it xspan/mhs-agent</code>
+          <button class="copy-btn" onclick="copyCmd(this, 'docker run -it xspan/mhs-agent')">Copy</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features">
+      <div class="feature">
+        <h3>Apple Health + Wearables</h3>
+        <p>Native HealthKit bridge. Oura, WHOOP, Dexcom, Garmin via Terra API. All data stays local.</p>
+      </div>
+      <div class="feature">
+        <h3>Medical Records (FHIR)</h3>
+        <p>Import from Epic MyChart, b.well, or upload PDFs. FHIR R4 compliant.</p>
+      </div>
+      <div class="feature">
+        <h3>AI-Powered Insights</h3>
+        <p>Clinical-grade analysis across 100+ biomarkers. Trend detection, risk scoring, actionable recommendations.</p>
+      </div>
+      <div class="feature">
+        <h3>HIPAA Compliant</h3>
+        <p>End-to-end encryption. Offline-first architecture. Your data never leaves your device without consent.</p>
+      </div>
+      <div class="feature">
+        <h3>MCP Server</h3>
+        <p>Connect to Claude, GPT, or any AI assistant via Model Context Protocol. Your health data as context.</p>
+      </div>
+      <div class="feature">
+        <h3>$5.99/mo</h3>
+        <p>Free tier available. Premium unlocks AI insights, trend analysis, and health passport generation.</p>
+      </div>
+    </section>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <a href="https://xspan.ai">XSpan.ai</a> &middot;
+      <a href="https://github.com/karlmehta/XSpan-HealthAI-Agent">GitHub</a> &middot;
+      <a href="https://github.com/karlmehta/XSpan-HealthAI-Agent/blob/main/LICENSE">MIT License</a>
+      <br><br>
+      &copy; 2026 XSpan, Inc. All rights reserved.
+    </div>
+  </footer>
+
+  <script>
+    // --- OS Detection ---
+    function detectOS() {
+      const ua = navigator.userAgent.toLowerCase();
+      const platform = navigator.platform?.toLowerCase() || '';
+
+      if (ua.includes('win')) return { os: 'windows', arch: 'x64', label: 'Windows' };
+      if (ua.includes('linux')) return { os: 'linux', arch: 'x64', label: 'Linux' };
+      if (ua.includes('mac') || platform.includes('mac')) {
+        // Check for Apple Silicon via GPU or known patterns
+        const isARM = /arm|aarch/i.test(platform) ||
+          (navigator.userAgentData?.platform === 'macOS' && navigator.userAgentData?.architecture === 'arm') ||
+          (window.screen.width > 0 && navigator.hardwareConcurrency >= 8);
+        return {
+          os: 'macos',
+          arch: isARM ? 'arm64' : 'x64',
+          label: isARM ? 'macOS (Apple Silicon)' : 'macOS (Intel)'
+        };
+      }
+      return { os: 'macos', arch: 'arm64', label: 'macOS' };
+    }
+
+    const detected = detectOS();
+    const downloadBtn = document.getElementById('primaryDownload');
+    const downloadLabel = document.getElementById('primaryLabel');
+    const detectedText = document.getElementById('detectedOs');
+
+    const downloadMap = {
+      'macos-arm64': '/bin/mhs-macos-arm64',
+      'macos-x64': '/bin/mhs-macos-x64',
+      'windows-x64': '/bin/mhs-win-x64.exe',
+      'linux-x64': '/bin/mhs-linux-x64'
+    };
+
+    const key = `${detected.os}-${detected.arch}`;
+    downloadBtn.href = downloadMap[key] || downloadMap['macos-arm64'];
+    downloadBtn.setAttribute('download', '');
+    downloadLabel.textContent = `Download for ${detected.label}`;
+    detectedText.innerHTML = `Detected: ${detected.label}. <a href="#all-platforms">Other platforms</a>`;
+
+    // --- Copy command ---
+    function copyCmd(btn, text) {
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'Copied';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = 'Copy';
+          btn.classList.remove('copied');
+        }, 2000);
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XSpan-EHR Entity Relationship Diagram</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, 'Inter', system-ui, sans-serif; background: #0B0F1A; color: #E2E8F0; min-height: 100vh; padding: 24px; }
+h1 { font-size: 24px; font-weight: 800; color: #fff; margin-bottom: 4px; }
+.subtitle { font-size: 12px; color: #64748B; margin-bottom: 20px; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #94A3B8; }
+.legend-item .dot { width: 10px; height: 10px; border-radius: 2px; }
+.diagram-container { background: #fff; border-radius: 12px; padding: 20px; overflow-x: auto; }
+.section { margin-top: 32px; }
+.section h2 { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+.section p { font-size: 12px; color: #94A3B8; line-height: 1.6; margin-bottom: 12px; }
+.features { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-top: 16px; }
+.feature { background: #1E293B; border: 1px solid #334155; border-radius: 8px; padding: 14px; }
+.feature h3 { font-size: 13px; font-weight: 700; color: #E8751A; margin-bottom: 6px; }
+.feature p { font-size: 11px; color: #94A3B8; line-height: 1.5; }
+.feature code { font-size: 10px; color: #6EE7B7; background: #0F172A; padding: 2px 6px; border-radius: 3px; }
+.footer { text-align: center; padding: 20px 0; font-size: 11px; color: #475569; border-top: 1px solid #1E293B; margin-top: 32px; }
+</style>
+</head>
+<body>
+
+<h1>XSpan-EHR Entity Relationship Diagram</h1>
+<div class="subtitle">PostgreSQL &middot; 18 tables &middot; Full referential integrity &middot; Enums, CHECK constraints, computed columns, partial indexes</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="dot" style="background:#3B82F6"></div> Core</div>
+  <div class="legend-item"><div class="dot" style="background:#EF4444"></div> Vitals / Wearable</div>
+  <div class="legend-item"><div class="dot" style="background:#8B5CF6"></div> Clinical (EHR)</div>
+  <div class="legend-item"><div class="dot" style="background:#F59E0B"></div> Labs</div>
+  <div class="legend-item"><div class="dot" style="background:#10B981"></div> Omics</div>
+  <div class="legend-item"><div class="dot" style="background:#E8751A"></div> Computed</div>
+  <div class="legend-item"><div class="dot" style="background:#64748B"></div> System</div>
+</div>
+
+<div class="diagram-container">
+<pre class="mermaid">
+erDiagram
+    patient ||--o{ data_source : "has sources"
+    patient ||--o{ vital_signs : "has vitals"
+    patient ||--o{ body_measurements : "has measurements"
+    patient ||--o{ sleep : "has sleep records"
+    patient ||--o{ activity : "has activity"
+    patient ||--o{ lab_results : "has lab results"
+    patient ||--o{ conditions : "has conditions"
+    patient ||--o{ medications : "has medications"
+    patient ||--o{ allergies : "has allergies"
+    patient ||--o{ immunizations : "has immunizations"
+    patient ||--o{ encounters : "has encounters"
+    patient ||--o{ procedures : "has procedures"
+    patient ||--o{ care_plans : "has care plans"
+    patient ||--o{ genomic_variants : "has variants"
+    patient ||--o{ microbiome : "has microbiome"
+    patient ||--o{ daily_snapshot : "has snapshots"
+    patient ||--o{ baselines : "has baselines"
+    patient ||--o{ drift_alerts : "has alerts"
+
+    data_source ||--o{ vital_signs : "provides"
+    data_source ||--o{ body_measurements : "provides"
+    data_source ||--o{ sleep : "provides"
+    data_source ||--o{ activity : "provides"
+    data_source ||--o{ lab_results : "provides"
+    data_source ||--o{ conditions : "provides"
+    data_source ||--o{ medications : "provides"
+    data_source ||--o{ allergies : "provides"
+    data_source ||--o{ immunizations : "provides"
+    data_source ||--o{ encounters : "provides"
+    data_source ||--o{ procedures : "provides"
+    data_source ||--o{ care_plans : "provides"
+    data_source ||--o{ genomic_variants : "provides"
+    data_source ||--o{ microbiome : "provides"
+    data_source ||--o{ sync_log : "has sync logs"
+
+    lab_reference ||--o{ lab_results : "defines ranges"
+    encounters ||--o{ procedures : "includes"
+
+    patient {
+        UUID id PK
+        TEXT first_name
+        TEXT last_name
+        DATE date_of_birth
+        enum gender
+        TEXT email
+        TEXT phone
+        TEXT address_country
+    }
+
+    data_source {
+        UUID id PK
+        UUID patient_id FK
+        enum source_type
+        TEXT provider
+        TEXT provider_name
+        enum connection_status
+        TIMESTAMPTZ last_sync_at
+        enum sync_frequency
+        BYTEA access_token_enc
+    }
+
+    vital_signs {
+        UUID id PK
+        UUID patient_id FK
+        UUID source_id FK
+        TIMESTAMPTZ recorded_at
+        SMALLINT heart_rate
+        SMALLINT heart_rate_resting
+        REAL hrv_sdnn
+        REAL hrv_rmssd
+        SMALLINT bp_systolic
+        SMALLINT bp_diastolic
+        REAL spo2
+        REAL blood_glucose
+        enum glucose_type
+    }
+
+    body_measurements {
+        UUID id PK
+        UUID patient_id FK
+        UUID source_id FK
+        REAL weight_kg
+        REAL height_cm
+        REAL bmi "GENERATED"
+        REAL body_fat_pct
+        REAL lean_mass_kg
+        REAL waist_hip_ratio "GENERATED"
+    }
+
+    sleep {
+        UUID id PK
+        UUID patient_id FK
+        UUID source_id FK
+        DATE recorded_at
+        SMALLINT total_sleep_min
+        SMALLINT rem_min
+        SMALLINT deep_min
+        SMALLINT light_min
+        REAL sleep_efficiency
+        SMALLINT sleep_score
+        REAL avg_hr_sleep
+        REAL avg_hrv_sleep
+    }
+
+    activity {
+        UUID id PK
+        UUID patient_id FK
+        UUID source_id FK
+        DATE recorded_at
+        INTEGER steps
+        INTEGER calories_active
+        SMALLINT active_min
+        REAL strain_score
+        SMALLINT recovery_score
+        SMALLINT readiness_score
+        REAL vo2_max
+    }
+
+    lab_reference {
+        SERIAL id PK
+        TEXT loinc_code UK
+        TEXT test_name
+        TEXT category
+        TEXT unit
+        REAL reference_low
+        REAL reference_high
+        REAL optimal_low
+        REAL optimal_high
+    }
+
+    lab_results {
+        UUID id PK
+        UUID patient_id FK
+        UUID source_id FK
+        INTEGER lab_ref_id FK
+        TEXT loinc_code
+        TEXT test_name
+        REAL value_numeric
+        TEXT unit
+        enum interpretation
+        BOOLEAN is_fasting
+    }
+
+    conditions {
+        UUID id PK
+        UUID patient_id FK
+        UUID source_id FK
+        TEXT icd10_code
+        TEXT snomed_code
+        TEXT display_name
+        enum clinical_status
+        enum severity
+        TIMESTAMPTZ resolved_at
+    }
+
+    medications {
+        UUID id PK
+        UUID patient_id FK
+        UUID source_id FK
+        TEXT rxnorm_code
+        TEXT medication_name
+        enum status
+        REAL dose_value
+        TEXT dose_unit
+        TEXT frequency
+        TEXT route
+        DATE start_date
+    }
+
+    allergies {
+        UUID id PK
+        UUID patient_id FK
+        UUID source_id FK
+        TEXT allergen_name
+        enum allergen_type
+        enum criticality
+        enum severity
+        TEXT_ARRAY manifestation
+    }
+
+    immunizations {
+        UUID id PK
+        UUID patient_id FK
+        UUID source_id FK
+        TEXT cvx_code
+        TEXT vaccine_name
+        SMALLINT dose_number
+        TEXT manufacturer
+        TEXT status
+    }
+
+    encounters {
+        UUID id PK
+        UUID patient_id FK
+        UUID source_id FK
+        TEXT encounter_type
+        enum class
+        enum status
+        TEXT reason
+        TEXT provider_name
+        JSONB diagnoses
+    }
+
+    procedures {
+        UUID id PK
+        UUID patient_id FK
+        UUID source_id FK
+        UUID encounter_id FK
+        TEXT cpt_code
+        TEXT procedure_name
+        enum category
+        enum status
+    }
+
+    care_plans {
+        UUID id PK
+        UUID patient_id FK
+        UUID source_id FK
+        TEXT title
+        TEXT status
+        JSONB goals
+        JSONB activities
+        JSONB care_team
+    }
+
+    genomic_variants {
+        UUID id PK
+        UUID patient_id FK
+        UUID source_id FK
+        TEXT gene
+        TEXT rsid
+        TEXT chromosome
+        TEXT genotype
+        enum zygosity
+        enum clinical_significance
+        BOOLEAN is_pharmacogenomic
+    }
+
+    microbiome {
+        UUID id PK
+        UUID patient_id FK
+        UUID source_id FK
+        REAL shannon_diversity
+        REAL firmicutes_pct
+        REAL bacteroidetes_pct
+        REAL fb_ratio
+        SMALLINT gut_health_score
+        JSONB top_species
+    }
+
+    daily_snapshot {
+        UUID id PK
+        UUID patient_id FK
+        DATE date UK
+        REAL resting_hr
+        REAL hrv
+        SMALLINT sleep_duration_min
+        SMALLINT sleep_score
+        INTEGER steps
+        REAL avg_glucose
+        SMALLINT overall_health_score
+    }
+
+    baselines {
+        UUID id PK
+        UUID patient_id FK
+        TEXT metric UK
+        REAL baseline_value
+        REAL baseline_stddev
+        SMALLINT window_days
+    }
+
+    drift_alerts {
+        UUID id PK
+        UUID patient_id FK
+        TEXT metric
+        REAL pct_change
+        enum severity
+        enum direction
+        TEXT message
+        BOOLEAN acknowledged
+    }
+
+    sync_log {
+        UUID id PK
+        UUID source_id FK
+        enum status
+        INTEGER records_fetched
+        INTEGER records_stored
+        INTEGER duration_ms "GENERATED"
+    }
+</pre>
+</div>
+
+<div class="section">
+  <h2>PostgreSQL Production Features</h2>
+  <p>What this schema gives your engineers beyond the SQLite version:</p>
+
+  <div class="features">
+    <div class="feature">
+      <h3>Enums for Data Integrity</h3>
+      <p>20+ PostgreSQL enums ensure only valid values enter the database. No more "actve" typos breaking queries.</p>
+      <p><code>clinical_status_enum</code> <code>severity_enum</code> <code>med_status_enum</code> <code>encounter_class_enum</code></p>
+    </div>
+    <div class="feature">
+      <h3>CHECK Constraints on Every Metric</h3>
+      <p>Every numeric field has range validation. Heart rate must be 20-300 bpm. SpO2 must be 50-100%. Prevents garbage data at the DB level.</p>
+      <p><code>heart_rate BETWEEN 20 AND 300</code></p>
+    </div>
+    <div class="feature">
+      <h3>GENERATED Columns (Auto-Computed)</h3>
+      <p>BMI and waist-hip ratio are auto-computed from their inputs. No application code needed.</p>
+      <p><code>bmi GENERATED ALWAYS AS (weight_kg / (height_cm/100)^2) STORED</code></p>
+    </div>
+    <div class="feature">
+      <h3>Partial Indexes for Common Queries</h3>
+      <p>Indexes only on the rows engineers actually query. Active meds, active conditions, unacked alerts, pathogenic variants, failed syncs.</p>
+      <p><code>WHERE clinical_status = 'active'</code> <code>WHERE acknowledged = FALSE</code></p>
+    </div>
+    <div class="feature">
+      <h3>Auto-Link Trigger (lab_results to lab_reference)</h3>
+      <p>When a lab result is inserted with a LOINC code, a trigger auto-populates the <code>lab_ref_id</code> FK. Engineers never need to look up the reference table manually.</p>
+    </div>
+    <div class="feature">
+      <h3>JSONB for Flexible Nested Data</h3>
+      <p>Encounter diagnoses, care plan goals, microbiome species lists — stored as queryable JSONB, not opaque TEXT.</p>
+      <p><code>diagnoses JSONB</code> <code>goals JSONB</code> <code>top_species JSONB</code></p>
+    </div>
+    <div class="feature">
+      <h3>7 Pre-Built Views</h3>
+      <p>Common queries pre-defined: <code>v_active_medications</code>, <code>v_active_conditions</code>, <code>v_latest_vitals</code>, <code>v_abnormal_labs</code>, <code>v_pending_alerts</code>, <code>v_pathogenic_variants</code>, <code>v_health_trend_90d</code></p>
+    </div>
+    <div class="feature">
+      <h3>Cascading Deletes</h3>
+      <p>Delete a patient and all their data goes with them. Delete a data source and all records from that source are removed. GDPR-ready.</p>
+      <p><code>ON DELETE CASCADE</code></p>
+    </div>
+    <div class="feature">
+      <h3>Encrypted Token Storage</h3>
+      <p>OAuth tokens stored as <code>BYTEA</code> for pgcrypto encryption. Not plaintext.</p>
+    </div>
+    <div class="feature">
+      <h3>Auto-Computed Sync Duration</h3>
+      <p><code>sync_log.duration_ms</code> auto-computed from start/complete timestamps. No application math needed.</p>
+    </div>
+    <div class="feature">
+      <h3>TEXT[] Arrays for Multi-Value Fields</h3>
+      <p>Allergy manifestations stored as native PostgreSQL arrays. Query with <code>ANY()</code> or <code>@&gt;</code> operators.</p>
+      <p><code>manifestation TEXT[]</code> <code>sources TEXT[]</code></p>
+    </div>
+    <div class="feature">
+      <h3>Table Comments for Onboarding</h3>
+      <p>Every table and view has a <code>COMMENT ON</code> description. Run <code>\dt+</code> or <code>\dv+</code> in psql to see them.</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Key Queries Your Engineers Will Write</h2>
+  <div class="features">
+    <div class="feature">
+      <h3>Dashboard Trend Charts</h3>
+      <p><code>SELECT * FROM v_health_trend_90d WHERE patient_id = $1</code></p>
+      <p>Returns 90 days of daily snapshots with all vitals, sleep, activity, glucose, and composite scores.</p>
+    </div>
+    <div class="feature">
+      <h3>Smart Nudges: Drift Detection</h3>
+      <p><code>SELECT * FROM v_pending_alerts WHERE patient_id = $1</code></p>
+      <p>Unacknowledged alerts like "HRV down 14% from 30-day average". Severity-sorted for priority.</p>
+    </div>
+    <div class="feature">
+      <h3>Drug-Gene Interactions</h3>
+      <p><code>SELECT m.medication_name, g.gene, g.clinical_significance FROM v_active_medications m CROSS JOIN genomic_variants g WHERE g.is_pharmacogenomic AND g.patient_id = m.patient_id</code></p>
+    </div>
+    <div class="feature">
+      <h3>Abnormal Lab Trend</h3>
+      <p><code>SELECT test_name, value_numeric, recorded_at FROM lab_results WHERE patient_id = $1 AND loinc_code = '4548-4' ORDER BY recorded_at</code></p>
+      <p>HbA1c over time — power a line chart showing metabolic trend.</p>
+    </div>
+    <div class="feature">
+      <h3>Multi-Source Cardiovascular Synthesis</h3>
+      <p><code>SELECT date, resting_hr, hrv, bp_systolic, bp_diastolic, cardiovascular_score FROM daily_snapshot WHERE patient_id = $1 ORDER BY date DESC LIMIT 30</code></p>
+      <p>HR from Apple Watch + HRV from Oura + BP from Omron + labs from b.well = one unified view.</p>
+    </div>
+    <div class="feature">
+      <h3>Patient Clinical Summary (for Health Passport)</h3>
+      <p>Join <code>v_active_conditions</code> + <code>v_active_medications</code> + <code>v_active_allergies</code> + <code>v_latest_vitals</code> + most recent <code>lab_results</code> = complete clinical picture.</p>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  XSpan-EHR Data Schema v1.0 &middot; PostgreSQL Production &middot; 18 tables &middot; 20+ enums &middot; 7 views &middot; Built by <a href="https://xspan.ai" style="color:#E8751A">XSpan.ai</a>
+</div>
+
+<script>
+mermaid.initialize({
+  startOnLoad: true,
+  theme: 'default',
+  er: {
+    diagramPadding: 20,
+    layoutDirection: 'TB',
+    minEntityWidth: 100,
+    minEntityHeight: 75,
+    entityPadding: 15,
+    fontSize: 11
+  }
+});
+</script>
+</body>
+</html>

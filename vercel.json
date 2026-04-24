@@ -1,0 +1,32 @@
+{
+  "name": "myhealthspan-download",
+  "buildCommand": null,
+  "outputDirectory": "download",
+  "rewrites": [
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/install.sh", "destination": "/install.sh" }
+  ],
+  "headers": [
+    {
+      "source": "/bin/(.*)",
+      "headers": [
+        { "key": "Content-Type", "value": "application/octet-stream" },
+        { "key": "Content-Disposition", "value": "attachment" },
+        { "key": "Cache-Control", "value": "public, max-age=3600" }
+      ]
+    },
+    {
+      "source": "/install.sh",
+      "headers": [
+        { "key": "Content-Type", "value": "text/plain; charset=utf-8" },
+        { "key": "Cache-Control", "value": "public, max-age=300" }
+      ]
+    },
+    {
+      "source": "/(.*).html",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=60" }
+      ]
+    }
+  ]
+}
